@@ -1,0 +1,30 @@
+{
+  "template": "https://github.com/scverse/cookiecutter-scverse",
+  "commit": "5d44c58df427f884585ae9772cae81f1b6638f80",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "project_name": "dvp-io",
+      "package_name": "dvpio",
+      "project_description": "Read and write funtionalities from and to spatialdata for deep vizual proteomics",
+      "author_full_name": "Lucas Diedrich",
+      "author_email": "diedrich@biochem.mpg.de",
+      "github_user": "lucas-diedrich",
+      "github_repo": "dvp-io",
+      "license": "Apache License Version 2.0",
+      "ide_integration": true,
+      "_copy_without_render": [
+        ".github/workflows/build.yaml",
+        ".github/workflows/test.yaml",
+        "docs/_templates/autosummary/**.rst"
+      ],
+      "_render_devdocs": false,
+      "_jinja2_env_vars": {
+        "lstrip_blocks": true,
+        "trim_blocks": true
+      },
+      "_template": "https://github.com/scverse/cookiecutter-scverse"
+    }
+  },
+  "directory": null
+}
