@@ -24,8 +24,11 @@ classifiers = [
 ]
 dependencies = [
   "anndata",
-  # for debug logging (referenced from the issue template)
-  "session-info",
+  "openslide-bin",
+  "openslide-python",
+  "py-lmd",
+  "pylibczirw",
+  "spatialdata",
 ]
 optional-dependencies.dev = [
   "pre-commit",
