@@ -1,27 +1,15 @@
 # API
 
-## Preprocessing
+## Reader
 
 ```{eval-rst}
-.. module:: dvpio.pp
+.. module:: dvpio.read
 .. currentmodule:: dvpio
 
 .. autosummary::
     :toctree: generated
 
-    pp.basic_preproc
-```
-
-## Tools
-
-```{eval-rst}
-.. module:: dvpio.tl
-.. currentmodule:: dvpio
-
-.. autosummary::
-    :toctree: generated
-
-    tl.basic_tool
+    reader.image
 ```
 
 ## Plotting
@@ -30,9 +18,4 @@
 .. module:: dvpio.pl
 .. currentmodule:: dvpio
 
-.. autosummary::
-    :toctree: generated
-
-    pl.basic_plot
-    pl.BasicClass
 ```

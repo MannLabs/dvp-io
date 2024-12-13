@@ -11,5 +11,5 @@ changelog.md
 contributing.md
 references.md
 
-notebooks/example
+notebooks/001_introduction-to-spatialdata
 ```
