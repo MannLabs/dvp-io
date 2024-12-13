@@ -6,7 +6,7 @@
 [badge-tests]: https://img.shields.io/github/actions/workflow/status/lucas-diedrich/dvp-io/test.yaml?branch=main
 [badge-docs]: https://img.shields.io/readthedocs/dvp-io
 
-Read and write funtionalities from and to spatialdata for deep vizual proteomics
+Read and write funtionalities from and to spatialdata for deep visual proteomics
 
 ## Getting started
 
@@ -36,16 +36,13 @@ pip install git+https://github.com/lucas-diedrich/dvp-io.git@main
 
 ## Release notes
 
-See the [changelog][].
+Refer to the [Releases page](https://github.com/lucas-diedrich/dvp-io/releases) for information on releases and the changelog.
 
-## Contact
+## References
 
-For questions and help requests, you can reach out in the [scverse discourse][].
-If you found a bug, please use the [issue tracker][].
+> SPARCS, a platform for genome-scale CRISPR screening for spatial cellular phenotypes Niklas Arndt Schmacke, Sophia Clara Maedler, Georg Wallmann, Andreas Metousis, Marleen Berouti, Hartmann Harz, Heinrich Leonhardt, Matthias Mann, Veit Hornung bioRxiv 2023.06.01.542416; doi: https://doi.org/10.1101/2023.06.01.542416
 
-## Citation
-
-> t.b.a
+> Marconato, L. et al. SpatialData: an open and universal data framework for spatial omics. Nat Methods 1–5 (2024) doi:10.1038/s41592-024-02212-x.
 
 [mambaforge]: https://github.com/conda-forge/miniforge#mambaforge
 [scverse discourse]: https://discourse.scverse.org/
