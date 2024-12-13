@@ -24,11 +24,13 @@ classifiers = [
 ]
 dependencies = [
   "anndata",
+  "napari-spatialdata",
   "openslide-bin",
   "openslide-python",
   "py-lmd",
   "pylibczirw",
   "spatialdata",
+  "spatialdata-plot",
 ]
 optional-dependencies.dev = [
   "pre-commit",
