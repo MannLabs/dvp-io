@@ -5,6 +5,10 @@ from numpy.typing import NDArray
 from spatialdata.models import PointsModel, ShapesModel
 
 
+def _polygon_to_array(polygon):
+    return np.array(polygon.exterior.coords)
+
+
 def compute_affine_transformation(
     query_points: NDArray[np.float64], reference_points: NDArray[np.float64], precision: int | None = None
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
@@ -118,12 +122,11 @@ def transform_shapes(
     )
     # Transform shapes
     # Iterate through shapes and apply affine transformation
-    transformed_shapes = shapes["geometry"].apply(
-        lambda shape: shapely.transform(
-            shape,
-            transformation=lambda geom: apply_affine_transformation(geom, rotation=rotation, translation=translation),
-        )
+    transformed_shapes = shapes["geometry"].apply(lambda shape: _polygon_to_array(shape))
+    transformed_shapes = transformed_shapes.apply(
+        lambda shape: apply_affine_transformation(shape, rotation=rotation, translation=translation)
     )
+    transformed_shapes = transformed_shapes.apply(lambda shape: shapely.Polygon(shape))
 
     # Reassign as DataFrame and parse with spatialdata
     transformed_shapes = shapes.assign(geometry=transformed_shapes)
