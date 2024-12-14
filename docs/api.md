@@ -2,20 +2,23 @@
 
 ## Reader
 
-```{eval-rst}
-.. module:: dvpio.read
-.. currentmodule:: dvpio
+### Image
 
+```{eval-rst}
+.. module:: dvpio
+.. currentmodule:: dvpio.read.image
 .. autosummary::
     :toctree: generated
 
-    reader.image
+    read_czi
+    read_openslide
+
 ```
 
-## Plotting
+<!-- ## Plotting
 
 ```{eval-rst}
 .. module:: dvpio.pl
 .. currentmodule:: dvpio
 
-```
+``` -->
