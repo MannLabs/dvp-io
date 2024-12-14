@@ -1,5 +1,9 @@
 name: Test
 
+permissions:
+  actions: read
+  contents: read
+
 on:
   push:
     branches: [main]
