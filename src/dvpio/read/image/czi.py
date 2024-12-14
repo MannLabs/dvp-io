@@ -158,7 +158,7 @@ def read_czi(
 
     Returns
     -------
-    Image2DModel
+    :class:`spatialdata.models.Image2DModel`
     """
     czidoc_r = pyczi.CziReader(path)
 
