@@ -41,7 +41,7 @@ def compute_affine_transformation(
     if precision is not None:
         affine_matrix = np.around(affine_matrix, precision)
 
-    rotation, translation = affine_matrix[:2, :], affine_matrix[2, :]
+    rotation, translation = affine_matrix[:2, :], affine_matrix[2, :].reshape(1, -1)
     return rotation, translation
 
 
@@ -80,6 +80,7 @@ def transform_shapes(
     shapes: gpd.GeoDataFrame | ShapesModel,
     calibration_points_target: gpd.GeoDataFrame | PointsModel,
     calibration_points_source: gpd.GeoDataFrame | PointsModel,
+    precision: int = 3,
 ) -> ShapesModel:
     """Apply coordinate transformation to shapes based on calibration points from a target and a source
 
@@ -95,8 +96,8 @@ def transform_shapes(
     calibration_points_source
         3 Calibration points, matched to `calibration_points_target` in source coordinate system (usually LMD coordinates)
         Expects :class:`geopandas.GeoDataFrame` with calibration points in `geometry` column
-    switch_orientation
-        Whether to switch (x, y) coordinate order. Necessary for LMD data.
+    precision
+        Precision of affine transformation
 
     Returns
     -------
@@ -112,19 +113,19 @@ def transform_shapes(
     )
 
     # Compute rotation (2x2) and translation (2x1) matrices
-    rotation, translation = compute_affine_transformation(calibration_points_source, calibration_points_target)
-
+    rotation, translation = compute_affine_transformation(
+        calibration_points_source, calibration_points_target, precision=precision
+    )
     # Transform shapes
     # Iterate through shapes and apply affine transformation
-    transformed_shapes = [
-        shapely.transform(
-            row["geometry"],
+    transformed_shapes = shapes["geometry"].apply(
+        lambda shape: shapely.transform(
+            shape,
             transformation=lambda geom: apply_affine_transformation(geom, rotation=rotation, translation=translation),
         )
-        for _, row in shapes.iterrows()
-    ]
+    )
 
     # Reassign as DataFrame and parse with spatialdata
-    transformed_shapes = gpd.GeoDataFrame(shapes, geometry=transformed_shapes)
+    transformed_shapes = shapes.assign(geometry=transformed_shapes)
 
     return ShapesModel.parse(transformed_shapes)

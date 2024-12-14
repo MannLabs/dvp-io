@@ -32,7 +32,7 @@ def read_lmd(path: str, calibration_points_image: gpd.GeoDataFrame, switch_orien
     lmd_shapes.load(path)
 
     # Transform to geopandas
-    shapes = gpd.GeoDataFrame(geometry=[shapely.Polygon(shape) for shape in lmd_shapes.shapes])
+    shapes = gpd.GeoDataFrame(geometry=[shapely.Polygon(shape.points) for shape in lmd_shapes.shapes])
 
     calibration_points_lmd = gpd.GeoDataFrame(
         data={"radius": np.ones(shape=len(lmd_shapes.calibration_points))},
