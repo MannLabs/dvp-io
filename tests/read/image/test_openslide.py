@@ -1,7 +1,8 @@
 import numpy as np
 import openslide
 import pytest
-from spatialdata_io.experimental.openslide import read_openslide
+
+from dvpio.read.image import read_openslide
 
 
 @pytest.mark.parametrize(
