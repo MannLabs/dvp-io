@@ -1,4 +1,4 @@
-# Notebooks
+# Tutorials
 
 This page contains a few tutorials on how to use spatialdata and this package in your DVP workflow.
 
@@ -7,7 +7,8 @@ This page contains a few tutorials on how to use spatialdata and this package in
 ```{toctree}
 :maxdepth: 1
 
-notebooks/001_introduction-to-spatialdata
+tutorials/000_spatialdata_and_dvp
+tutorials/001_introduction-to-spatialdata
 ```
 
 ## Data loading
