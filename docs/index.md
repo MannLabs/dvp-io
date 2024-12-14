@@ -7,9 +7,8 @@
 :maxdepth: 1
 
 api.md
+notebooks.md
 changelog.md
 contributing.md
 references.md
-
-notebooks/001_introduction-to-spatialdata
 ```
