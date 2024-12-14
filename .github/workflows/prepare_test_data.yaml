@@ -1,0 +1,37 @@
+name: Prepare test data
+
+on:
+  workflow_dispatch:
+  # uncomment and adjust the branch name if you need to add new datasets to the artifact
+  push:
+    branches:
+      - dataset
+jobs:
+  prepare-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download test datasets
+        run: |
+          set -e
+          rm -rf ./data && mkdir -p ./data
+          curl -o ./data/openslide-mirax.zip https://openslide.cs.cmu.edu/download/openslide-testdata/Mirax/Mirax2.2-4-PNG.zip
+          curl -o ./data/zeiss.zip https://datashare.biochem.mpg.de/s/k2C6sg0qrXBdWdc/download
+
+      - name: Unzip files
+        run: |
+          unzip ./data/openslide-mirax.zip -d ./data/openslide-mirax
+          unzip ./data/zeiss.zip -d ./data/zeiss
+
+      - name: Remove archives
+        run: |
+          rm ./data/openslide-mirax.zip
+          rm ./data/zeiss.zip
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: data
+          path: ./data
