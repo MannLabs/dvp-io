@@ -112,5 +112,5 @@ def read_openslide(path: str, chunk_size: tuple[int, int] = (10000, 10000), pyra
         dims="cyx",
         c_coords=["r", "g", "b", "a"],
         scale_factors=scale_factors,
-        chunks=chunk_size,
+        chunks=(4, *chunk_size[::-1]),
     )
