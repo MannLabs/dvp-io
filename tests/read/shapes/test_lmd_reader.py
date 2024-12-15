@@ -4,7 +4,7 @@ import pytest
 from numpy.typing import NDArray
 from scipy.optimize import linear_sum_assignment as lsa
 from scipy.spatial.distance import cdist
-from shapely import Point
+from spatialdata.models import PointsModel
 
 from dvpio.read.shapes import read_lmd
 
@@ -13,7 +13,7 @@ def _get_centroid_xy(geometry: gpd.GeoSeries) -> NDArray[np.float64]:
     return np.array(geometry.apply(lambda geom: [geom.centroid.x, geom.centroid.y]).tolist())
 
 
-calibration_points_image = gpd.GeoDataFrame(geometry=[Point([1015, 15]), Point([205, 15]), Point([15, 1015])])
+calibration_points_image = PointsModel.parse(np.array([[1015, 15], [205, 15], [15, 1015]]))
 
 
 @pytest.mark.parametrize(
