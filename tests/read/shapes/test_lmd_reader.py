@@ -13,7 +13,7 @@ def _get_centroid_xy(geometry: gpd.GeoSeries) -> NDArray[np.float64]:
     return np.array(geometry.apply(lambda geom: [geom.centroid.x, geom.centroid.y]).tolist())
 
 
-calibration_points_image = PointsModel.parse(np.array([[1015, 15], [205, 15], [15, 1015]]))
+calibration_points_image = PointsModel.parse(np.array([[15, 1015], [15, 205], [1015, 15]]))
 
 
 @pytest.mark.parametrize(
@@ -27,7 +27,7 @@ calibration_points_image = PointsModel.parse(np.array([[1015, 15], [205, 15], [1
     ],
 )
 def test_read_lmd(path: str, calibration_points: NDArray[np.float64], ground_truth_path: str) -> None:
-    lmd_shapes = read_lmd(path, calibration_points, switch_orientation=True)
+    lmd_shapes = read_lmd(path, calibration_points, switch_orientation=False)
     lmd_centroids = _get_centroid_xy(lmd_shapes["geometry"])
 
     ground_truth = gpd.read_file(ground_truth_path)
