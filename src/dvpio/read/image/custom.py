@@ -33,6 +33,8 @@ def read_custom(
     -------
     :class:`spatialdata.models.Image2DModel`
     """
+    # Per default, reads a glob string and has 4 dimensions
+    # Remove 0th dimension as we currently do not support globstrings
     img = daimread(path, imread=imread).squeeze(0)
 
     return Image2DModel.parse(img, **kwargs)
