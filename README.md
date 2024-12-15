@@ -16,9 +16,6 @@ in particular, the [API documentation][].
 ## Installation
 
 You need to have Python 3.10 or newer installed on your system.
-If you don't have Python installed, we recommend installing [Mambaforge][].
-
-There are several alternative options to install dvp-io:
 
 <!--
 1) Install the latest release of `dvp-io` from [PyPI][]:
@@ -28,7 +25,14 @@ pip install dvp-io
 ```
 -->
 
-1. Install the latest development version:
+### Users
+
+Install the latest development version:
+
+```bash
+# Optional: Create a suitable conda envionemnt
+conda create -n dvpio python=3.11 -y  && conda activate dvpio
+```
 
 ```bash
 pip install git+https://github.com/lucas-diedrich/dvp-io.git@main

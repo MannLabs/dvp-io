@@ -42,7 +42,8 @@ def read_lmd(path: str, calibration_points_image: PointsModel, switch_orientatio
     )
 
     calibration_points_image = gpd.GeoDataFrame(
-        geometry=[shapely.Point(row["x"], row["y"]) for _, row in calibration_points_image.iterrows()]
+        data={"radius": np.ones(shape=len(calibration_points_image))},
+        geometry=[shapely.Point(row["x"], row["y"]) for _, row in calibration_points_image.iterrows()],
     )
 
     if len(calibration_points_lmd) < 3:
