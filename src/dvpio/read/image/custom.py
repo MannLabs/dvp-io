@@ -14,7 +14,7 @@ def read_custom(
 
     This function might not be performant for large images.
 
-    Uses the :class:`dask.array.image.imread` function to read any image file to dask.
+    Uses the :func:`dask.array.image.imread` function to read any image file to dask.
     Support widely used file types, including `.tiff`.
 
     Pass a custom reader function to `imread`
@@ -25,9 +25,9 @@ def read_custom(
         Path to file
     imread
         Custom image reading function. Function should expect a filename string
-        return a numpy array (:class:`dask.array.image.imread`)
+        return a numpy array (:func:`dask.array.image.imread`)
     **kwargs
-        Keyword arguments passed to :class:`spatialdata.models.Image2DModel.parse`
+        Keyword arguments passed to :meth:`spatialdata.models.Image2DModel.parse`
 
     Returns
     -------
