@@ -12,6 +12,8 @@ def read_custom(
 ) -> Image2DModel:
     """Read a custom image file to Image2DModel
 
+    This function might not be performant for large images.
+
     Uses the :function:`dask.array.image.imread` function to read any image file to dask.
     Support widely used file types, including `.tiff`.
 
@@ -31,6 +33,6 @@ def read_custom(
     -------
     :class:`spatialdata.models.Image2DModel`
     """
-    img = daimread(path, imread=imread)
+    img = daimread(path, imread=imread).squeeze(0)
 
     return Image2DModel.parse(img, **kwargs)
