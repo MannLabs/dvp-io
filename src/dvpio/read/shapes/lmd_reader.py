@@ -2,12 +2,12 @@ import geopandas as gpd
 import lmd.lib as pylmd
 import numpy as np
 import shapely
-from spatialdata.models import ShapesModel
+from spatialdata.models import PointsModel, ShapesModel
 
 from .geometry import transform_shapes
 
 
-def read_lmd(path: str, calibration_points_image: gpd.GeoDataFrame, switch_orientation: bool = True) -> ShapesModel:
+def read_lmd(path: str, calibration_points_image: PointsModel, switch_orientation: bool = True) -> ShapesModel:
     """Read and parse LMD-formatted masks for the use in spatialdata
 
     Wrapper for pyLMD functions.
@@ -17,8 +17,8 @@ def read_lmd(path: str, calibration_points_image: gpd.GeoDataFrame, switch_orien
     path
         Path to LMD-formatted segmentation masks in .xml format
     calibration_points_image
-        Calibration points of the image as geopandas.DataFrame, with 3 calibration points
-        in geometry column
+        Calibration points of the image as DataFrame, with 3 calibration points. Point coordinates are
+        stored as seperate columns in `x` and `y` column.
     switch_orientation
         Per default, LMD is working in a (x, y) coordinate system while the image coordinates are in a (row=y, col=x)
         coordinate system. If True, transform the coordinate systems by mirroring the coordinate system at the
@@ -39,6 +39,10 @@ def read_lmd(path: str, calibration_points_image: gpd.GeoDataFrame, switch_orien
     calibration_points_lmd = gpd.GeoDataFrame(
         data={"radius": np.ones(shape=len(lmd_shapes.calibration_points))},
         geometry=[shapely.Point(point) for point in lmd_shapes.calibration_points],
+    )
+
+    calibration_points_image = gpd.GeoDataFrame(
+        geometry=[shapely.Point(row["x"], row["y"]) for _, row in calibration_points_image.iterrows()]
     )
 
     if len(calibration_points_lmd) < 3:
