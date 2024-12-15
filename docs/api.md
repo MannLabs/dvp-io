@@ -12,6 +12,7 @@
 
     read_czi
     read_openslide
+    read_custom
 ```
 
 ### Shapes
