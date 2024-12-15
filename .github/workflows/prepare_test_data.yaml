@@ -19,16 +19,19 @@ jobs:
           rm -rf ./data && mkdir -p ./data
           curl -o ./data/openslide-mirax.zip https://openslide.cs.cmu.edu/download/openslide-testdata/Mirax/Mirax2.2-4-PNG.zip
           curl -o ./data/zeiss.zip https://datashare.biochem.mpg.de/s/k2C6sg0qrXBdWdc/download
+          curl -o ./data/blobs.zip https://datashare.biochem.mpg.de/s/vi0MyArhSFCEgbL/download
 
       - name: Unzip files
         run: |
           unzip ./data/openslide-mirax.zip -d ./data/openslide-mirax
           unzip ./data/zeiss.zip -d ./data/zeiss
+          unzip ./data/blobs.zip -d ./data/blobs
 
       - name: Remove archives
         run: |
           rm ./data/openslide-mirax.zip
           rm ./data/zeiss.zip
+          rm ./data/blobs.zip
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
