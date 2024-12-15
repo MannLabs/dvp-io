@@ -5,7 +5,6 @@
 ### Image
 
 ```{eval-rst}
-.. module:: dvpio
 .. currentmodule:: dvpio.read.image
 .. autosummary::
     :toctree: generated
@@ -18,7 +17,6 @@
 ### Shapes
 
 ```{eval-rst}
-.. module:: dvpio
 .. currentmodule:: dvpio.read.shapes
 .. autosummary::
     :toctree: generated
