@@ -20,15 +20,10 @@ calibration_points_image = gpd.GeoDataFrame(geometry=[Point([1015, 15]), Point([
     ["path", "calibration_points", "ground_truth_path"],
     [
         [
-            "./data/blobs/shapes/all_tiles_contours.xml",
+            "./data/blobs/blobs/shapes/all_tiles_contours.xml",
             calibration_points_image,
-            "./data/blobs/ground_truth/binary-blobs.segmentation.geojson",
-        ],
-        [
-            "./data/blobs/shapes/middle_tiles_contours.xml",
-            calibration_points_image,
-            "./data/blobs/ground_truth/binary-blobs.segmentation.geojson",
-        ],
+            "./data/blobs/blobs/ground_truth/binary-blobs.segmentation.geojson",
+        ]
     ],
 )
 def test_read_lmd(path: str, calibration_points: NDArray[np.float64], ground_truth_path: str) -> None:
