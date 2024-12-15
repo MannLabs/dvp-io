@@ -25,9 +25,9 @@ def read_custom(
         Path to file
     imread
         Custom image reading function. Function should expect a filename string
-        return a numpy array (:function:`dask.array.image.imread`)
+        return a numpy array (:class:`dask.array.image.imread`)
     **kwargs
-        Keyword arguments passed to :function:`spatialdata.models.Image2DModel.parse`
+        Keyword arguments passed to :class:`spatialdata.models.Image2DModel.parse`
 
     Returns
     -------
