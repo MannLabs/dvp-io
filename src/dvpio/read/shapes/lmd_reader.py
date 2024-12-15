@@ -10,6 +10,8 @@ from .geometry import transform_shapes
 def read_lmd(path: str, calibration_points_image: gpd.GeoDataFrame, switch_orientation: bool = True) -> ShapesModel:
     """Read and parse LMD-formatted masks for the use in spatialdata
 
+    Wrapper for pyLMD functions.
+
     Parameters
     ----------
     path
