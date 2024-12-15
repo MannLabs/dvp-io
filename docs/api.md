@@ -12,7 +12,19 @@
 
     read_czi
     read_openslide
+    read_custom
+```
 
+### Shapes
+
+```{eval-rst}
+.. module:: dvpio
+.. currentmodule:: dvpio.read.shapes
+.. autosummary::
+    :toctree: generated
+
+    read_lmd
+    transform_shapes
 ```
 
 <!-- ## Plotting
