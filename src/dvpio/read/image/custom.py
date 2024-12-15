@@ -14,7 +14,7 @@ def read_custom(
 
     This function might not be performant for large images.
 
-    Uses the :function:`dask.array.image.imread` function to read any image file to dask.
+    Uses the :class:`dask.array.image.imread` function to read any image file to dask.
     Support widely used file types, including `.tiff`.
 
     Pass a custom reader function to `imread`
