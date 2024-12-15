@@ -2,6 +2,7 @@
 
 [![Tests][badge-tests]][tests]
 [![Documentation][badge-docs]][documentation]
+[![codecov](https://codecov.io/gh/lucas-diedrich/dvp-io/graph/badge.svg?token=RO2UBP3JQ0)](https://codecov.io/gh/lucas-diedrich/dvp-io)
 
 [badge-tests]: https://img.shields.io/github/actions/workflow/status/lucas-diedrich/dvp-io/test.yaml?branch=main
 [badge-docs]: https://img.shields.io/readthedocs/dvp-io
