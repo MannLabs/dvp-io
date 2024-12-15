@@ -49,10 +49,12 @@ def read_openslide(path: str, chunk_size: tuple[int, int] = (10000, 10000), pyra
     Uses openslide to read multiple pathology slide representations and parse them
     to a lazy dask array. Currently supported formats
 
-    [tested]
+    Tested
+
     - .mirax (Mirax format)
 
-    [in principle supported by openslide]
+    In principle supported by openslide:
+
     - Aperio (.svs, .tif)
     - DICOM (.dcm)
     - Hamamatsu (.ndpi, .vms, .vmu)
@@ -62,8 +64,11 @@ def read_openslide(path: str, chunk_size: tuple[int, int] = (10000, 10000), pyra
     - Sakura (.svslide)
     - Trestle (.tif)
     - Ventana (.bif, .tif)
-    [- Zeiss (.czi)] We recommend to use the read_czi function for this format
     - Generic tiled TIFF (.tif)
+
+    We recommend to use the read_czi function for this format
+
+    - Zeiss (.czi)
 
     Parameters
     ----------
@@ -76,7 +81,7 @@ def read_openslide(path: str, chunk_size: tuple[int, int] = (10000, 10000), pyra
 
     Returns
     -------
-    Image2DModel
+    :class:`spatialdata.models.Image2DModel`
     """
     slide = openslide.OpenSlide(path)
 
@@ -107,5 +112,5 @@ def read_openslide(path: str, chunk_size: tuple[int, int] = (10000, 10000), pyra
         dims="cyx",
         c_coords=["r", "g", "b", "a"],
         scale_factors=scale_factors,
-        chunks=chunk_size,
+        chunks=(4, *chunk_size[::-1]),
     )

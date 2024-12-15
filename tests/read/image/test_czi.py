@@ -1,7 +1,7 @@
 import pytest
 from pylibCZIrw import czi as pyczi
 
-from dvpio.read.image.czi import read_czi
+from dvpio.read.image import read_czi
 
 
 @pytest.mark.parametrize(
