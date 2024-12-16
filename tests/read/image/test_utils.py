@@ -3,6 +3,7 @@ from typing import Any
 import dask.array as da
 import numpy as np
 import pytest
+from dask import delayed
 from numpy.typing import NDArray
 
 from dvpio.read.image._utils import _chunk_factory, _create_tiles
@@ -75,13 +76,14 @@ def test_chunk_factory(
 ) -> None:
     """Test if tiles can be assembled to dask array"""
 
+    @delayed
     def func(slide: Any, coords: Any, size: tuple[int]) -> NDArray[np.int_]:
         """Create arrays in shape of tiles"""
-        return np.zeros(shape=size)
+        return da.zeros(shape=size)
 
     coords = _create_tiles(dimensions=dimensions, tile_size=tile_size, min_coordinates=min_coordinates)
 
-    tiles_ = _chunk_factory(func, slide=None, coords=coords).compute()
+    tiles_ = _chunk_factory(func, slide=None, coords=coords, n_channel=1)
     tiles = da.block(tiles_)
 
-    assert tiles.shape == dimensions
+    assert tiles.shape == (1, *dimensions)
