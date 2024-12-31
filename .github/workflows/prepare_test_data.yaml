@@ -34,7 +34,7 @@ jobs:
           rm ./data/blobs.zip
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v6
         with:
           name: data
           path: ./data
