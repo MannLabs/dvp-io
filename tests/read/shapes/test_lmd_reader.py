@@ -38,4 +38,5 @@ def test_read_lmd(path: str, calibration_points: NDArray[np.float64], ground_tru
 
     assert isinstance(lmd_shapes, gpd.GeoDataFrame)
     # Centroids of matched shapes are much closer than shapes of all shapes
+    # (can't be identical due to segmentation errors of cellpose)
     assert np.median(distances[row, col]) < 0.05 * np.median(distances)
