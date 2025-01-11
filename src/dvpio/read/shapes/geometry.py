@@ -44,7 +44,7 @@ def compute_affine_transformation(
     return affine_matrix
 
 
-def _apply_affine_transformation(
+def apply_affine_transformation(
     shape: NDArray[np.float64],
     affine_transformation: NDArray[np.float64],
 ) -> NDArray[np.float64]:
@@ -124,7 +124,7 @@ def transform_shapes(
     # Iterate through shapes and apply affine transformation
     transformed_shapes = shapes["geometry"].apply(
         lambda shape: shapely.transform(
-            shape, transformation=lambda geom: _apply_affine_transformation(geom, affine_transformation)
+            shape, transformation=lambda geom: apply_affine_transformation(geom, affine_transformation)
         )
     )
 

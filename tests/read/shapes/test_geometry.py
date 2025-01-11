@@ -6,7 +6,7 @@ from shapely import Polygon
 from spatialdata.models import PointsModel, ShapesModel
 
 from dvpio.read.shapes.geometry import (
-    _apply_affine_transformation,
+    apply_affine_transformation,
     compute_affine_transformation,
     transform_shapes,
 )
@@ -55,7 +55,7 @@ def test_apply_affine_transformation(
     reference: NDArray[np.float64],
     affine_transformation: NDArray[np.float64],
 ) -> None:
-    target = _apply_affine_transformation(query, affine_transformation)
+    target = apply_affine_transformation(query, affine_transformation)
     assert np.isclose(target, reference, rtol=0.001).all()
 
 
