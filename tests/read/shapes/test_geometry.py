@@ -2,7 +2,8 @@ import geopandas as gpd
 import numpy as np
 import pytest
 from numpy.typing import NDArray
-from shapely import Point, Polygon
+from shapely import Polygon
+from spatialdata.models import PointsModel
 
 from dvpio.read.shapes.geometry import apply_affine_transformation, compute_affine_transformation, transform_shapes
 
@@ -63,7 +64,7 @@ def test_apply_affine_transformation(
 
 def test_transform_shapes() -> None:
     # Create data
-    calibration_points = gpd.GeoDataFrame(geometry=[Point([0, 0]), Point(1, 0), Point(0, 1)])
+    calibration_points = PointsModel.parse(np.array([[0, 0], [1, 0], [0, 1]]))
     shape = Polygon([[0, 0], [1, 1], [0, 1]])
     shapes = gpd.GeoDataFrame(geometry=[shape] * 10)
 
