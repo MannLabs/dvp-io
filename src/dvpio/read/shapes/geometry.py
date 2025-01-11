@@ -9,12 +9,18 @@ def _polygon_to_array(polygon):
     return np.array(polygon.exterior.coords)
 
 
+def _transform_polygon(shape: shapely.Polygon, rotation: np.ndarray, translation: np.ndarray | None) -> shapely.Polygon:
+    shape = _polygon_to_array(shape)
+    shape = apply_affine_transformation(shape, rotation=rotation, translation=translation)
+    return shapely.Polygon(shape)
+
+
 def compute_affine_transformation(
     query_points: NDArray[np.float64], reference_points: NDArray[np.float64], precision: int | None = None
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Computes the affine transformation mapping query_points to reference_points.
 
-    .. math:
+    .. math::
         Aq = r
 
     Parameters
@@ -121,11 +127,9 @@ def transform_shapes(
     )
     # Transform shapes
     # Iterate through shapes and apply affine transformation
-    transformed_shapes = shapes["geometry"].apply(lambda shape: _polygon_to_array(shape))
-    transformed_shapes = transformed_shapes.apply(
-        lambda shape: apply_affine_transformation(shape, rotation=rotation, translation=translation)
+    transformed_shapes = shapes["geometry"].apply(
+        lambda shape: _transform_polygon(shape, rotation=rotation, translation=translation)
     )
-    transformed_shapes = transformed_shapes.apply(lambda shape: shapely.Polygon(shape))
 
     # Reassign as DataFrame and parse with spatialdata
     transformed_shapes = shapes.assign(geometry=transformed_shapes)
