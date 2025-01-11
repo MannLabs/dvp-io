@@ -1,7 +1,5 @@
 import numpy as np
-import shapely
 from numpy.typing import NDArray
-from spatialdata.models import PointsModel, ShapesModel
 
 
 def compute_affine_transformation(
@@ -73,62 +71,3 @@ def apply_affine_transformation(
     shape_transformed = shape_mod @ affine_transformation
     # Reuturn shape without padded ones
     return shape_transformed[:, :-1]
-
-
-def transform_shapes(
-    shapes: ShapesModel,
-    calibration_points_target: PointsModel,
-    calibration_points_source: PointsModel,
-    precision: int = 3,
-) -> ShapesModel:
-    """Apply coordinate transformation to shapes based on calibration points from a target and a source
-
-    Computes transformation between source and target coordinates.
-
-    Parameters
-    ----------
-    shapes
-        Shapes in source coordinate system (usually LMD coordinates)
-    calibration_points_target
-        3 Calibration points in target coordinate system (usually image/pixel coordinates)
-        Expects :class:`spatialdata.models.PointsModel` with calibration points in `x`/`y` column
-    calibration_points_source
-        3 Calibration points, matched to `calibration_points_target` in source coordinate system (usually LMD coordinates)
-        Expects :class:`spatialdata.models.PointsModel` with calibration points in `x`/`y` column
-    precision
-        Precision of affine transformation
-
-    Returns
-    -------
-    ShapesModel
-        Transformed shapes in target coordinate system
-
-    Raises
-    ------
-    AttributeError
-        Checks validity of shapes and calibration points data formats
-    """
-    ShapesModel.validate(shapes)
-    PointsModel.validate(calibration_points_source)
-    PointsModel.validate(calibration_points_target)
-
-    # Convert to numpy arrays
-    calibration_points_source = calibration_points_source[["x", "y"]].to_dask_array().compute()
-    calibration_points_target = calibration_points_target[["x", "y"]].to_dask_array().compute()
-
-    # Compute rotation (2x2) and translation (2x1) matrices
-    affine_transformation = compute_affine_transformation(
-        calibration_points_source, calibration_points_target, precision=precision
-    )
-    # Transform shapes
-    # Iterate through shapes and apply affine transformation
-    transformed_shapes = shapes["geometry"].apply(
-        lambda shape: shapely.transform(
-            shape, transformation=lambda geom: apply_affine_transformation(geom, affine_transformation)
-        )
-    )
-
-    # Reassign as DataFrame and parse with spatialdata
-    transformed_shapes = shapes.assign(geometry=transformed_shapes)
-
-    return ShapesModel.parse(transformed_shapes)

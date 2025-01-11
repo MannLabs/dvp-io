@@ -4,9 +4,10 @@ import pytest
 from numpy.typing import NDArray
 from scipy.optimize import linear_sum_assignment as lsa
 from scipy.spatial.distance import cdist
-from spatialdata.models import PointsModel
+from shapely import Polygon
+from spatialdata.models import PointsModel, ShapesModel
 
-from dvpio.read.shapes import read_lmd
+from dvpio.read.shapes import read_lmd, transform_shapes
 
 
 def _get_centroid_xy(geometry: gpd.GeoSeries) -> NDArray[np.float64]:
@@ -14,6 +15,21 @@ def _get_centroid_xy(geometry: gpd.GeoSeries) -> NDArray[np.float64]:
 
 
 calibration_points_image = PointsModel.parse(np.array([[15, 1015], [15, 205], [1015, 15]]))
+
+
+def test_transform_shapes() -> None:
+    # Create data
+    calibration_points = PointsModel.parse(np.array([[0, 0], [1, 0], [0, 1]]))
+    shape = Polygon([[0, 0], [1, 1], [0, 1]])
+    shapes = ShapesModel.parse(gpd.GeoDataFrame(geometry=[shape] * 10))
+
+    # Transform
+    transformed_shapes = transform_shapes(
+        shapes=shapes, calibration_points_source=calibration_points, calibration_points_target=calibration_points
+    )
+
+    assert isinstance(transformed_shapes, gpd.GeoDataFrame)
+    assert len(transformed_shapes) == len(shapes)
 
 
 @pytest.mark.parametrize(
