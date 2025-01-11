@@ -2,7 +2,7 @@ import geopandas as gpd
 import numpy as np
 import shapely
 from numpy.typing import NDArray
-from spatialdata.models import ShapesModel
+from spatialdata.models import PointsModel, ShapesModel
 
 
 def _polygon_to_array(polygon):
@@ -82,8 +82,8 @@ def apply_affine_transformation(
 
 def transform_shapes(
     shapes: gpd.GeoDataFrame | ShapesModel,
-    calibration_points_target: gpd.GeoDataFrame | ShapesModel,
-    calibration_points_source: gpd.GeoDataFrame | ShapesModel,
+    calibration_points_target: PointsModel,
+    calibration_points_source: PointsModel,
     precision: int = 3,
 ) -> ShapesModel:
     """Apply coordinate transformation to shapes based on calibration points from a target and a source
@@ -96,10 +96,10 @@ def transform_shapes(
         Shapes in source coordinate system (usually LMD coordinates)
     calibration_points_target
         3 Calibration points in target coordinate system (usually image/pixel coordinates)
-        Expects :class:`geopandas.GeoDataFrame` with calibration points in `geometry` column
+        Expects :class:`spatialdata.models.PointsModel` with calibration points in `x`/`y` column
     calibration_points_source
         3 Calibration points, matched to `calibration_points_target` in source coordinate system (usually LMD coordinates)
-        Expects :class:`geopandas.GeoDataFrame` with calibration points in `geometry` column
+        Expects :class:`spatialdata.models.PointsModel` with calibration points in `x`/`y` column
     precision
         Precision of affine transformation
 
@@ -108,13 +108,12 @@ def transform_shapes(
     ShapesModel
         Transformed shapes in target coordinate system
     """
+    PointsModel.validate(calibration_points_source)
+    PointsModel.validate(calibration_points_target)
+
     # Convert to numpy arrays
-    calibration_points_source = np.array(
-        calibration_points_source["geometry"].apply(lambda point: [point.x, point.y]).tolist()
-    )
-    calibration_points_target = np.array(
-        calibration_points_target["geometry"].apply(lambda point: [point.x, point.y]).tolist()
-    )
+    calibration_points_source = calibration_points_source[["x", "y"]].to_dask_array().compute()
+    calibration_points_target = calibration_points_target[["x", "y"]].to_dask_array().compute()
 
     # Compute rotation (2x2) and translation (2x1) matrices
     rotation, translation = compute_affine_transformation(
