@@ -20,21 +20,24 @@ jobs:
           curl -o ./data/openslide-mirax.zip https://openslide.cs.cmu.edu/download/openslide-testdata/Mirax/Mirax2.2-4-PNG.zip
           curl -o ./data/zeiss.zip https://datashare.biochem.mpg.de/s/k2C6sg0qrXBdWdc/download
           curl -o ./data/blobs.zip https://datashare.biochem.mpg.de/s/0oTGB6xpUaWIaVh/download
+          curl -o ./data/triangles.zip https://datashare.biochem.mpg.de/s/zneNg7QxZNM2wSm/download
 
       - name: Unzip files
         run: |
           unzip ./data/openslide-mirax.zip -d ./data/openslide-mirax
           unzip ./data/zeiss.zip -d ./data/zeiss
           unzip ./data/blobs.zip -d ./data/blobs
+          unzip ./data/blobs.zip -d ./data/triangles
 
       - name: Remove archives
         run: |
           rm ./data/openslide-mirax.zip
           rm ./data/zeiss.zip
           rm ./data/blobs.zip
+          rm ./data/triangles.zip
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: data
           path: ./data
