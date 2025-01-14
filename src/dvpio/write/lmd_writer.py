@@ -32,14 +32,14 @@ def write_lmd(
     affine_transformation
         Optional. Affine transformation to apply to the data to recover Leica coordinate system. If None,
         tries to recover the `leica_micro_dissection` coordinate transformation from the `annotation`
-        `class`::`spatialdata.models.ShapesModel` object
+        :class:`spatialdata.models.ShapesModel` object
     annotation_name_column
         Optional. Provide column that specifies a (unique) cell name in `annotation`
-        `class`::`spatialdata.models.ShapesModel` object. Will be stored in as the tag of
+        :class:`spatialdata.models.ShapesModel` object. Will be stored in as the tag of
         the Shape.
     annotation_well_column
         Optional. Provide column that specifies a well in the `annotation`
-        `class`::`spatialdata.models.ShapesModel` object. Will be stored in as the `CapID` attribute of
+        :class:`spatialdata.models.ShapesModel` object. Will be stored in as the `CapID` attribute of
         the Shape.
     overwrite
         Default `True`. Whether to overwrite existing data.
@@ -51,6 +51,7 @@ def write_lmd(
     Example
     -------
     .. code-block:: python
+
         from spatialdata.models import ShapesModel, PointsModel
         from tempfile import mkdtemp
         from dvpio.write import write_lmd
