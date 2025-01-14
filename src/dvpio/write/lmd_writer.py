@@ -23,19 +23,17 @@ def write_lmd(
     ----------
     path:
         Export path for .xml
-    sdata
-        Spatialdata
     annotation
         Shapes to export with pyLMD
     calibration_points
-        Calibration points in the image.
+        Calibration points in image coordinates
     affine_transformation
-        Optional. Affine transformation to apply to the data to recover Leica coordinate system. If None,
-        tries to recover the `leica_micro_dissection` coordinate transformation from the `annotation`
+        Optional. Affine transformation to apply to the data to recover Leica coordinate system. If `None`,
+        tries to recover the `to_lmd` coordinate transformation from the `annotation`
         :class:`spatialdata.models.ShapesModel` object
     annotation_name_column
         Optional. Provide column that specifies a (unique) cell name in `annotation`
-        :class:`spatialdata.models.ShapesModel` object. Will be stored in as the tag of
+        :class:`spatialdata.models.ShapesModel` object. Will be stored as the tag of
         the Shape.
     annotation_well_column
         Optional. Provide column that specifies a well in the `annotation`
