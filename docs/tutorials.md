@@ -20,3 +20,9 @@ tutorials/002_read-dvpio.ipynb
 ```
 
 ## Data export
+
+```{toctree}
+:maxdepth: 1
+
+tutorials/003_write-dvpio.ipynb
+```
