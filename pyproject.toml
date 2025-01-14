@@ -77,6 +77,9 @@ scripts.clean = "git clean -fdX -- {args:docs}"
 [tool.hatch.envs.hatch-test]
 features = [ "test" ]
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.ruff]
 line-length = 120
 src = [ "src" ]
