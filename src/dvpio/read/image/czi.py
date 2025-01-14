@@ -146,14 +146,14 @@ def read_czi(
         Path to file
     chunk_size
         Size of the individual regions that are read into memory during the process
-    kwargs
-        Keyword arguments passed to Image2DModel.parse
     channels
         If multiple channels are available, select these channels
     timepoint
         If timeseries, select the given index (defaults to 0 [first])
     z_stack
         If z_stack, defaults to the given stack/index (defaults to 0 [first])
+    kwargs
+        Keyword arguments passed to :meth:`spatialdata.models.Image2DModel.parse`
 
     Returns
     -------
