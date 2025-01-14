@@ -27,8 +27,8 @@ dependencies = [
   "napari-spatialdata",
   "openslide-bin",
   "openslide-python",
-  "py-lmd",
   "pylibczirw",
+  "pylmd @ https://github.com/MannLabs/py-lmd.git",
   "spatialdata",
   "spatialdata-plot",
 ]
