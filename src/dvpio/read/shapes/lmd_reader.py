@@ -38,8 +38,8 @@ def transform_shapes(
     Object has special attributes
 
     - `ShapesModel.attrs.transformation`
-        - global: (image coordinates)
-        - leica_micro_dissection: Leica coordinate system transformation
+        - `global`: (image coordinates)
+        - `to_lmd`: Leica coordinate system transformation
 
     Raises
     ------
