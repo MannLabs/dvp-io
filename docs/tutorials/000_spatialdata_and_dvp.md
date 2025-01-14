@@ -2,7 +2,7 @@
 
 ## What is spatialdata?
 
-Spatialdata is a data framework for the joint and accessible storage of imaging data, annotations, and -omics data. This is extremely useful for spatial -omics experiments, that commonly generate imaging data and (partially) paired -omics measurements.
+Spatialdata {cite:p}`Spatialdata2024` is a data framework for the joint and accessible storage of imaging data, annotations, and -omics data. This is extremely useful for spatial -omics experiments, that commonly generate imaging data and (partially) paired -omics measurements.
 
 ### Yet another dataformat?
 
@@ -23,7 +23,7 @@ A typical DVP workflow is outlined in the following. Note that spatialdata imple
 | 1   | Immunofluorescence/Pathology staining | Imaging                  | `.czi`, `.mrxs`, `.tiff`               | `.images`                                |
 | 2   | Cell segmentation                     | Annotation               | cellpose, ... (e.g. `.tiff`)           | `.shapes` vectors, `.labels` raster data |
 | 3   | Selection of cells                    | Annotation/Featurization | scPortrait (`diverse`)                 | `.tables`                                |
-| 4   | Excision of cells                     | -                        | pyLMD (`.xml`)                         | -                                        |
+| 4   | Excision of cells                     | -                        | pyLMD {cite:p}`Sparcs2023` (`.xml`)    | -                                        |
 | 5   | MS measurement                        | omics                    | alphaDIA, alphabase, DIANN (`diverse`) | `.tables`                                |
 
 ### DVP IO

@@ -1,5 +1,3 @@
-import sys
-
 import numpy as np
 import openslide
 import pytest
@@ -7,7 +5,7 @@ import pytest
 from dvpio.read.image import read_openslide
 
 
-@pytest.mark.skipif(sys.platform != "darwin", reason="Tests fail online due to limited resources")
+# @pytest.mark.skipif(sys.platform != "darwin", reason="Tests fail online due to limited resources")
 @pytest.mark.parametrize(
     ("dataset", "xmin", "ymin", "xmax", "ymax"),
     [

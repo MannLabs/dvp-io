@@ -1,0 +1,25 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: dvp-io
+message: >-
+    Read and write funtionalities from and to spatialdata for
+    deep visual proteomics
+type: software
+authors:
+    - given-names: Lucas
+      family-names: Diedrich
+      email: diedrich@biochem.mpg.de
+      affiliation: Max-Planck-Institute of Biochemistry
+      name-suffix: †
+      orcid: "https://orcid.org/0009-0007-4884-1422"
+repository-code: "https://github.com/lucas-diedrich/dvp-io"
+url: "https://dvp-io.readthedocs.io/en/latest/index.html"
+abstract: >
+    Read/write functions to and from spatialdata for Deep
+    Visual Proteomics
+keywords:
+    - spatial-omics
+    - proteomics
+license: Apache-2.0

@@ -13,4 +13,10 @@ tutorials/001_introduction-to-spatialdata
 
 ## Data loading
 
+```{toctree}
+:maxdepth: 1
+
+tutorials/002_read-dvpio.ipynb
+```
+
 ## Data export

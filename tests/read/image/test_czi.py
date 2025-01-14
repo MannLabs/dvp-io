@@ -8,7 +8,7 @@ from dvpio.read.image import read_czi
     ("dataset", "xmin", "ymin", "width", "height"),
     [
         # RGB
-        # ("./data/zeiss/zeiss/kabatnik2023_20211129_C1.czi", -170000, 40000, 10000, 10000),
+        ("./data/zeiss/zeiss/kabatnik2023_20211129_C1.czi", -170000, 40000, 10000, 10000),
         # Multichannel
         ("./data/zeiss/zeiss/zeiss_multi-channel.czi", 0, 0, 1000, 1000),
     ],

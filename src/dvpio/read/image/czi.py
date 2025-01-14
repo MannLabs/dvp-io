@@ -2,14 +2,13 @@ from collections.abc import Mapping
 from enum import Enum
 from typing import Any
 
-import dask.array as da
 import numpy as np
 from dask import delayed
 from numpy.typing import NDArray
 from pylibCZIrw import czi as pyczi
 from spatialdata.models import Image2DModel
 
-from ._utils import _assemble_delayed, _chunk_factory, _create_tiles
+from ._utils import _assemble, _chunk_factory, _create_tiles
 
 
 class CZIPixelType(Enum):
@@ -183,6 +182,7 @@ def read_czi(
                 _get_img,
                 slide=czidoc_r,
                 coords=chunk_coords,
+                n_channel=1,
                 channel=c,
                 timepoint=timepoint,
                 z_stack=z_stack,
@@ -194,18 +194,13 @@ def read_czi(
             _get_img,
             slide=czidoc_r,
             coords=chunk_coords,
+            n_channel=sum(channel_dim),
             channel=channels,
             timepoint=timepoint,
             z_stack=z_stack,
         )
 
-    array_ = _assemble_delayed(chunks)
-
-    array = da.from_delayed(
-        array_,
-        shape=(sum(channel_dim), width, height),
-        dtype=pixel_spec.dtype,
-    )
+    array = _assemble(chunks)
 
     return Image2DModel.parse(
         array,

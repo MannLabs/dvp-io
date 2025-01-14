@@ -2,7 +2,7 @@ import geopandas as gpd
 import numpy as np
 import shapely
 from numpy.typing import NDArray
-from spatialdata.models import PointsModel, ShapesModel
+from spatialdata.models import ShapesModel
 
 
 def _polygon_to_array(polygon):
@@ -82,8 +82,8 @@ def apply_affine_transformation(
 
 def transform_shapes(
     shapes: gpd.GeoDataFrame | ShapesModel,
-    calibration_points_target: gpd.GeoDataFrame | PointsModel,
-    calibration_points_source: gpd.GeoDataFrame | PointsModel,
+    calibration_points_target: gpd.GeoDataFrame | ShapesModel,
+    calibration_points_source: gpd.GeoDataFrame | ShapesModel,
     precision: int = 3,
 ) -> ShapesModel:
     """Apply coordinate transformation to shapes based on calibration points from a target and a source
