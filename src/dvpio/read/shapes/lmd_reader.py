@@ -1,8 +1,8 @@
-import geopandas as gpd
 import lmd.lib as pylmd
 import numpy as np
 import shapely
 from spatialdata.models import PointsModel, ShapesModel
+from spatialdata.transformations import Affine, set_transformation
 
 from .geometry import apply_affine_transformation, compute_affine_transformation
 
@@ -32,8 +32,14 @@ def transform_shapes(
 
     Returns
     -------
-    ShapesModel
+    `class`::`spatialdata.models.ShapesModel`
         Transformed shapes in target coordinate system
+
+    Object has special attributes
+
+    - `ShapesModel.attrs.transformation`
+        - global: (image coordinates)
+        - leica_micro_dissection: Leica coordinate system transformation
 
     Raises
     ------
@@ -52,6 +58,9 @@ def transform_shapes(
     affine_transformation = compute_affine_transformation(
         calibration_points_source, calibration_points_target, precision=precision
     )
+
+    affine_transformation_inverse = np.around(np.linalg.inv(affine_transformation), precision)
+
     # Transform shapes
     # Iterate through shapes and apply affine transformation
     transformed_shapes = shapes["geometry"].apply(
@@ -61,9 +70,19 @@ def transform_shapes(
     )
 
     # Reassign as DataFrame and parse with spatialdata
-    transformed_shapes = shapes.assign(geometry=transformed_shapes)
+    transformed_shapes = ShapesModel.parse(shapes.assign(geometry=transformed_shapes))
 
-    return ShapesModel.parse(transformed_shapes)
+    # Set inverse transformation as transformation to leica coordinate system
+    set_transformation(
+        transformed_shapes,
+        transformation=Affine(affine_transformation_inverse.T, input_axes=("x", "y"), output_axes=("x", "y")),
+        to_coordinate_system="to_lmd",
+    )
+
+    # Store original calibration points
+    transformed_shapes.attrs["lmd_calibration_points"] = calibration_points_source
+
+    return transformed_shapes
 
 
 def read_lmd(path: str, calibration_points_image: PointsModel, switch_orientation: bool = False) -> ShapesModel:
@@ -85,17 +104,24 @@ def read_lmd(path: str, calibration_points_image: PointsModel, switch_orientatio
 
     Returns
     -------
-    ShapesModel
-        Transformed shapes in image coordinats
+    `class`::`spatialdata.models.ShapesModel`
+        Transformed shapes in image coordinates.
+
+        Object has special attributes
+
+            - `ShapesModel.attrs.transformation`
+                - global: (image coordinates)
+                - to_lmd: Transformation back to leica coordinate system
     """
     PointsModel.validate(calibration_points_image)
 
     # Load LMD shapes with pyLMD
     lmd_shapes = pylmd.Collection()
     lmd_shapes.load(path)
+    shapes = lmd_shapes.to_geopandas("name", "well")
 
     # Transform to spatialdata models
-    shapes = gpd.GeoDataFrame(geometry=[shapely.Polygon(shape.points) for shape in lmd_shapes.shapes])
+    shapes = ShapesModel.parse(shapes)
     calibration_points_lmd = PointsModel.parse(lmd_shapes.calibration_points)
 
     if len(calibration_points_lmd) < 3:
