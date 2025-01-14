@@ -27,7 +27,7 @@ dependencies = [
   "napari-spatialdata",
   "openslide-bin",
   "openslide-python",
-  "py-lmd",
+  "py-lmd @ git+https://github.com/MannLabs/py-lmd.git",
   "pylibczirw",
   "spatialdata",
   "spatialdata-plot",
@@ -76,6 +76,9 @@ scripts.clean = "git clean -fdX -- {args:docs}"
 
 [tool.hatch.envs.hatch-test]
 features = [ "test" ]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.ruff]
 line-length = 120

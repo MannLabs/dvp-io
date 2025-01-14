@@ -1,12 +1,5 @@
-import geopandas as gpd
 import numpy as np
-import shapely
 from numpy.typing import NDArray
-from spatialdata.models import ShapesModel
-
-
-def _polygon_to_array(polygon):
-    return np.array(polygon.exterior.coords)
 
 
 def compute_affine_transformation(
@@ -14,7 +7,7 @@ def compute_affine_transformation(
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Computes the affine transformation mapping query_points to reference_points.
 
-    .. math:
+    .. math::
         Aq = r
 
     Parameters
@@ -40,23 +33,22 @@ def compute_affine_transformation(
         raise ValueError("At least three points are required to compute the transformation.")
 
     query_points = np.concatenate([query_points, np.ones(shape=(query_points.shape[0], 1))], axis=1)
+    reference_points = np.concatenate([reference_points, np.ones(shape=(reference_points.shape[0], 1))], axis=1)
     affine_matrix, _, _, _ = np.linalg.lstsq(query_points, reference_points, rcond=None)
 
     if precision is not None:
         affine_matrix = np.around(affine_matrix, precision)
 
-    rotation, translation = affine_matrix[:2, :], affine_matrix[2, :].reshape(1, -1)
-    return rotation, translation
+    return affine_matrix
 
 
 def apply_affine_transformation(
     shape: NDArray[np.float64],
-    rotation: NDArray[np.float64],
-    translation: NDArray[np.float64] | None = None,
+    affine_transformation: NDArray[np.float64],
 ) -> NDArray[np.float64]:
     """Transform shapes between coordinate systems
 
-    Applies rotation, translation, and switch of coordinate systems to a shape,
+    Applies affine transformation to a shape,
     in this order.
 
     Parameters
@@ -71,64 +63,11 @@ def apply_affine_transformation(
     Returns
     -------
     NDArray[np.float64]
-        Shape after affine transformation.
+        Shape (N, 2) after affine transformation.
     """
-    if translation is None:
-        # Identity translation
-        translation = np.zeros(shape=(1, 2))
-
-    return shape @ rotation + translation
-
-
-def transform_shapes(
-    shapes: gpd.GeoDataFrame | ShapesModel,
-    calibration_points_target: gpd.GeoDataFrame | ShapesModel,
-    calibration_points_source: gpd.GeoDataFrame | ShapesModel,
-    precision: int = 3,
-) -> ShapesModel:
-    """Apply coordinate transformation to shapes based on calibration points from a target and a source
-
-    Computes transformation between source and target coordinates.
-
-    Parameters
-    ----------
-    shapes
-        Shapes in source coordinate system (usually LMD coordinates)
-    calibration_points_target
-        3 Calibration points in target coordinate system (usually image/pixel coordinates)
-        Expects :class:`geopandas.GeoDataFrame` with calibration points in `geometry` column
-    calibration_points_source
-        3 Calibration points, matched to `calibration_points_target` in source coordinate system (usually LMD coordinates)
-        Expects :class:`geopandas.GeoDataFrame` with calibration points in `geometry` column
-    precision
-        Precision of affine transformation
-
-    Returns
-    -------
-    ShapesModel
-        Transformed shapes in target coordinate system
-    """
-    # Convert to numpy arrays
-    calibration_points_source = np.array(
-        calibration_points_source["geometry"].apply(lambda point: [point.x, point.y]).tolist()
-    )
-    calibration_points_target = np.array(
-        calibration_points_target["geometry"].apply(lambda point: [point.x, point.y]).tolist()
-    )
-
-    # Compute rotation (2x2) and translation (2x1) matrices
-    rotation, translation = compute_affine_transformation(
-        calibration_points_source, calibration_points_target, precision=precision
-    )
-    # Transform shapes
-    # Iterate through shapes and apply affine transformation
-    transformed_shapes = shapes["geometry"].apply(lambda shape: _polygon_to_array(shape))
-    transformed_shapes = transformed_shapes.apply(
-        lambda shape: apply_affine_transformation(shape, rotation=rotation, translation=translation)
-    )
-    transformed_shapes = transformed_shapes.apply(lambda shape: shapely.Polygon(shape))
-
-    # Reassign as DataFrame and parse with spatialdata
-    transformed_shapes = shapes.assign(geometry=transformed_shapes)
-
-    return ShapesModel.parse(transformed_shapes)
+    # Extend shape with ones
+    shape_mod = np.hstack([shape, np.ones(shape=(shape.shape[0], 1))])
+    # Apply affine transformation
+    shape_transformed = shape_mod @ affine_transformation
+    # Reuturn shape without padded ones
+    return shape_transformed[:, :-1]
