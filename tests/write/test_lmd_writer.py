@@ -2,21 +2,16 @@ import os
 from tempfile import mkdtemp
 
 import geopandas as gpd
+import lmd.lib as pylmd
 import numpy as np
 import pytest
-import shapely
-from spatialdata.models import PointsModel, ShapesModel
+from spatialdata.models import PointsModel
 
 from dvpio.read.shapes import read_lmd
 from dvpio.write import write_lmd
 
-gdf = ShapesModel.parse(
-    gpd.GeoDataFrame(
-        data={"name": ["001"], "well": ["A1"]}, geometry=[shapely.Polygon([[0, 0], [0, 1], [1, 0], [0, 0]])]
-    )
-)
-
-calibration_points_image = PointsModel.parse(np.array([[15, 1015], [15, 205], [1015, 15]]))
+calibration_points_image = PointsModel.parse(np.array([[0, 2], [2, 2], [2, 0]]))
+gdf = read_lmd("./data/triangles/collection.xml", calibration_points_image=calibration_points_image)
 
 
 @pytest.mark.parametrize(
@@ -58,6 +53,7 @@ def test_write_lmd_overwrite(
     annotation_name_column: str | None,
     annotation_well_column: str | None,
 ) -> None:
+    """Test repeated overwriting of xml output"""
     path = os.path.join(mkdtemp(), "test.xml")
 
     write_lmd(
@@ -94,30 +90,25 @@ def test_write_lmd_overwrite(
 
 @pytest.mark.parametrize(
     ["read_path", "calibration_points"],
-    [
-        [
-            "./data/blobs/blobs/shapes/all_tiles_contours.xml",
-            calibration_points_image,
-        ]
-    ],
+    [["./data/triangles/collection.xml", calibration_points_image]],
 )
 def test_read_write_lmd(read_path, calibration_points):
+    """Test whether dvpio-based read-write operations modify shapes in any way"""
     write_path = os.path.join(mkdtemp(), "test.xml")
 
-    gdf = read_lmd(read_path, calibration_points_image=calibration_points, switch_orientation=False)
+    # Read in example data
+    gdf = read_lmd(read_path, calibration_points_image=calibration_points)
 
+    # Write
     write_lmd(write_path, annotation=gdf, calibration_points=calibration_points)
 
-    with open(read_path) as f:
-        xml_ref = f.read()
+    # Compare original (ref) with rewritten copy
+    ref = pylmd.Collection()
+    ref.load(read_path)
+    ref = ref.to_geopandas()
 
-    with open(write_path) as f:
-        xml_query = f.read()
+    query = pylmd.Collection()
+    query.load(write_path)
+    query = query.to_geopandas()
 
-    lines_ref = xml_ref.split("\n")
-    lines_query = xml_query.split("\n")
-
-    assert len(lines_ref) == len(lines_query)
-
-    agreement = [ref == query for ref, query in zip(lines_ref, lines_query, strict=True)]
-    assert all(agreement)
+    assert query.equals(ref)
