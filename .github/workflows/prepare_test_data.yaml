@@ -27,7 +27,7 @@ jobs:
           unzip ./data/openslide-mirax.zip -d ./data/openslide-mirax
           unzip ./data/zeiss.zip -d ./data/zeiss
           unzip ./data/blobs.zip -d ./data/blobs
-          unzip ./data/blobs.zip -d ./data/triangles
+          unzip ./data/triangles.zip -d ./data
 
       - name: Remove archives
         run: |
