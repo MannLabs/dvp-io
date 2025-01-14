@@ -28,7 +28,7 @@ dependencies = [
   "openslide-bin",
   "openslide-python",
   "pylibczirw",
-  "pylmd @ https://github.com/MannLabs/py-lmd.git",
+  "pylmd @ git+https://github.com/MannLabs/py-lmd.git",
   "spatialdata",
   "spatialdata-plot",
 ]
