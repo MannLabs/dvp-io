@@ -61,13 +61,14 @@ def write_lmd(
             )
         )
 
+        calibration_points = PointsModel.parse(np.array([[0, 0], [1, 1], [0, 1]]))
 
         path = os.path.join(mkdtemp(), "test.xml")
 
         write_lmd(
             path=path,
             annotation=annotation,
-            annotation_geometry_column="geometry",
+            calibration_points=calibration_points,
             annotation_name_column=annotation_name_column,
             annotation_well_column=annotation_well_column,
             overwrite=True,
