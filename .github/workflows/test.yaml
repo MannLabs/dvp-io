@@ -52,7 +52,7 @@ jobs:
           cache-dependency-path: "**/pyproject.toml"
 
       - name: Download artifact of test data
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           workflow: prepare_test_data.yaml
           name: data
