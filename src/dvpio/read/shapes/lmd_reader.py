@@ -32,14 +32,14 @@ def transform_shapes(
 
     Returns
     -------
-    `class`::`spatialdata.models.ShapesModel`
+    :class:`spatialdata.models.ShapesModel`
         Transformed shapes in target coordinate system
 
     Object has special attributes
 
     - `ShapesModel.attrs.transformation`
-        - global: (image coordinates)
-        - leica_micro_dissection: Leica coordinate system transformation
+        - `global`: (image coordinates)
+        - `to_lmd`: Leica coordinate system transformation
 
     Raises
     ------
@@ -104,7 +104,7 @@ def read_lmd(path: str, calibration_points_image: PointsModel, switch_orientatio
 
     Returns
     -------
-    `class`::`spatialdata.models.ShapesModel`
+    :class:`spatialdata.models.ShapesModel`
         Transformed shapes in image coordinates.
 
         Object has special attributes
