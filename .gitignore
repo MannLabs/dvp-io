@@ -18,4 +18,4 @@ __pycache__/
 # docs
 /docs/generated/
 /docs/_build/
-/docs/tutorials/mock-data/** */
+/docs/tutorials/mock-data/
