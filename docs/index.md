@@ -8,6 +8,7 @@
 
 api.md
 tutorials.md
+faq.md
 changelog.md
 contributing.md
 references.md
