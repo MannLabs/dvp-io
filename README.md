@@ -39,21 +39,6 @@ conda create -n dvpio python=3.11 -y  && conda activate dvpio
 pip install git+https://github.com/lucas-diedrich/dvp-io.git@main
 ```
 
-## Known issues with napari_spatialdata
-
-Importing napari_spatialdata might initially fail due missing non-python dependencies. If you get the following error:
-
-```python
-import napari_spatialdata
-> qtpy.PythonQtError: No Qt bindings could be found
-```
-
-Try to install the `pyqt5-tools` binaries in your environment
-
-```bash
-pip install pyqt5-tools
-```
-
 ## Release notes
 
 Refer to the [Releases page](https://github.com/lucas-diedrich/dvp-io/releases) for information on releases and the changelog.
