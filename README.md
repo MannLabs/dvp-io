@@ -12,7 +12,9 @@ Read and write funtionalities from and to spatialdata for deep visual proteomics
 ## Getting started
 
 Please refer to the [documentation][],
-in particular, the [API documentation][].
+in particular, the [API documentation][],
+[tutorials][],
+and the [FAQs][].
 
 ## Installation
 
@@ -56,4 +58,6 @@ Refer to the [Releases page](https://github.com/lucas-diedrich/dvp-io/releases) 
 [documentation]: https://dvp-io.readthedocs.io
 [changelog]: https://dvp-io.readthedocs.io/en/latest/changelog.html
 [api documentation]: https://dvp-io.readthedocs.io/en/latest/api.html
+[FAQs]: https://dvp-io.readthedocs.io/en/latest/faq.html
+[tutorials]: https://dvp-io.readthedocs.io/en/latest/tutorials.html
 [pypi]: https://pypi.org/project/dvp-io
