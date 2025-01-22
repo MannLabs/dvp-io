@@ -86,3 +86,7 @@ pip install "napari[optional,pyqt6]>=0.5.6rc0"
 ```
 
 And tick the box in the Napari GUI under `Napari > Preferences > Experimental > Use C++ code to speed up creation and updates of Shapes Layers`
+
+### I can't overlay multiple channels for my fluorescence image in the Napari viewer
+
+On the left, select the image layer you are interested in, right click, and select `Split Stack`. Now, the individual channels are shown as distinct layers.
