@@ -8,6 +8,9 @@ sphinx:
   configuration: docs/conf.py
   # disable this for more lenient docs builds
   fail_on_warning: true
+commands:
+  pre_build:
+    - sudo apt-get update && sudo apt-get install -y libssh2-1 libssh2-1-dev
 python:
   install:
     - method: pip
