@@ -1,5 +1,9 @@
+from collections.abc import Mapping
+from typing import Any
+
 import anndata as ad
 import pandas as pd
+from alphabase.anndata.anndata_factory import AnnDataFactory
 from alphabase.psm_reader.psm_reader import psm_reader_provider
 from spatialdata.models import TableModel
 
@@ -89,4 +93,96 @@ def parse_df(
     var = _parse_pandas_index(df.columns, set_index=var_index)
 
     adata = ad.AnnData(X=X, obs=obs, var=var)
+    return TableModel.parse(adata, **table_kwargs)
+
+
+def read_precursor_table(
+    path: str,
+    reader_type: str,
+    *,
+    intensity_column: str | None = None,
+    protein_id_column: str | None = None,
+    raw_name_column: str | None = None,
+    reader_kwargs: Mapping[str, Any] | None = None,
+    **table_kwargs: Mapping[str, Any],
+) -> ad.AnnData:
+    """Parse proteomics precursor reports to the :class:`anndata.AnnData` format
+
+    Supported formats include
+
+        - AlphaDIA `alphadia_parquet` (.parquet) `alphadia_tsv` (.tsv)
+        - DIANN `diann` (.tsv)
+        - MaxQuant
+        - MSFragger `msfragger`
+        - Sage `sage_parquet` (.parquet), `sage_tsv` (.tsv)
+        - Spectronaut
+
+    see :func:`dvpio.read.omics.available_reader` for a complete list
+
+    Parameters
+    ----------
+    path
+        Path to proteomics report
+    reader_type
+        Name of engine output, pass the method name of the corresponding reader. You can
+        list all available readers with the :func:`dvpio.read.omics.available_reader` helper function
+    intensity_column
+        Column name of precursor intensity in report
+    protein_id_column
+        Column name of feature (i.e. protein group) in report
+    raw_name_column
+        Column names of individual samples in report.
+    reader_kwargs
+        Optional keyword arguments passed to :class:`alphabase.psm_reader.psm_reader.PSMReaderBase`
+    table_kwargs
+        Passed to :meth:`spatialdata.models.TableModel.parse`
+
+    Returns
+    -------
+    :class:`ad.AnnData`
+        AnnData object that can be further processed with scVerse packages.
+
+        - adata.X
+            Stores values of the `intensity_column` argument the report as sparse matrix of shape observations x features
+        - adata.obs
+            Stores observations
+        - adata.var
+            Stores features
+
+    Example
+    -------
+
+    .. code-block:: python
+
+        from dvpio.io.read.omics import read_report, available_reader
+
+        print(available_reader())
+        > ['alphadia', 'alphadia_parquet', 'alphapept', 'diann', 'maxquant', ...]
+
+        path = ...
+        adata = read_precursor_table(
+            path,
+            reader_type="diann",
+            intensity_column="Precursor.Normalised",
+            raw_name_column="File.Name",
+            protein_id_column="Protein.Names"
+        )
+
+    """
+    if reader_type not in available_reader():
+        raise ValueError(f"Argument reader_type must be one of {''.join(available_reader())}, not {reader_type}")
+
+    reader_kwargs = {} if reader_kwargs is None else reader_kwargs
+
+    factory = AnnDataFactory.from_files(
+        path,
+        reader_type=reader_type,
+        intensity_column=intensity_column,
+        protein_id_column=protein_id_column,
+        raw_name_column=raw_name_column,
+        **reader_kwargs,
+    )
+
+    adata = factory.create_anndata()
+
     return TableModel.parse(adata, **table_kwargs)
