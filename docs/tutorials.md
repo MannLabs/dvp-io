@@ -17,6 +17,8 @@ tutorials/001_introduction-to-spatialdata
 :maxdepth: 1
 
 tutorials/002_read-dvpio.ipynb
+tutorials/004_scdvp.ipynb
+
 ```
 
 ## Data export
