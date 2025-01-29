@@ -6,13 +6,13 @@ Please raise an [issue](https://github.com/lucas-diedrich/dvp-io/issues) to requ
 
 ### Images (Tested)
 
-| Type  |                                        | Function         | Supported channels | Wrapped library                    |
-| ----- | -------------------------------------- | ---------------- | ------------------ | ---------------------------------- |
-| .czi  | Fluorescence Microscopy Single-Channel | `read_czi`       | Grayscale          | pylibczirw                         |
-| .czi  | Fluorescence Microscopy Multi-channel  | `read_czi`       | Grayscale          | pylibczirw                         |
-| .czi  | Whole Slide Image                      | `read_czi`       | RGB(A)             | pylibczirw                         |
-| .mrxs | Whole Slide Images                     | `read_openslide` | RGB(A)             | openslide                          |
-| .tiff | -                                      | `read_custom`    | grayscale          | dask.array.image/skimage.io.imread |
+| Type  |                                        | Function         | Supported channels       | Wrapped library                    |
+| ----- | -------------------------------------- | ---------------- | ------------------------ | ---------------------------------- |
+| .czi  | Fluorescence Microscopy Single-Channel | `read_czi`       | Grayscale                | pylibczirw                         |
+| .czi  | Fluorescence Microscopy Multi-channel  | `read_czi`       | Grayscale                | pylibczirw                         |
+| .czi  | Whole Slide Image                      | `read_czi`       | RGB(A)                   | pylibczirw                         |
+| .mrxs | Whole Slide Images                     | `read_openslide` | RGB(A)                   | openslide                          |
+| .tiff | -                                      | `read_custom`    | (multichannel) grayscale | dask.array.image/skimage.io.imread |
 
 ### Images (supported, in principle)
 
