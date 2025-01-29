@@ -32,6 +32,21 @@ Please raise an [issue](https://github.com/lucas-diedrich/dvp-io/issues) to requ
 | ---- | --- | ---------------------------- | --------------- |
 | .xml | LMD | `dvpio.read.shapes.read_lmd` | py-lmd          |
 
+### Omics
+
+| Type               |                                            | Function                                               | Wrapped library |
+| ------------------ | ------------------------------------------ | ------------------------------------------------------ | --------------- |
+| `pandas.DataFrame` | Any type, preprocessed into correct format | `dvpio.read.omics.parse_df`                            | -               |
+| .tsv               | alphaDIA                                   | `dvpio.read.shapes.read_precursor_table` (alphadia)    | alphabase       |
+| .tsv               | DIANN                                      | `dvpio.read.shapes.read_precursor_table` (diann)       | alphabase       |
+| .tsv               | DIANN                                      | `dvpio.read.shapes.read_precursor_table` (diann)       | alphabase       |
+| .tsv               | alphapept                                  | `dvpio.read.shapes.read_precursor_table` (alphapept)   | alphabase       |
+| .tsv               | MSFragger                                  | `dvpio.read.shapes.read_precursor_table` (msfragger)   | alphabase       |
+| .tsv               | DIANN                                      | `dvpio.read.shapes.read_precursor_table` (msfragger)   | alphabase       |
+| .tsv               | spectronaut                                | `dvpio.read.shapes.read_precursor_table` (spectronaut) | alphabase       |
+| .parquet           | alphaDIA                                   | `dvpio.read.shapes.read_precursor_table` (alphadia)    | alphabase       |
+| .parquet           | DIANN                                      | `dvpio.read.shapes.read_precursor_table` (diann)       | alphabase       |
+
 ## How to...
 
 ### ... open spatialdata in Napari?
