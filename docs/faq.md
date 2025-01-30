@@ -76,3 +76,17 @@ Try to install the `pyqt5-tools` binaries in your environment
 ```bash
 pip install pyqt5-tools
 ```
+
+### Rendering cell segmentation results takes very long in Napari
+
+This is a known issue in Napari. Very recently, Grzegorz Bokota and colleagues implemented an experimental C++ version of the rendering algorithm for shapes that greatly improves the performance (~10x). See their [blogpost](https://napari.org/island-dispatch/blog/triangles_speedup_beta.html). To use the feature install napari with optional dependencies:
+
+```shell
+pip install "napari[optional,pyqt6]>=0.5.6rc0"
+```
+
+And tick the box in the Napari GUI under `Napari > Preferences > Experimental > Use C++ code to speed up creation and updates of Shapes Layers`
+
+### I can't overlay multiple channels for my fluorescence image in the Napari viewer
+
+On the left, select the image layer you are interested in, right click, and select `Split Stack`. Now, the individual channels are shown as distinct layers.
