@@ -104,7 +104,7 @@ def read_precursor_table(
     protein_id_column: str | None = None,
     raw_name_column: str | None = None,
     reader_kwargs: Mapping[str, Any] | None = None,
-    **table_kwargs: Mapping[str, Any],
+    **kwargs: Mapping[str, Any],
 ) -> ad.AnnData:
     """Parse proteomics precursor reports to the :class:`anndata.AnnData` format
 
@@ -134,7 +134,7 @@ def read_precursor_table(
         Column names of individual samples in report.
     reader_kwargs
         Optional keyword arguments passed to :class:`alphabase.psm_reader.psm_reader.PSMReaderBase`
-    table_kwargs
+    kwargs
         Passed to :meth:`spatialdata.models.TableModel.parse`
 
     Returns
@@ -185,4 +185,4 @@ def read_precursor_table(
 
     adata = factory.create_anndata()
 
-    return TableModel.parse(adata, **table_kwargs)
+    return TableModel.parse(adata, **kwargs)
