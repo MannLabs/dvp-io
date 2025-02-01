@@ -23,11 +23,12 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
+  "alphabase @ git+https://github.com/MannLabs/alphabase.git@additional_diann_fdr",
   "anndata",
   "napari-spatialdata",
   "openslide-bin",
   "openslide-python",
-  "py-lmd @ git+https://github.com/MannLabs/py-lmd.git",
+  "py-lmd",
   "pylibczirw",
   "spatialdata",
   "spatialdata-plot",
