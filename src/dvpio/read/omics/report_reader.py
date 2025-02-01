@@ -83,7 +83,7 @@ def parse_df(
         assert "sample" in adata.obs.columns
         assert "gene" in adata.var.columns
 
-        adata = parse_df(df, obs_index="sample)
+        adata = parse_df(df, obs_index="sample")
         assert "sample" not in adata.obs.columns
         assert adata.obs.index.name == "sample"
     """
