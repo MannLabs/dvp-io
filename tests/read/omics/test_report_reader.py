@@ -4,48 +4,56 @@ import pytest
 from alphabase.psm_reader.psm_reader import psm_reader_provider
 from spatialdata.models import TableModel
 
-from dvpio.read.omics import available_reader, parse_df
+from dvpio.read.omics import available_reader, parse_df, read_precursor_table
 from dvpio.read.omics.report_reader import _parse_pandas_index
 
 
 @pytest.fixture()
 def gene_index():
+    """Feature-like pandas index"""
     return pd.Index(["G1", "G2", "G3"], name="gene")
 
 
 @pytest.fixture()
-def sample_index():
+def sample_index() -> pd.Index:
+    """Sample-like pandas index"""
     return pd.Index(["A", "B", "C"], name="sample")
 
 
 @pytest.fixture()
-def sample_index_int():
+def sample_index_int() -> pd.Index:
+    """Sample-like pandas index with integer as column name"""
     return pd.Index(["A", "B", "C"], name=0)
 
 
 @pytest.fixture()
-def multi_index():
+def multi_index() -> pd.MultiIndex:
+    """Pandas multiindex"""
     return pd.MultiIndex.from_arrays([np.arange(3), np.arange(3, 6)], names=["A", "B"])
 
 
 @pytest.fixture()
 def df(gene_index: pd.Index, sample_index: pd.Index) -> pd.DataFrame:
+    """Pandas dataframe with single-level indices"""
     return pd.DataFrame(np.arange(9).reshape(3, 3), columns=gene_index, index=sample_index)
 
 
 @pytest.fixture()
 def df_int(gene_index: pd.Index, sample_index_int: pd.Index) -> pd.DataFrame:
+    """Pandas dataframe with index with int column name"""
     return pd.DataFrame(np.arange(9).reshape(3, 3), columns=gene_index, index=sample_index_int)
 
 
 @pytest.fixture()
 def df_complex(gene_index: pd.Index, multi_index: pd.MultiIndex) -> pd.DataFrame:
+    """Pandas dataframe with multiindex"""
     return pd.DataFrame(np.arange(9).reshape(3, 3), columns=gene_index, index=multi_index)
 
 
 @pytest.fixture()
 def alphadia_pg_report() -> pd.DataFrame:
-    df = pd.read_csv("./data/omics/alphadia/pg.matrix.tsv", sep="\t", index_col="pg")
+    """Read alphaDIA protein group report and return it as N x F matrix"""
+    df = pd.read_csv("./data/omics/alphadia/alphadia.protein-group.tsv", sep="\t", index_col="pg")
     return df.T
 
 
@@ -170,20 +178,41 @@ def test_parse_df_table_kwargs(
     assert adata.shape == df.shape
 
 
-# @pytest.mark.parametrize(
-#     ["shape", "obs_columns", "var_columns"],
-#     [((3, 7497), ["0"], ["pg"])],
-# )
-# def test_parse_df_real_data(
-#     alphadia_pg_report, shape: tuple[int], obs_columns: list[str], var_columns: list[str]
-# ) -> None:
-#     df = alphadia_pg_report
-#     adata = parse_df(df)
+@pytest.mark.parametrize(
+    ["shape", "obs_index", "var_index", "obs_columns", "var_columns"],
+    [((3, 7497), None, None, ["0"], ["pg"]), ((3, 7497), "0", "pg", None, None)],
+)
+def test_parse_df_real_data(
+    alphadia_pg_report,
+    shape: tuple[int],
+    obs_index: str | None,
+    var_index: str | None,
+    obs_columns: list[str],
+    var_columns: list[str],
+) -> None:
+    df = alphadia_pg_report
+    adata = parse_df(df, obs_index=obs_index, var_index=var_index)
 
-#     assert adata.shape == shape
-#     assert adata.obs.columns == obs_columns
-#     assert adata.var.columns == var_columns
+    assert adata.shape == shape
+
+    if obs_columns is not None:
+        assert adata.obs.columns == obs_columns
+    if var_columns is not None:
+        assert adata.var.columns == var_columns
 
 
-# def test_read_precursor_table():
-#     pass
+@pytest.mark.parametrize(
+    ("path", "reader_type", "func_kwargs", "shape"),
+    [
+        ("./data/omics/alphadia/alphadia.precursors.tsv", "alphadia", {}, (3, 7497)),
+        (
+            "./data/omics/diann/diann_report.tsv",
+            "diann",
+            {"intensity_column": "PG.Normalised", "protein_id_column": "Protein.Group", "raw_name_column": "File.Name"},
+            (3, 380),
+        ),
+    ],
+)
+def test_read_precursor_table(path: str, reader_type: str, func_kwargs: dict, shape: tuple[int]) -> None:
+    adata = read_precursor_table(path, reader_type=reader_type, **func_kwargs)
+    assert adata.shape == shape
