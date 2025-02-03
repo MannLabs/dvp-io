@@ -19,3 +19,5 @@ __pycache__/
 /docs/generated/
 /docs/_build/
 /docs/tutorials/mock-data/
+
+.coverage

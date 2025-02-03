@@ -6,13 +6,13 @@ Please raise an [issue](https://github.com/lucas-diedrich/dvp-io/issues) to requ
 
 ### Images (Tested)
 
-| Type  |                                        | Function         | Supported channels | Wrapped library                    |
-| ----- | -------------------------------------- | ---------------- | ------------------ | ---------------------------------- |
-| .czi  | Fluorescence Microscopy Single-Channel | `read_czi`       | Grayscale          | pylibczirw                         |
-| .czi  | Fluorescence Microscopy Multi-channel  | `read_czi`       | Grayscale          | pylibczirw                         |
-| .czi  | Whole Slide Image                      | `read_czi`       | RGB(A)             | pylibczirw                         |
-| .mrxs | Whole Slide Images                     | `read_openslide` | RGB(A)             | openslide                          |
-| .tiff | -                                      | `read_custom`    | grayscale          | dask.array.image/skimage.io.imread |
+| Type  |                                        | Function         | Supported channels       | Wrapped library                    |
+| ----- | -------------------------------------- | ---------------- | ------------------------ | ---------------------------------- |
+| .czi  | Fluorescence Microscopy Single-Channel | `read_czi`       | Grayscale                | pylibczirw                         |
+| .czi  | Fluorescence Microscopy Multi-channel  | `read_czi`       | Grayscale                | pylibczirw                         |
+| .czi  | Whole Slide Image                      | `read_czi`       | RGB(A)                   | pylibczirw                         |
+| .mrxs | Whole Slide Images                     | `read_openslide` | RGB(A)                   | openslide                          |
+| .tiff | -                                      | `read_custom`    | (multichannel) grayscale | dask.array.image/skimage.io.imread |
 
 ### Images (supported, in principle)
 
@@ -31,6 +31,21 @@ Please raise an [issue](https://github.com/lucas-diedrich/dvp-io/issues) to requ
 | Type |     | Function                     | Wrapped library |
 | ---- | --- | ---------------------------- | --------------- |
 | .xml | LMD | `dvpio.read.shapes.read_lmd` | py-lmd          |
+
+### Omics
+
+| Type               |                                            | Function                                               | Wrapped library |
+| ------------------ | ------------------------------------------ | ------------------------------------------------------ | --------------- |
+| `pandas.DataFrame` | Any type, preprocessed into correct format | `dvpio.read.omics.parse_df`                            | -               |
+| .tsv               | alphaDIA                                   | `dvpio.read.shapes.read_precursor_table` (alphadia)    | alphabase       |
+| .tsv               | DIANN                                      | `dvpio.read.shapes.read_precursor_table` (diann)       | alphabase       |
+| .tsv               | DIANN                                      | `dvpio.read.shapes.read_precursor_table` (diann)       | alphabase       |
+| .tsv               | alphapept                                  | `dvpio.read.shapes.read_precursor_table` (alphapept)   | alphabase       |
+| .tsv               | MSFragger                                  | `dvpio.read.shapes.read_precursor_table` (msfragger)   | alphabase       |
+| .tsv               | DIANN                                      | `dvpio.read.shapes.read_precursor_table` (msfragger)   | alphabase       |
+| .tsv               | spectronaut                                | `dvpio.read.shapes.read_precursor_table` (spectronaut) | alphabase       |
+| .parquet           | alphaDIA                                   | `dvpio.read.shapes.read_precursor_table` (alphadia)    | alphabase       |
+| .parquet           | DIANN                                      | `dvpio.read.shapes.read_precursor_table` (diann)       | alphabase       |
 
 ## How to...
 
