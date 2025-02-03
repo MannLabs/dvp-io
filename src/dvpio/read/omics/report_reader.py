@@ -34,6 +34,7 @@ def _parse_pandas_index(index: pd.Index | pd.MultiIndex, set_index: str | None =
     """
     df = index.to_frame(index=False)
     df.index = df.index.astype(str)
+    df.columns = df.columns.astype(str)
 
     if set_index is not None:
         df.set_index(set_index, inplace=True)
