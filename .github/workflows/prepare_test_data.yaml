@@ -21,6 +21,7 @@ jobs:
           curl -o ./data/zeiss.zip https://datashare.biochem.mpg.de/s/k2C6sg0qrXBdWdc/download
           curl -o ./data/blobs.zip https://datashare.biochem.mpg.de/s/0oTGB6xpUaWIaVh/download
           curl -o ./data/triangles.zip https://datashare.biochem.mpg.de/s/zneNg7QxZNM2wSm/download
+          curl -o ./data/omics.zip https://datashare.biochem.mpg.de/s/a9bTNCXBYgE5n5S/download
 
       - name: Unzip files
         run: |
@@ -28,6 +29,7 @@ jobs:
           unzip ./data/zeiss.zip -d ./data/zeiss
           unzip ./data/blobs.zip -d ./data/blobs
           unzip ./data/triangles.zip -d ./data
+          unzip ./data/omics.zip -d ./data
 
       - name: Remove archives
         run: |
@@ -35,6 +37,7 @@ jobs:
           rm ./data/zeiss.zip
           rm ./data/blobs.zip
           rm ./data/triangles.zip
+          rm ./data/omics.zip
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
