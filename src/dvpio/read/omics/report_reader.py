@@ -7,6 +7,8 @@ from alphabase.anndata.anndata_factory import AnnDataFactory
 from alphabase.psm_reader.psm_reader import psm_reader_provider
 from spatialdata.models import TableModel
 
+from dvpio._utils import experimental_docs, experimental_log
+
 
 def available_reader() -> list[str]:
     """Get a list of all available readers, as provided by alphabase"""
@@ -96,6 +98,8 @@ def parse_df(
     return TableModel.parse(adata, **table_kwargs)
 
 
+@experimental_log
+@experimental_docs
 def read_precursor_table(
     path: str,
     reader_type: str,
