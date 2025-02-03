@@ -83,7 +83,24 @@ def test_chunk_factory(
 
     coords = _create_tiles(dimensions=dimensions, tile_size=tile_size, min_coordinates=min_coordinates)
 
-    tiles_ = _chunk_factory(func, slide=None, coords=coords, n_channel=1)
+    tiles_ = _chunk_factory(func, slide=None, coords=coords, n_channel=1, dtype=np.uint8)
     tiles = da.block(tiles_)
 
     assert tiles.shape == (1, *dimensions)
+
+
+@pytest.mark.parametrize(("dtype"), [(np.uint8), (np.int16), (np.float32)])
+def test_chunk_factory_dtype(dtype) -> None:
+    """Test if tiles can be assembled to dask array"""
+
+    @delayed
+    def func(slide: Any, coords: Any, size: tuple[int]) -> NDArray[np.int_]:
+        """Create arrays in shape of tiles"""
+        return da.zeros(shape=size)
+
+    coords = _create_tiles(dimensions=(2, 2), tile_size=(1, 1), min_coordinates=(0, 0))
+
+    tiles_ = _chunk_factory(func, slide=None, coords=coords, n_channel=1, dtype=dtype)
+    tiles = da.block(tiles_)
+
+    assert tiles.dtype == dtype
