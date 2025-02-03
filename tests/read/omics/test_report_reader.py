@@ -10,8 +10,10 @@ from dvpio.read.omics.report_reader import _parse_pandas_index
 # Test data
 gene_index = pd.Index(["G1", "G2", "G3"], name="gene")
 sample_index = pd.Index(["A", "B", "C"], name="sample")
+sample_index_int = pd.Index(["A", "B", "C"], name=0)
 index_complex = pd.MultiIndex.from_arrays([np.arange(3), np.arange(3, 6)], names=["A", "B"])
 df = pd.DataFrame(np.arange(9).reshape(3, 3), columns=gene_index, index=sample_index)
+df_int = pd.DataFrame(np.arange(9).reshape(3, 3), columns=gene_index, index=sample_index_int)
 df_complex = pd.DataFrame(np.arange(9).reshape(3, 3), columns=gene_index, index=index_complex)
 
 
@@ -29,6 +31,7 @@ def test_available_reader() -> None:
         (gene_index, "gene", (3, 0), None),
         (sample_index, None, (3, 1), ["sample"]),
         (sample_index, "sample", (3, 0), None),
+        (sample_index_int, None, (3, 1), "0"),
         (index_complex, None, (3, 2), ["A", "B"]),
         (index_complex, "A", (3, 1), ["B"]),
     ],
@@ -52,6 +55,7 @@ def test_parse_pandas_index(
         (df, "sample", "gene", 0, 0),
         (df_complex, None, None, 2, 1),
         (df_complex, "A", None, 1, 1),
+        (df_int, None, "gene", 1, 0),
     ],
 )
 def test_parse_df(
