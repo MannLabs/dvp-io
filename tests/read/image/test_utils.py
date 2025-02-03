@@ -83,7 +83,7 @@ def test_chunk_factory(
 
     coords = _create_tiles(dimensions=dimensions, tile_size=tile_size, min_coordinates=min_coordinates)
 
-    tiles_ = _chunk_factory(func, slide=None, coords=coords, n_channel=1)
+    tiles_ = _chunk_factory(func, slide=None, coords=coords, n_channel=1, dtype=np.uint8)
     tiles = da.block(tiles_)
 
     assert tiles.shape == (1, *dimensions)
