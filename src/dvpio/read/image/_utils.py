@@ -1,4 +1,4 @@
-from collections.abc import Callable, Mapping
+from collections.abc import Callable
 from typing import Any
 
 import dask.array as da
@@ -54,11 +54,7 @@ def _create_tiles(
 
 
 def _chunk_factory(
-    func: Callable[..., NDArray],
-    slide: Any,
-    coords: NDArray,
-    n_channel: int,
-    **func_kwargs: Mapping[str, Any],
+    func: Callable[..., NDArray], slide: Any, coords: NDArray, n_channel: int, dtype: np.dtype, **func_kwargs: Any
 ) -> list[list[NDArray]]:
     """Abstract factory method to tile a large microscopy image.
 
@@ -73,6 +69,8 @@ def _chunk_factory(
         where the last dimension defines the rectangular tile in format (x, y, width, height)
     n_channel
         Number of channels in array (first dimension)
+    dtype
+        Data type of image
     func_kwargs
         Additional keyword arguments passed to func
     """
@@ -92,7 +90,7 @@ def _chunk_factory(
                     size=coords[x, y, [2, 3]],
                     **func_kwargs,
                 ),
-                dtype=np.uint8,
+                dtype=dtype,
                 shape=(n_channel, *coords[x, y, [2, 3]]),
             )
             for y in range(coords.shape[1])

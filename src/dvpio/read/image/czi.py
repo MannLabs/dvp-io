@@ -27,7 +27,7 @@ class CZIPixelType(Enum):
     Bgr96Float = (3, np.float32, ["r", "g", "b"])
     Invalid = (np.nan, np.nan, np.nan)
 
-    def __init__(self, dimensionality: int, dtype: type, c_coords: str | None) -> None:
+    def __init__(self, dimensionality: int, dtype: type, c_coords: list[str] | None) -> None:
         self.dimensionality = dimensionality
         self.dtype = dtype
         self.c_coords = c_coords
@@ -183,6 +183,7 @@ def read_czi(
                 slide=czidoc_r,
                 coords=chunk_coords,
                 n_channel=1,
+                dtype=pixel_spec.dtype,
                 channel=c,
                 timepoint=timepoint,
                 z_stack=z_stack,
@@ -195,6 +196,7 @@ def read_czi(
             slide=czidoc_r,
             coords=chunk_coords,
             n_channel=sum(channel_dim),
+            dtype=pixel_spec.dtype,
             channel=channels,
             timepoint=timepoint,
             z_stack=z_stack,
