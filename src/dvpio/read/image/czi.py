@@ -19,10 +19,10 @@ class CZIPixelType(Enum):
     Documented pixel types https://zeiss.github.io/libczi/accessors.html
     """
 
-    Gray8 = (1, np.uint8, None)
+    Gray8 = (1, np.uint16, None)
     Gray16 = (1, np.uint16, None)
     Gray32Float = (1, np.float32, None)
-    Bgr24 = (3, np.uint8, ["r", "g", "b"])
+    Bgr24 = (3, np.uint16, ["r", "g", "b"])
     Bgr48 = (3, np.uint16, ["r", "g", "b"])
     Bgr96Float = (3, np.float32, ["r", "g", "b"])
     Invalid = (np.nan, np.nan, np.nan)
