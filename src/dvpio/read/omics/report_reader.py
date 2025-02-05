@@ -144,7 +144,7 @@ def read_precursor_table(
 
     Returns
     -------
-    :class:`ad.AnnData`
+    :class:`anndata.AnnData`
         AnnData object that can be further processed with scVerse packages.
 
         - adata.X
