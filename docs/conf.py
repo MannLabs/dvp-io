@@ -99,6 +99,8 @@ intersphinx_mapping = {
     "spatialdata": ("https://spatialdata.scverse.org/en/stable/", None),
     "geopandas": ("https://geopandas.org/en/stable/", None),
     "dask": ("https://docs.dask.org/en/stable/", None),
+    "pandas": ("https://pandas.pydata.org/docs/", None),
+    "alphabase": ("https://alphabase.readthedocs.io/en/latest/", None),
 }
 
 # List of patterns, relative to source directory, that match files and
