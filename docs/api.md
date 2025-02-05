@@ -1,6 +1,6 @@
 # API
 
-## Reader
+## Read
 
 ### Image
 
@@ -23,6 +23,18 @@
 
     read_lmd
     transform_shapes
+```
+
+### Proteomics
+
+```{eval-rst}
+.. currentmodule:: dvpio.read.omics
+.. autosummary::
+    :toctree: generated
+
+    available_reader
+    parse_df
+    read_precursor_table
 ```
 
 ## Write

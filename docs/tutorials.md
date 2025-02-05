@@ -28,3 +28,12 @@ tutorials/004_scdvp.ipynb
 
 tutorials/003_write-dvpio.ipynb
 ```
+
+## DVP-IO x External packages
+
+```{toctree}
+:maxdepth: 1
+
+tutorials/005_scportrait.ipynb
+tutorials/006_sopa.ipynb
+```
