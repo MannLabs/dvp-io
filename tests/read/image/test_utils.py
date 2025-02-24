@@ -6,7 +6,28 @@ import pytest
 from dask import delayed
 from numpy.typing import NDArray
 
-from dvpio.read.image._utils import _compute_chunks, _read_chunks
+from dvpio.read.image._utils import _compute_chunk_sizes_positions, _compute_chunks, _read_chunks
+
+
+@pytest.mark.parametrize(
+    ("size", "chunk", "min_coordinate", "positions", "lengths"),
+    [
+        (3, 1, 0, np.array([0, 1, 2]), np.array([1, 1, 1])),
+        (3, 2, 0, np.array([0, 2]), np.array([2, 1])),
+        (3, 1, -1, np.array([-1, 0, 1]), np.array([1, 1, 1])),
+        (3, 2, -1, np.array([-1, 1]), np.array([2, 1])),
+    ],
+)
+def test_compute_chunk_sizes_positions(
+    size: int,
+    chunk: int,
+    min_coordinate: int,
+    positions: NDArray[np.number],
+    lengths: NDArray[np.number],
+) -> None:
+    computed_positions, computed_lengths = _compute_chunk_sizes_positions(size, chunk, min_coordinate)
+    assert (positions == computed_positions).all()
+    assert (lengths == computed_lengths).all()
 
 
 @pytest.mark.parametrize(
