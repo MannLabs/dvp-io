@@ -50,8 +50,8 @@ def _compute_chunks(
     y_positions, heights = _compute_chunk_sizes_positions(dimensions[1], chunk_size[1], min_coord=min_coordinates[1])
 
     # Generate the tiles
-    # x/width are inner list dim=-2
-    # y/height are outer list dim=-1
+    # x/width are inner list
+    # y/height are outer list
     # in line with dask.array.block
     tiles = np.array(
         [
