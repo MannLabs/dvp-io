@@ -77,8 +77,10 @@ def _parse_pixel_type(slide: pyczi.CziReader, channels: int | list[int]) -> tupl
 @delayed
 def _get_img(
     slide: pyczi.CziReader,
-    coords: tuple[int, int],
-    size: tuple[int, int],
+    x0: int,
+    y0: int,
+    width: int,
+    height: int,
     channel: int = 0,
     timepoint: int = 0,
     z_stack: int = 0,
@@ -117,10 +119,10 @@ def _get_img(
     img = slide.read(
         plane={"C": channel, "T": timepoint, "Z": z_stack},
         roi=(
-            coords[0],  # xmin (x)
-            coords[1],  # ymin (y)
-            size[0],  # width (w)
-            size[1],  # height (h)
+            x0,  # xmin (x)
+            y0,  # ymin (y)
+            width,  # width (w)
+            height,  # height (h)
         ),
     )
 
