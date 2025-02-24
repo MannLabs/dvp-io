@@ -24,10 +24,10 @@ def _get_img(
     ----------
     slide
         WSI
-    coords
+    x0, y0
         Upper left corner (x, y) to read
-    size
-        Size of tile
+    width, height
+        Size of tile in x direction (width) and y direction (height)
     level
         Level in pyramidal image format
 
@@ -76,7 +76,7 @@ def read_openslide(path: str, chunk_size: tuple[int, int] = (10000, 10000), pyra
     path
         Path to file
     chunk_size
-        Size of the individual regions that are read into memory during the process
+        Size of the individual regions that are read into memory during the process in format (x, y)
     pyramidal
         Whether to create a pyramidal image with same scales as original image
 
