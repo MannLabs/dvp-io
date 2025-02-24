@@ -6,47 +6,53 @@ import numpy as np
 from numpy.typing import NDArray
 
 
-def _create_tiles(
+def _compute_chunk_sizes_positions(size: int, chunk: int, min_coord: int) -> tuple[NDArray[np.int_], NDArray[np.int_]]:
+    """Calculate chunk sizes and positions for a given dimension and chunk size"""
+    # All chunks have the same size except for the last one
+    positions = np.arange(min_coord, min_coord + size, chunk)
+    lengths = np.full_like(positions, chunk, dtype=int)
+
+    # Last position coordinate exceeds maximum coordinate of slide
+    if positions[-1] + chunk > size + min_coord:
+        lengths[-1] = size + min_coord - positions[-1]
+
+    return positions, lengths
+
+
+def _compute_chunks(
     dimensions: tuple[int, int],
-    tile_size: tuple[int, int],
+    chunk_size: tuple[int, int],
     min_coordinates: tuple[int, int] = (0, 0),
 ) -> NDArray[np.int_]:
-    """Create rectangular tiles for a given image size.
+    """Create all chunk specs for a given image and chunk size.
+
+    Creates specifications (x, y, width, height) with (x, y) being the upper left corner
+    of chunks of size chunk_size. Chunks at the edges correspond to the remainder of
+    chunk size and dimensions
 
     Parameters
     ----------
     dimensions : tuple[int, int]
         Size of the image in (width, height).
-    tile_size : tuple[int, int]
+    chunk_size : tuple[int, int]
         Size of individual tiles in (width, height).
     min_coordinates : tuple[int, int], optional
-        Minimum coordinates in the image, defaults to (0, 0).
+        Minimum coordinates (x, y) in the image, defaults to (0, 0).
 
     Returns
     -------
     np.ndarray
-        Array of shape (n_tiles_x, n_tiles_y, 4), where each entry defines a tile
+        Array of shape (n_tiles_x, n_tiles_y, 4). Each entry defines a tile
         as (x, y, width, height).
     """
-    # Calculate tile sizes and positions
-    widths = np.full(dimensions[0] // tile_size[0], tile_size[0])
-    remainder_x = dimensions[0] % tile_size[0]
-    if remainder_x > 0:
-        widths = np.append(widths, remainder_x)
-
-    heights = np.full(dimensions[1] // tile_size[1], tile_size[1])
-    remainder_y = dimensions[1] % tile_size[1]
-    if remainder_y > 0:
-        heights = np.append(heights, remainder_y)
-
-    x_positions = min_coordinates[0] + np.cumsum(np.r_[0, widths[:-1]])
-    y_positions = min_coordinates[1] + np.cumsum(np.r_[0, heights[:-1]])
+    x_positions, widths = _compute_chunk_sizes_positions(dimensions[1], chunk_size[1], min_coord=min_coordinates[1])
+    y_positions, heights = _compute_chunk_sizes_positions(dimensions[0], chunk_size[0], min_coord=min_coordinates[0])
 
     # Generate the tiles
     tiles = np.array(
         [
-            [[x, y, w, h] for y, h in zip(y_positions, heights, strict=False)]
-            for x, w in zip(x_positions, widths, strict=False)
+            [[x, y, w, h] for x, w in zip(x_positions, widths, strict=True)]
+            for y, h in zip(y_positions, heights, strict=True)
         ],
         dtype=int,
     )
