@@ -14,6 +14,8 @@ from dvpio.read.image import read_czi
         ("./data/zeiss/zeiss/rect-upper-left.rgb.czi", 0, 0, 10, 10),
         # Kabatnik et al (RGB)
         ("./data/zeiss/zeiss/kabatnik2023_20211129_C1.czi", -150080, 56320, 5000, 4000),
+        # Zeiss example data (Grayscale)
+        ("./data/zeiss/zeiss/zeiss_multi-channel.czi", 0, 0, 2752, 2208),
     ],
 )
 def test_read_czi(dataset: str, xmin: int, ymin: int, width: int, height: int) -> None:
@@ -41,6 +43,7 @@ def test_read_czi(dataset: str, xmin: int, ymin: int, width: int, height: int) -
         ("./data/zeiss/zeiss/rect-upper-left.multi-channel.czi", 0, 1),
         ("./data/zeiss/zeiss/rect-upper-left.multi-channel.czi", [0], 1),
         ("./data/zeiss/zeiss/rect-upper-left.multi-channel.czi", [0, 1], 2),
+        ("./data/zeiss/zeiss/zeiss_multi-channel.czi", [0, 1], 2),
     ],
 )
 def test_read_czi_multichannel(
@@ -60,7 +63,7 @@ def test_read_czi_multichannel(
 
     # Reader returns (y, x, c=1) array
     # Stack all channels
-    img_ref = np.concatenate([czidoc_r.read(plane={"C": channel}) for channel in channels], axis=-1)
+    img_ref = np.concatenate([czidoc_r.read(plane={"C": channel}) for channel in range(result_dim)], axis=-1)
 
     assert img_test.shape == (result_dim, total_height, total_width)
     assert (img_test.transpose("y", "x", "c") == img_ref).all()
