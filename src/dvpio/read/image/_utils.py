@@ -84,8 +84,8 @@ def _read_chunks(
     func_kwargs = func_kwargs if func_kwargs else {}
 
     # Collect each delayed chunk as item in list of list
-    # Inner list becomes dim=-1 (rows)
-    # Outer list becomes dim=-2 (cols)
+    # Inner list becomes dim=-1 (x in cyx)
+    # Outer list becomes dim=-2 (y in cyx)
     # see dask.array.block
     chunks = [
         [
