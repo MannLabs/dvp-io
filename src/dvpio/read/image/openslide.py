@@ -12,8 +12,10 @@ from ._utils import _assemble, _compute_chunks, _read_chunks
 @delayed
 def _get_img(
     slide: openslide.ImageSlide,
-    coords: tuple[int, int],
-    size: tuple[int, int],
+    x0: int,
+    y0: int,
+    width: int,
+    height: int,
     level: int,
 ) -> NDArray:
     """Return numpy array of slide region
@@ -32,13 +34,13 @@ def _get_img(
     Returns
     -------
     np.array
-        Image in (c, y, x) format and RGBA channels
+        Image in (c=4, y, x) format and RGBA channels
     """
     # Openslide returns a PILLOW image in RGBA format
     # Shape (x, y, c)
-    img = slide.read_region(coords, level=level, size=size)
+    img = slide.read_region((x0, y0), level=level, size=(width, height))
 
-    # Return image in (c, y, x) format
+    # Return image in (c=4, y, x) format
     return np.array(img).T
 
 
