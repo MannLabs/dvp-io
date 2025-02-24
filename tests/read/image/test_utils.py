@@ -6,7 +6,7 @@ import pytest
 from dask import delayed
 from numpy.typing import NDArray
 
-from dvpio.read.image._utils import _chunk_factory, _create_tiles
+from dvpio.read.image._utils import _compute_chunks, _read_chunks
 
 
 @pytest.mark.parametrize(
@@ -35,13 +35,13 @@ from dvpio.read.image._utils import _chunk_factory, _create_tiles
         ),
     ],
 )
-def test_create_tiles(
+def test_compute_chunks(
     dimensions: tuple[int, int],
     tile_size: tuple[int, int],
     min_coordinates: tuple[int, int],
     result: NDArray,
 ) -> None:
-    tiles = _create_tiles(dimensions=dimensions, tile_size=tile_size, min_coordinates=min_coordinates)
+    tiles = _compute_chunks(dimensions=dimensions, tile_size=tile_size, min_coordinates=min_coordinates)
 
     assert (tiles == result).all()
 
@@ -69,7 +69,7 @@ def test_create_tiles(
         ),
     ],
 )
-def test_chunk_factory(
+def test_read_chunks(
     dimensions: tuple[int, int],
     tile_size: tuple[int, int],
     min_coordinates: tuple[int, int],
@@ -81,16 +81,16 @@ def test_chunk_factory(
         """Create arrays in shape of tiles"""
         return da.zeros(shape=size)
 
-    coords = _create_tiles(dimensions=dimensions, tile_size=tile_size, min_coordinates=min_coordinates)
+    coords = _compute_chunks(dimensions=dimensions, tile_size=tile_size, min_coordinates=min_coordinates)
 
-    tiles_ = _chunk_factory(func, slide=None, coords=coords, n_channel=1, dtype=np.uint8)
+    tiles_ = _read_chunks(func, slide=None, coords=coords, n_channel=1, dtype=np.uint8)
     tiles = da.block(tiles_)
 
     assert tiles.shape == (1, *dimensions)
 
 
 @pytest.mark.parametrize(("dtype"), [(np.uint8), (np.int16), (np.float32)])
-def test_chunk_factory_dtype(dtype) -> None:
+def test_read_chunks_dtype(dtype) -> None:
     """Test if tiles can be assembled to dask array"""
 
     @delayed
@@ -98,9 +98,9 @@ def test_chunk_factory_dtype(dtype) -> None:
         """Create arrays in shape of tiles"""
         return da.zeros(shape=size)
 
-    coords = _create_tiles(dimensions=(2, 2), tile_size=(1, 1), min_coordinates=(0, 0))
+    coords = _compute_chunks(dimensions=(2, 2), tile_size=(1, 1), min_coordinates=(0, 0))
 
-    tiles_ = _chunk_factory(func, slide=None, coords=coords, n_channel=1, dtype=dtype)
+    tiles_ = _read_chunks(func, slide=None, coords=coords, n_channel=1, dtype=dtype)
     tiles = da.block(tiles_)
 
     assert tiles.dtype == dtype
