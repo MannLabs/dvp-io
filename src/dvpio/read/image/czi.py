@@ -127,7 +127,7 @@ def _get_img(
     )
 
     # Return image in (c, y, x) format
-    return np.array(img).T
+    return np.array(img).transpose(2, 0, 1)
 
 
 def read_czi(
