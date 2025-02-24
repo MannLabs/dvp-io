@@ -1,3 +1,5 @@
+"""Reader for generic images"""
+
 from collections.abc import Callable, Mapping
 from typing import Any
 
