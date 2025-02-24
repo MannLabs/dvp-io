@@ -3,6 +3,7 @@ from typing import Any
 
 import dask.array as da
 import numpy as np
+from dask import delayed
 from numpy.typing import NDArray
 
 
@@ -86,22 +87,23 @@ def _read_chunks(
     # Inner list becomes dim=-1 (rows)
     # Outer list becomes dim=-2 (cols)
     # see dask.array.block
-
     chunks = [
         [
             da.from_delayed(
-                func(
+                delayed(func)(
                     slide,
-                    coords=coords[x, y, [0, 1]],
-                    size=coords[x, y, [2, 3]],
+                    x0=coords[tile_y, tile_x, 0],
+                    y0=coords[tile_y, tile_x, 1],
+                    width=coords[tile_y, tile_x, 2],
+                    height=coords[tile_y, tile_x, 3],
                     **func_kwargs,
                 ),
                 dtype=dtype,
-                shape=(n_channel, *coords[x, y, [2, 3]]),
+                shape=(n_channel, *coords[tile_y, tile_x, [3, 2]]),
             )
-            for y in range(coords.shape[1])
+            for tile_x in range(coords.shape[1])
         ]
-        for x in range(coords.shape[0])
+        for tile_y in range(coords.shape[0])
     ]
     return chunks
 
