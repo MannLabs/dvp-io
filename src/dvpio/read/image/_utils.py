@@ -71,7 +71,16 @@ def _read_chunks(
     Parameters
     ----------
     func
-        Function to retrieve a rectangular tile from the slide image
+        Function to retrieve a rectangular tile from the slide image. Must take the
+        arguments:
+
+            - slide Full slide image
+            - x0: x (col) coordinate of upper left corner of chunk
+            - y0: y (row) coordinate of upper left corner of chunk
+            - width: Width of chunk
+            - height: Height of chunk
+
+        and should return the chunk as numpy array of shape (c, y, x)
     slide
         Slide image in format compatible with func
     coords
