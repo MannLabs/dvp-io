@@ -91,10 +91,10 @@ def _get_img(
     ----------
     slide
         WSI
-    coords
-        Upper left corner (x, y) to read
-    size
-        Size of tile
+    x0/y0
+        Upper left corner (x0, y0) to read
+    width/height
+        Size of tile in x direction (width) and y direction (height)
     channel
         Channel of image
     timepoint
