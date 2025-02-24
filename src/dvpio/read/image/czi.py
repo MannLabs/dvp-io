@@ -105,11 +105,13 @@ def _get_img(
     np.array
         Image in (c, y, x) format and RGBA channels
     """
-    # czi returns an np.ndarray
-    # Shape VIHT*Z*C*X*Y* (*: Obligatory) https://zeiss.github.io/libczi/imagedocumentconcept.html#autotoc_md7
+    # pylibCZIrw returns an np.ndarray
+    # Shape VIHT*Z*Y*X*C (*: Obligatory)
+    # https://zeiss.github.io/libczi/imagedocumentconcept.html#autotoc_md7
+    # https://zeiss.github.io/pylibczirw/#readkwargs
+    # C: Channels (1 for Grayscale, 3 for BGR)
     # X/Y: 2D plane
     # Z: Z-stack
-    # C: Channels
     # T: Time point
     # M is used in order to enumerate all tiles in a plane i.e all planes in a given plane shall have an M-index,
     # M-index starts counting from zero to the number of tiles on that plane
