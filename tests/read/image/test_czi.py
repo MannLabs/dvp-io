@@ -12,6 +12,8 @@ from dvpio.read.image import read_czi
         ("./data/zeiss/zeiss/rect-upper-left.czi", 0, 0, 10, 10),
         ("./data/zeiss/zeiss/rect-upper-left.multi-channel.czi", 0, 0, 10, 10),
         ("./data/zeiss/zeiss/rect-upper-left.rgb.czi", 0, 0, 10, 10),
+        # Kabatnik et al (RGB)
+        ("./data/zeiss/zeiss/kabatnik2023_20211129_C1.czi", -150080, 56320, 5000, 4000),
     ],
 )
 def test_read_czi(dataset: str, xmin: int, ymin: int, width: int, height: int) -> None:
