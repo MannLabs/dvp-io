@@ -124,7 +124,7 @@ def test_read_chunks(
 
 @pytest.mark.parametrize(("dtype"), [(np.uint8), (np.int16), (np.float32)])
 def test_read_chunks_dtype(dtype) -> None:
-    """Test if tiles can be assembled to dask array"""
+    """Test if dtype of re-assembled tiles is equivalent to the original dtype"""
 
     @delayed
     def func(slide: Any, coords: Any, size: tuple[int]) -> NDArray[np.int_]:
