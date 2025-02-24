@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 from pylibCZIrw import czi as pyczi
 from spatialdata.models import Image2DModel
 
-from ._utils import _assemble, _chunk_factory, _create_tiles
+from ._utils import _assemble, _chunk_factory, _compute_chunks
 
 
 class CZIPixelType(Enum):
@@ -167,7 +167,7 @@ def read_czi(
     xmin, ymin, width, height = czidoc_r.total_bounding_rectangle
 
     # Define coordinates for chunkwise loading of the slide
-    chunk_coords = _create_tiles(dimensions=(width, height), tile_size=chunk_size, min_coordinates=(xmin, ymin))
+    chunk_coords = _compute_chunks(dimensions=(width, height), tile_size=chunk_size, min_coordinates=(xmin, ymin))
 
     pixel_spec, channel_dim = _parse_pixel_type(slide=czidoc_r, channels=channels)
 
