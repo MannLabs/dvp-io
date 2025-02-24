@@ -29,6 +29,7 @@ def test_compute_chunk_sizes_positions(
     positions: NDArray[np.number],
     lengths: NDArray[np.number],
 ) -> None:
+    """Test whether 1D chunking"""
     computed_positions, computed_lengths = _compute_chunk_sizes_positions(size, chunk, min_coordinate)
     assert (positions == computed_positions).all()
     assert (lengths == computed_lengths).all()
@@ -66,6 +67,7 @@ def test_compute_chunks(
     min_coordinates: tuple[int, int],
     result: NDArray,
 ) -> None:
+    """Test two dimensional chunking"""
     tiles = _compute_chunks(dimensions=dimensions, chunk_size=chunk_size, min_coordinates=min_coordinates)
 
     assert (tiles == result).all()
@@ -83,6 +85,12 @@ def test_compute_chunks(
         # Different tile sizes
         (
             (3, 3),
+            (2, 2),
+            (0, 0),
+        ),
+        # Different sizes in x/y direction
+        (
+            (4, 3),
             (2, 2),
             (0, 0),
         ),
@@ -111,7 +119,7 @@ def test_read_chunks(
     tiles_ = _read_chunks(func, slide=None, coords=coords, n_channel=1, dtype=np.uint8)
     tiles = da.block(tiles_)
 
-    assert tiles.shape == (1, *dimensions)
+    assert tiles.shape == (1, *dimensions[::-1])
 
 
 @pytest.mark.parametrize(("dtype"), [(np.uint8), (np.int16), (np.float32)])
