@@ -59,7 +59,7 @@ def _compute_chunks(
     return tiles
 
 
-def _chunk_factory(
+def _read_chunks(
     func: Callable[..., NDArray], slide: Any, coords: NDArray, n_channel: int, dtype: np.dtype, **func_kwargs: Any
 ) -> list[list[NDArray]]:
     """Abstract factory method to tile a large microscopy image.
