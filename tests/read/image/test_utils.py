@@ -12,9 +12,13 @@ from dvpio.read.image._utils import _compute_chunk_sizes_positions, _compute_chu
 @pytest.mark.parametrize(
     ("size", "chunk", "min_coordinate", "positions", "lengths"),
     [
+        # Evenly spaced subsets
         (3, 1, 0, np.array([0, 1, 2]), np.array([1, 1, 1])),
+        # Unevenly spaced subsets
         (3, 2, 0, np.array([0, 2]), np.array([2, 1])),
+        # Negative start coordinate
         (3, 1, -1, np.array([-1, 0, 1]), np.array([1, 1, 1])),
+        # Uneven spacing and negative start coordinate
         (3, 2, -1, np.array([-1, 1]), np.array([2, 1])),
     ],
 )
