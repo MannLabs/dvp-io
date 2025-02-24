@@ -21,9 +21,9 @@ class CZIPixelType(Enum):
     Gray8 = (1, np.uint16, None)
     Gray16 = (1, np.uint16, None)
     Gray32Float = (1, np.float32, None)
-    Bgr24 = (3, np.uint16, ["r", "g", "b"])
-    Bgr48 = (3, np.uint16, ["r", "g", "b"])
-    Bgr96Float = (3, np.float32, ["r", "g", "b"])
+    Bgr24 = (3, np.uint16, ["b", "g", "r"])
+    Bgr48 = (3, np.uint16, ["b", "g", "r"])
+    Bgr96Float = (3, np.float32, ["b", "g", "r"])
     Invalid = (np.nan, np.nan, np.nan)
 
     def __init__(self, dimensionality: int, dtype: type, c_coords: list[str] | None) -> None:
