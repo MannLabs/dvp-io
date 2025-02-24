@@ -2,14 +2,12 @@
 
 import numpy as np
 import openslide
-from dask import delayed
 from numpy.typing import NDArray
 from spatialdata.models import Image2DModel
 
 from ._utils import _assemble, _compute_chunks, _read_chunks
 
 
-@delayed
 def _get_img(
     slide: openslide.ImageSlide,
     x0: int,
