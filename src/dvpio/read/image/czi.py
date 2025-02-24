@@ -3,7 +3,6 @@ from enum import Enum
 from typing import Any
 
 import numpy as np
-from dask import delayed
 from numpy.typing import NDArray
 from pylibCZIrw import czi as pyczi
 from spatialdata.models import Image2DModel
@@ -74,7 +73,6 @@ def _parse_pixel_type(slide: pyczi.CziReader, channels: int | list[int]) -> tupl
     return complex_pixel_spec, channel_dim
 
 
-@delayed
 def _get_img(
     slide: pyczi.CziReader,
     x0: int,
