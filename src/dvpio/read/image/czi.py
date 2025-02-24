@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 from pylibCZIrw import czi as pyczi
 from spatialdata.models import Image2DModel
 
-from ._utils import _assemble, _chunk_factory, _compute_chunks
+from ._utils import _assemble, _compute_chunks, _read_chunks
 
 
 class CZIPixelType(Enum):
@@ -180,7 +180,7 @@ def read_czi(
             )
 
         chunks = [
-            _chunk_factory(
+            _read_chunks(
                 _get_img,
                 slide=czidoc_r,
                 coords=chunk_coords,
@@ -193,7 +193,7 @@ def read_czi(
             for c in channels
         ]
     else:
-        chunks = _chunk_factory(
+        chunks = _read_chunks(
             _get_img,
             slide=czidoc_r,
             coords=chunk_coords,
