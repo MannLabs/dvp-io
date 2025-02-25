@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
 
 class ImageMetadata(BaseModel, ABC):
@@ -45,6 +45,11 @@ class ImageMetadata(BaseModel, ABC):
 
 class CZIImageMetadata(ImageMetadata):
     metadata: dict[str, Any]
+
+    @computed_field
+    @property
+    def image_type(self) -> str:
+        return "czi"
 
     @classmethod
     def from_file(cls, path: str) -> BaseModel:
