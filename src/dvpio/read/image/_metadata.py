@@ -10,36 +10,49 @@ class ImageMetadata(BaseModel, ABC):
     @property
     @abstractmethod
     def objective_nominal_magnification(self) -> int | None:
+        """Nominal magnification of the microscope objective
+
+        Note
+        ----
+        This value does not consider the magnifications by additional optical elements
+        in the specific microscopy setup
+        """
         raise NotImplementedError
 
     @property
     @abstractmethod
     def mpp_x(self) -> float:
+        """Resolution of the image in meters per pixel along x-axis"""
         raise NotImplementedError
 
     @property
     @abstractmethod
     def mpp_y(self) -> float:
+        """Resolution of the image in meters per pixel along y-axis"""
         raise NotImplementedError
 
     @property
     @abstractmethod
     def mpp_z(self) -> float:
+        """Resolution of the image in meters per pixel along z-axis"""
         raise NotImplementedError
 
     @property
     @abstractmethod
     def channel_names(self) -> list[str] | None:
+        """Names of the microscopy channels"""
         raise NotImplementedError
 
     @property
     @abstractmethod
     def image_type(self) -> str:
+        """Indicator of the original image format/microscopy vendor"""
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def from_file(path: str):
+        """Load metadata from microscopy image in path"""
         raise NotImplementedError
 
 
