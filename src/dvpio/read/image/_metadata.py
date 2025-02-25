@@ -101,6 +101,11 @@ class CZIImageMetadata(ImageMetadata):
     def channel_names(self) -> list[str]:
         """Parse channel metadata to list of channel ids
 
+        Returns
+        -------
+        List of channel names
+            If no channel name is given, falls back to returning index of channel as string
+
         Notes
         -----
         Per channel, names are stored under the key `@Name` as str
