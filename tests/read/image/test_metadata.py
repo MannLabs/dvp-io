@@ -58,6 +58,11 @@ def test_czi_channel_id_parser(czi_metadata_parser):
     assert metadata.channel_id == ground_truth["channel_ids"]
 
 
+def test_czi_image_type_parser(czi_metadata_parser):
+    metadata, ground_truth = czi_metadata_parser
+    assert metadata.image_type == "czi"
+
+
 def test_czi_channel_names_parser(czi_metadata_parser):
     metadata, ground_truth = czi_metadata_parser
     assert metadata.channel_names == ground_truth["channel_names"]
