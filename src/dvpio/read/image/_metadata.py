@@ -51,7 +51,7 @@ class CZIImageMetadata(ImageMetadata):
     def image_type(self) -> str:
         return "czi"
 
-    def parse_channel_id(self, channel_name: str) -> int:
+    def _parse_channel_id(self, channel_name: str) -> int:
         """Parse CZI channel id representation to channel index"""
         if channel_name is None:
             return
