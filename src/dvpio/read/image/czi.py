@@ -143,20 +143,21 @@ def read_czi(
 ) -> Image2DModel:
     """Read .czi to Image2DModel
 
-    Uses the CZI API to read .czi Carl Zeiss image format to spatialdata Image format
+    Uses the CZI API to read .czi Carl Zeiss image format to spatialdata image format.
 
     Parameters
     ----------
     path
         Path to file
     chunk_size
-        Size of the individual regions that are read into memory during the process
+        Size of the individual regions that are read into memory during the process.
     channels
-        If multiple channels are available, select these channels
+        Defaults to `None` which automatically selects all available channels. Passing the numeric index of a single or multiple channels
+        subsets the data to the specified channels.
     timepoint
         If timeseries, select the given index (defaults to 0 [first])
     z_stack
-        If z_stack, defaults to the given stack/index (defaults to 0 [first])
+        If z_stack, selects the the given z-plane (defaults to 0 [first])
     kwargs
         Keyword arguments passed to :meth:`spatialdata.models.Image2DModel.parse`
 
