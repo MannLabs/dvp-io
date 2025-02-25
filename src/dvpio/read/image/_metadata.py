@@ -59,7 +59,7 @@ class CZIImageMetadata(ImageMetadata):
 
     @computed_field
     @property
-    def channel_info(self) -> list[dict[str, str]]:
+    def _channel_info(self) -> list[dict[str, str]]:
         """Obtain channel metadata from CZI metadata file
 
         Notes
@@ -94,7 +94,7 @@ class CZIImageMetadata(ImageMetadata):
         Per channel, IDs are stored under the key `@Id` in the form `Channel:<channel id>`
         in the channel metadata
         """
-        return [self.parse_channel_id(channel.get("@Id")) for channel in self.channel_info]
+        return [self.parse_channel_id(channel.get("@Id")) for channel in self._channel_info]
 
     @computed_field
     @property
@@ -106,11 +106,11 @@ class CZIImageMetadata(ImageMetadata):
         Per channel, names are stored under the key `@Name` as str
         in the channel metadata
         """
-        return [channel.get("@Name", str(idx)) for idx, channel in enumerate(self.channel_info)]
+        return [channel.get("@Name", str(idx)) for idx, channel in enumerate(self._channel_info)]
 
     @computed_field
     @property
-    def mpp(self) -> dict[str, dict[str, str]]:
+    def _mpp(self) -> dict[str, dict[str, str]]:
         """Parse pixel resolution from slide image
 
         Note
@@ -135,21 +135,21 @@ class CZIImageMetadata(ImageMetadata):
     @property
     def mpp_x(self) -> float | None:
         """Return resolution in X dimension in [meters per pixel]"""
-        mpp_x = self.mpp.get("X", {}).get("Value", None)
+        mpp_x = self._mpp.get("X", {}).get("Value", None)
         return float(mpp_x) if mpp_x else None
 
     @computed_field
     @property
     def mpp_y(self) -> float | None:
         """Resolution in Y dimension in [meters per pixel]"""
-        mpp_y = self.mpp.get("Y", {}).get("Value", None)
+        mpp_y = self._mpp.get("Y", {}).get("Value", None)
         return float(mpp_y) if mpp_y else None
 
     @computed_field
     @property
     def mpp_z(self) -> float | None:
         """Resolution in Z dimension in [meters per pixel]"""
-        mpp_z = self.mpp.get("Z", {}).get("Value", None)
+        mpp_z = self._mpp.get("Z", {}).get("Value", None)
         return float(mpp_z) if mpp_z else None
 
     @computed_field
