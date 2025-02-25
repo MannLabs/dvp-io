@@ -9,7 +9,7 @@ class ImageMetadata(BaseModel, ABC):
 
     @property
     @abstractmethod
-    def magnification(self) -> int | None:
+    def objective_nominal_magnification(self) -> int | None:
         raise NotImplementedError
 
     @property
@@ -160,7 +160,7 @@ class CZIImageMetadata(ImageMetadata):
     @computed_field
     @property
     def objective_name(self) -> str | None:
-        """Utilized objective name. Required to infer magnification
+        """Utilized objective name. Required to infer objective_nominal_magnification
 
         Note
         ----
@@ -177,13 +177,13 @@ class CZIImageMetadata(ImageMetadata):
 
     @computed_field
     @property
-    def magnification(self) -> float | None:
-        """Utilized magnification
+    def objective_nominal_magnification(self) -> float | None:
+        """Utilized objective_nominal_magnification
 
         Note
         ----
-        Given the utilized objective the utilized magnification can be extracted
-        from the metadata on all available Objectives. The magnification of an objective
+        Given the utilized objective the utilized objective_nominal_magnification can be extracted
+        from the metadata on all available Objectives. The objective_nominal_magnification of an objective
         is given as `NominalMagnification` field.
         """
         objectives = (
@@ -197,11 +197,11 @@ class CZIImageMetadata(ImageMetadata):
 
         if isinstance(objectives, dict):
             objectives = [objectives]
-        magnification = None
+        objective_nominal_magnification = None
         for objective in objectives:
             if objective.get("@Name") == self.objective_name:
-                magnification = objective.get("NominalMagnification")
-        return float(magnification) if magnification else None
+                objective_nominal_magnification = objective.get("NominalMagnification")
+        return float(objective_nominal_magnification) if objective_nominal_magnification else None
 
     @classmethod
     def from_file(cls, path: str) -> BaseModel:

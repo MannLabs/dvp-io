@@ -10,7 +10,7 @@ CZI_GROUND_TRUTH = {
         "mpp_x": 0,
         "mpp_y": 0,
         "mpp_z": 0,
-        "magnification": None,
+        "objective_nominal_magnification": None,
     },
     "./data/zeiss/zeiss/rect-upper-left.multi-channel.czi": {
         "channel_ids": [0, 1, 2],
@@ -18,7 +18,7 @@ CZI_GROUND_TRUTH = {
         "mpp_x": 0,
         "mpp_y": 0,
         "mpp_z": 0,
-        "magnification": None,
+        "objective_nominal_magnification": None,
     },
     "./data/zeiss/zeiss/rect-upper-left.rgb.czi": {
         "channel_ids": [0],
@@ -26,7 +26,7 @@ CZI_GROUND_TRUTH = {
         "mpp_x": 0,
         "mpp_y": 0,
         "mpp_z": 0,
-        "magnification": None,
+        "objective_nominal_magnification": None,
     },
     "./data/zeiss/zeiss/zeiss_multi-channel.czi": {
         "channel_ids": [0, 1],
@@ -34,7 +34,7 @@ CZI_GROUND_TRUTH = {
         "mpp_x": 4.5502152331985306e-07,
         "mpp_y": 4.5502152331985306e-07,
         "mpp_z": None,
-        "magnification": 5,
+        "objective_nominal_magnification": 5,
     },
     "./data/zeiss/zeiss/kabatnik2023_20211129_C1.czi": {
         "channel_ids": [0],
@@ -42,7 +42,7 @@ CZI_GROUND_TRUTH = {
         "mpp_x": 2.1999999999999998e-07,
         "mpp_y": 2.1999999999999998e-07,
         "mpp_z": 1.5e-06,
-        "magnification": 20,
+        "objective_nominal_magnification": 20,
     },
 }
 
@@ -77,6 +77,6 @@ def test_czi_mpp_parser(czi_metadata_parser):
 
 def test_czi_magnification_parser(czi_metadata_parser):
     metadata, ground_truth = czi_metadata_parser
-    assert metadata.magnification == ground_truth["magnification"]
+    assert metadata.objective_nominal_magnification == ground_truth["objective_nominal_magnification"]
     assert metadata.mpp_y == ground_truth["mpp_y"]
     assert metadata.mpp_z == ground_truth["mpp_z"]
