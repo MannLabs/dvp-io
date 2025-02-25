@@ -9,7 +9,7 @@ def test_experimental_docs():
         """Original docstring."""
         pass
 
-    assert "**Warning:** This function is experimental" in sample_func.__doc__
+    assert "Warning: This function is experimental" in sample_func.__doc__
 
 
 def test_experimental_log():

@@ -2,7 +2,7 @@ name: Prepare test data
 
 on:
   workflow_dispatch:
-  # uncomment and adjust the branch name if you need to add new datasets to the artifact
+  # Pushing to branch dataset will create a new artifact
   push:
     branches:
       - dataset
