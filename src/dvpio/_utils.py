@@ -4,9 +4,8 @@ import warnings
 
 def experimental_docs(func):
     """Decorator to mark a function as experimental in the docstring."""
-    func.__doc__ = "**Warning:** This function is experimental and may change in future versions. \n\n" + (
-        func.__doc__ or ""
-    )
+    func.__doc__ = f"""**Warning: This function is experimental and may change in future versions**\n\n
+    {func.__doc__ or ""}"""
     return func
 
 
