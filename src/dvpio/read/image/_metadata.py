@@ -94,7 +94,7 @@ class CZIImageMetadata(ImageMetadata):
         Per channel, IDs are stored under the key `@Id` in the form `Channel:<channel id>`
         in the channel metadata
         """
-        return [self.parse_channel_id(channel.get("@Id")) for channel in self._channel_info]
+        return [self._parse_channel_id(channel.get("@Id")) for channel in self._channel_info]
 
     @computed_field
     @property
