@@ -108,6 +108,50 @@ class CZIImageMetadata(ImageMetadata):
         """
         return [channel.get("@Name", str(idx)) for idx, channel in enumerate(self.channel_info)]
 
+    @computed_field
+    @property
+    def mpp(self) -> dict[str, dict[str, str]]:
+        """Parse pixel resolution from slide image
+
+        Note
+        ----
+        Pixel resolution is stored in `Distance` field and always specified in meters per pixel
+        """
+        mpp = (
+            self.metadata.get("ImageDocument", {})
+            .get("Metadata", {})
+            .get("Scaling", {})
+            .get("Items", {})
+            .get("Distance", [])
+        )
+
+        # Transpose list of dictionaries to dictionary with dimension name (X, Y, Z)
+        # as keys and data as values
+        mpp = {dim.get("@Id", str(idx)): dim for idx, dim in enumerate(mpp)}
+
+        return mpp
+
+    @computed_field
+    @property
+    def mpp_x(self) -> float | None:
+        """Return resolution in X dimension in [meters per pixel]"""
+        mpp_x = self.mpp.get("X", {}).get("Value", None)
+        return float(mpp_x) if mpp_x else None
+
+    @computed_field
+    @property
+    def mpp_y(self) -> float | None:
+        """Resolution in Y dimension in [meters per pixel]"""
+        mpp_y = self.mpp.get("Y", {}).get("Value", None)
+        return float(mpp_y) if mpp_y else None
+
+    @computed_field
+    @property
+    def mpp_z(self) -> float | None:
+        """Resolution in Z dimension in [meters per pixel]"""
+        mpp_z = self.mpp.get("Z", {}).get("Value", None)
+        return float(mpp_z) if mpp_z else None
+
     @classmethod
     def from_file(cls, path: str) -> BaseModel:
         """Parse metadata from file path
