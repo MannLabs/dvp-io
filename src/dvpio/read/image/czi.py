@@ -164,23 +164,26 @@ def read_czi(
     -------
     :class:`spatialdata.models.Image2DModel`
     """
+    # Read slide
     czidoc_r = pyczi.CziReader(path)
 
     # Parse metadata
     czi_metadata = CZIImageMetadata(metadata=czidoc_r.metadata)
 
+    # Chunked loading
+    # Read dimensions
+    xmin, ymin, width, height = czidoc_r.total_bounding_rectangle
+
+    # Define coordinates for chunkwise loading of the slide
+    chunk_coords = _compute_chunks(dimensions=(width, height), chunk_size=chunk_size, min_coordinates=(xmin, ymin))
+
+    # Channel processing
     # Automatically detect channels
     if channels is None:
         channels = czi_metadata.channel_id
     if isinstance(channels, list):
         if len(channels) == 1:
             channels = channels[0]
-
-    # Read dimensions
-    xmin, ymin, width, height = czidoc_r.total_bounding_rectangle
-
-    # Define coordinates for chunkwise loading of the slide
-    chunk_coords = _compute_chunks(dimensions=(width, height), chunk_size=chunk_size, min_coordinates=(xmin, ymin))
 
     pixel_spec, channel_dim = _parse_pixel_type(slide=czidoc_r, channels=channels)
 
