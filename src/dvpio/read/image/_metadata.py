@@ -152,6 +152,52 @@ class CZIImageMetadata(ImageMetadata):
         mpp_z = self.mpp.get("Z", {}).get("Value", None)
         return float(mpp_z) if mpp_z else None
 
+    @computed_field
+    @property
+    def objective_name(self) -> str | None:
+        """Utilized objective name. Required to infer magnification
+
+        Note
+        ----
+        Objective Name is stored as string in `ObjectiveName` field. Presumably,
+        this represents the currently utilized objective
+        """
+        return (
+            self.metadata.get("ImageDocument", {})
+            .get("Metadata", {})
+            .get("Scaling", {})
+            .get("AutoScaling", {})
+            .get("ObjectiveName")
+        )
+
+    @computed_field
+    @property
+    def magnification(self) -> float | None:
+        """Utilized magnification
+
+        Note
+        ----
+        Given the utilized objective the utilized magnification can be extracted
+        from the metadata on all available Objectives. The magnification of an objective
+        is given as `NominalMagnification` field.
+        """
+        objectives = (
+            self.metadata.get("ImageDocument", {})
+            .get("Metadata", {})
+            .get("Information", {})
+            .get("Instrument", {})
+            .get("Objectives", {})
+            .get("Objective", {})
+        )
+
+        if isinstance(objectives, dict):
+            objectives = [objectives]
+        magnification = None
+        for objective in objectives:
+            if objective.get("@Name") == self.objective_name:
+                magnification = objective.get("NominalMagnification")
+        return float(magnification) if magnification else None
+
     @classmethod
     def from_file(cls, path: str) -> BaseModel:
         """Parse metadata from file path
