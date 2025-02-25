@@ -9,6 +9,7 @@ from numpy.typing import NDArray
 from pylibCZIrw import czi as pyczi
 from spatialdata.models import Image2DModel
 
+from ._metadata import CZIImageMetadata
 from ._utils import _assemble, _compute_chunks, _read_chunks
 
 
@@ -135,7 +136,7 @@ def _get_img(
 def read_czi(
     path: str,
     chunk_size: tuple[int, int] = (10000, 10000),
-    channels: int | list[int] = 0,
+    channels: int | list[int] | None = None,
     timepoint: int = 0,
     z_stack: int = 0,
     **kwargs: Mapping[str, Any],
@@ -164,6 +165,16 @@ def read_czi(
     :class:`spatialdata.models.Image2DModel`
     """
     czidoc_r = pyczi.CziReader(path)
+
+    # Parse metadata
+    czi_metadata = CZIImageMetadata(metadata=czidoc_r.metadata)
+
+    # Automatically detect channels
+    if channels is None:
+        channels = czi_metadata.channel_id
+    if isinstance(channels, list):
+        if len(channels) == 1:
+            channels = channels[0]
 
     # Read dimensions
     xmin, ymin, width, height = czidoc_r.total_bounding_rectangle
@@ -208,9 +219,23 @@ def read_czi(
 
     array = _assemble(chunks)
 
+    # Determine channel names (c_coords)
+    # Passed c_coords take precendence
+    c_coords = kwargs.pop("c_coords", None)
+
+    # If no c_coords are passed, use pixel_specs.
+    # This is useful for BRG images as it automatically sets the channel order correctly
+    if c_coords is None:
+        c_coords = pixel_spec.c_coords
+
+    # For grayscale images, extract channel names from metadata
+    # Only select channels that were also specified in the function call
+    if c_coords is None:
+        c_coords = np.array(czi_metadata.channel_names)[channels]
+
     return Image2DModel.parse(
         array,
         dims="cyx",
-        c_coords=pixel_spec.c_coords,
+        c_coords=c_coords,
         **kwargs,
     )
