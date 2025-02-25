@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -40,3 +41,7 @@ class ImageMetadata(BaseModel, ABC):
     @abstractmethod
     def from_file(path: str):
         raise NotImplementedError
+
+
+class CZIImageMetadata(ImageMetadata):
+    metadata: dict[str, Any]
