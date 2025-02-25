@@ -45,3 +45,23 @@ class ImageMetadata(BaseModel, ABC):
 
 class CZIImageMetadata(ImageMetadata):
     metadata: dict[str, Any]
+
+    @classmethod
+    def from_file(cls, path: str) -> BaseModel:
+        """Parse metadata from file path
+
+        Parameters
+        ----------
+        path
+            Path to `.czi` file.
+
+        Returns
+        -------
+        Parsed metadata as pydantic model
+        """
+        from pylibCZIrw.czi import open_czi
+
+        with open_czi(path) as czi:
+            metadata = czi.metadata
+
+        return cls(metadata=metadata)
