@@ -14,7 +14,9 @@ def _compute_chunk_sizes_positions(size: int, chunk: int, min_coord: int) -> tup
     lengths = np.full_like(positions, chunk, dtype=int)
 
     # Last position coordinate exceeds maximum coordinate of slide
-    if positions[-1] + chunk > size + min_coord:
+    last_position_coordinate = positions[-1] + chunk
+    slide_max_coordinate = size + min_coord
+    if last_position_coordinate > slide_max_coordinate:
         lengths[-1] = size + min_coord - positions[-1]
 
     return positions, lengths
