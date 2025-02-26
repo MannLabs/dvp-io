@@ -57,8 +57,8 @@ def _compute_chunks(
     # in line with dask.array.block
     tiles = np.array(
         [
-            [[x, y, w, h] for x, w in zip(x_positions, widths, strict=True)]
-            for y, h in zip(y_positions, heights, strict=True)
+            [[x, y, width, height] for x, width in zip(x_positions, widths, strict=True)]
+            for y, height in zip(y_positions, heights, strict=True)
         ],
         dtype=int,
     )
