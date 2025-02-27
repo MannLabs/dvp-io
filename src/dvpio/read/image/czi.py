@@ -224,12 +224,10 @@ def read_czi(
     array = _assemble(chunks)
 
     # Determine channel names (c_coords)
-    # Passed c_coords take precendence
-    c_coords = kwargs.pop("c_coords", None)
-
+    # Passed c_coords should take precendence
     # If no c_coords are passed, use pixel_specs.
     # This is useful for BRG images as it automatically sets the channel order correctly
-    if c_coords is None:
+    if (c_coords := kwargs.pop("c_coords", None)) is None:
         c_coords = pixel_spec.c_coords
 
     # For grayscale images, extract channel names from metadata
