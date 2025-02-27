@@ -175,8 +175,9 @@ def read_czi(
     # Define coordinates for chunkwise loading of the slide
     chunk_coords = _compute_chunks(dimensions=(width, height), chunk_size=chunk_size, min_coordinates=(xmin, ymin))
 
-    # Channel processing
-    # Automatically detect channels
+    # We support the option to automatically extract channels from the metadata (None)
+    # Pass a list of indices list[int] or a single index
+    # Here, we assure that the channels variable stores list[int]
     if channels is None:
         channels = czi_metadata.channel_id
     if isinstance(channels, int):
