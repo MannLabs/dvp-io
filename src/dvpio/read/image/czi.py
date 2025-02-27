@@ -182,9 +182,8 @@ def read_czi(
     # Automatically detect channels
     if channels is None:
         channels = czi_metadata.channel_id
-    if isinstance(channels, list):
-        if len(channels) == 1:
-            channels = channels[0]
+    if isinstance(channels, int):
+        channels = [channels]
 
     pixel_spec, channel_dim = _parse_pixel_type(slide=czidoc_r, channels=channels)
 
