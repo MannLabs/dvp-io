@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel
 
 
 class ImageMetadata(BaseModel, ABC):
@@ -59,7 +59,6 @@ class ImageMetadata(BaseModel, ABC):
 class CZIImageMetadata(ImageMetadata):
     metadata: dict[str, Any]
 
-    @computed_field
     @property
     def image_type(self) -> str:
         return "czi"
@@ -70,7 +69,6 @@ class CZIImageMetadata(ImageMetadata):
             return
         return int(channel_name.replace("Channel:", ""))
 
-    @computed_field
     @property
     def _channel_info(self) -> list[dict[str, str]]:
         """Obtain channel metadata from CZI metadata file
@@ -97,7 +95,6 @@ class CZIImageMetadata(ImageMetadata):
 
         return channels or []
 
-    @computed_field
     @property
     def channel_id(self) -> list[int]:
         """Parse channel metadata to list of channel ids
@@ -109,7 +106,6 @@ class CZIImageMetadata(ImageMetadata):
         """
         return [self._parse_channel_id(channel.get("@Id")) for channel in self._channel_info]
 
-    @computed_field
     @property
     def channel_names(self) -> list[str]:
         """Parse channel metadata to list of channel ids
@@ -126,7 +122,6 @@ class CZIImageMetadata(ImageMetadata):
         """
         return [channel.get("@Name", str(idx)) for idx, channel in enumerate(self._channel_info)]
 
-    @computed_field
     @property
     def _mpp(self) -> dict[str, dict[str, str]]:
         """Parse pixel resolution from slide image
@@ -149,28 +144,24 @@ class CZIImageMetadata(ImageMetadata):
 
         return mpp
 
-    @computed_field
     @property
     def mpp_x(self) -> float | None:
         """Return resolution in X dimension in [meters per pixel]"""
         mpp_x = self._mpp.get("X", {}).get("Value", None)
         return float(mpp_x) if mpp_x else None
 
-    @computed_field
     @property
     def mpp_y(self) -> float | None:
         """Resolution in Y dimension in [meters per pixel]"""
         mpp_y = self._mpp.get("Y", {}).get("Value", None)
         return float(mpp_y) if mpp_y else None
 
-    @computed_field
     @property
     def mpp_z(self) -> float | None:
         """Resolution in Z dimension in [meters per pixel]"""
         mpp_z = self._mpp.get("Z", {}).get("Value", None)
         return float(mpp_z) if mpp_z else None
 
-    @computed_field
     @property
     def objective_name(self) -> str | None:
         """Utilized objective name. Required to infer objective_nominal_magnification
@@ -188,7 +179,6 @@ class CZIImageMetadata(ImageMetadata):
             .get("ObjectiveName")
         )
 
-    @computed_field
     @property
     def objective_nominal_magnification(self) -> float | None:
         """Utilized objective_nominal_magnification
