@@ -29,10 +29,10 @@ class CZIPixelType(Enum):
     Bgr96Float = (3, np.float32, ["b", "g", "r"])
     Invalid = (np.nan, np.nan, np.nan)
 
-    def __init__(self, dimensionality: int, dtype: type, c_coords: list[str] | None) -> None:
+    def __init__(self, dimensionality: int, dtype: type, channel_names: list[str] | None) -> None:
         self.dimensionality = dimensionality
         self.dtype = dtype
-        self.c_coords = c_coords
+        self.channel_names = channel_names
 
     def __lt__(self, other: "CZIPixelType") -> bool:
         """Define hierarchy of dtypes according to order of defintion"""
@@ -223,21 +223,20 @@ def read_czi(
 
     array = _assemble(chunks)
 
-    # Determine channel names (c_coords)
-    # Passed c_coords should take precendence
-    # If no c_coords are passed, use pixel_specs.
+    # Passed channel names (c_coords) should take precendence
+    # If no channel names are passed, use pixel_specs.
     # This is useful for BRG images as it automatically sets the channel order correctly
-    if (c_coords := kwargs.pop("c_coords", None)) is None:
-        c_coords = pixel_spec.c_coords
+    if (channel_names := kwargs.pop("c_coords", None)) is None:
+        channel_names = pixel_spec.channel_names
 
     # For grayscale images, extract channel names from metadata
     # Only select channels that were also specified in the function call
-    if c_coords is None:
-        c_coords = np.array(czi_metadata.channel_names)[channels]
+    if channel_names is None:
+        channel_names = np.array(czi_metadata.channel_names)[channels]
 
     return Image2DModel.parse(
         array,
         dims="cyx",
-        c_coords=c_coords,
+        c_coords=channel_names,
         **kwargs,
     )
