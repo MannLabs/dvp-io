@@ -186,22 +186,26 @@ def read_czi(
     pixel_spec, channel_dim = _parse_pixel_type(slide=czidoc_r, channels=channels)
 
     # For multiple indices, validate that all channels are grayscale
+    # Stacking RGB images might lead to unexpected behaviour
     if (len(channels) > 1) and (not all(c == 1 for c in channel_dim)):
         raise ValueError(
             f"""Not all channels in CZI file are one dimensional (dimensionalities: {channel_dim}).
             Currently, only 1D channels are supported for multi-channel images"""
         )
 
-    chunks = _read_chunks(
-        _get_img,
-        slide=czidoc_r,
-        coords=chunk_coords,
-        n_channel=sum(channel_dim),
-        dtype=pixel_spec.dtype,
-        channel=channels,
-        timepoint=timepoint,
-        z_stack=z_stack,
-    )
+    chunks = [
+        _read_chunks(
+            _get_img,
+            slide=czidoc_r,
+            coords=chunk_coords,
+            n_channel=dimensionality,
+            dtype=pixel_spec.dtype,
+            channel=channel,
+            timepoint=timepoint,
+            z_stack=z_stack,
+        )
+        for channel, dimensionality in zip(channels, channel_dim, strict=True)
+    ]
 
     array = _assemble(chunks)
 
