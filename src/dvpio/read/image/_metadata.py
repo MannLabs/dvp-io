@@ -8,7 +8,7 @@ def _get_value_from_nested_dict(nested_dict: dict, keys: list, default_return_va
     """Get a specific value from a nested dictionary"""
     for key in keys[:-1]:
         if not isinstance(nested_dict, dict):
-            raise ValueError(f"Returned type of key {key} in nested dict is not expected dict but {type(dict)}")
+            raise ValueError(f"Returned type of key {key} in nested dict is not expected dict but {type(nested_dict)}")
         nested_dict = nested_dict.get(key, {})
 
     return nested_dict.get(keys[-1], default_return_value)
