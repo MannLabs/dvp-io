@@ -27,7 +27,7 @@ def test_read_czi(dataset: str, xmin: int, ymin: int, width: int, height: int) -
     img_ref = czidoc_r.read(plane={"C": 0, "T": 0, "Z": 0}, roi=(xmin, ymin, width, height))
 
     # Test function
-    array = read_czi(dataset)
+    array = read_czi(dataset, channels=0)
 
     # # Coordinate systems are not aligned, modify roi so that its coordinate system starts at (0, 0)
     x, y = xmin - xmin_czi, ymin - ymin_czi

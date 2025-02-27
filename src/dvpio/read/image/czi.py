@@ -9,6 +9,7 @@ from numpy.typing import NDArray
 from pylibCZIrw import czi as pyczi
 from spatialdata.models import Image2DModel
 
+from ._metadata import CZIImageMetadata
 from ._utils import _assemble, _compute_chunks, _read_chunks
 
 
@@ -28,10 +29,10 @@ class CZIPixelType(Enum):
     Bgr96Float = (3, np.float32, ["b", "g", "r"])
     Invalid = (np.nan, np.nan, np.nan)
 
-    def __init__(self, dimensionality: int, dtype: type, c_coords: list[str] | None) -> None:
+    def __init__(self, dimensionality: int, dtype: type, channel_names: list[str] | None) -> None:
         self.dimensionality = dimensionality
         self.dtype = dtype
-        self.c_coords = c_coords
+        self.channel_names = channel_names
 
     def __lt__(self, other: "CZIPixelType") -> bool:
         """Define hierarchy of dtypes according to order of defintion"""
@@ -45,7 +46,7 @@ class CZIPixelType(Enum):
         raise ValueError("Element not in defined types")
 
 
-def _parse_pixel_type(slide: pyczi.CziReader, channels: int | list[int]) -> tuple[Any, list[int]]:
+def _parse_pixel_type(slide: pyczi.CziReader, channels: list[int]) -> tuple[Any, list[int]]:
     """Parse CZI channel info and return channel dimensionalities and pixel data types
 
     Parameters
@@ -63,9 +64,6 @@ def _parse_pixel_type(slide: pyczi.CziReader, channels: int | list[int]) -> tupl
         List of dimensions: List of dimensionalities for all channels. Used to infer total dimensionality of resulting dask array
 
     """
-    if isinstance(channels, int):
-        channels = [channels]
-
     pixel_czi_name = [slide.get_channel_pixel_type(c) for c in channels]
     pixel_spec = [CZIPixelType[c] for c in pixel_czi_name]
     complex_pixel_spec = max(pixel_spec)
@@ -135,27 +133,28 @@ def _get_img(
 def read_czi(
     path: str,
     chunk_size: tuple[int, int] = (10000, 10000),
-    channels: int | list[int] = 0,
+    channels: int | list[int] | None = None,
     timepoint: int = 0,
     z_stack: int = 0,
     **kwargs: Mapping[str, Any],
 ) -> Image2DModel:
     """Read .czi to Image2DModel
 
-    Uses the CZI API to read .czi Carl Zeiss image format to spatialdata Image format
+    Uses the CZI API to read .czi Carl Zeiss image format to spatialdata image format.
 
     Parameters
     ----------
     path
         Path to file
     chunk_size
-        Size of the individual regions that are read into memory during the process
+        Size of the individual regions that are read into memory during the process.
     channels
-        If multiple channels are available, select these channels
+        Defaults to `None` which automatically selects all available channels. Passing the numeric index of a single or multiple channels
+        subsets the data to the specified channels.
     timepoint
         If timeseries, select the given index (defaults to 0 [first])
     z_stack
-        If z_stack, defaults to the given stack/index (defaults to 0 [first])
+        If z_stack, selects the the given z-plane (defaults to 0 [first])
     kwargs
         Keyword arguments passed to :meth:`spatialdata.models.Image2DModel.parse`
 
@@ -163,54 +162,67 @@ def read_czi(
     -------
     :class:`spatialdata.models.Image2DModel`
     """
+    # Read slide
     czidoc_r = pyczi.CziReader(path)
 
+    # Parse metadata
+    czi_metadata = CZIImageMetadata(metadata=czidoc_r.metadata)
+
+    # Chunked loading
     # Read dimensions
     xmin, ymin, width, height = czidoc_r.total_bounding_rectangle
 
     # Define coordinates for chunkwise loading of the slide
     chunk_coords = _compute_chunks(dimensions=(width, height), chunk_size=chunk_size, min_coordinates=(xmin, ymin))
 
+    # We support the option to automatically extract channels from the metadata (None)
+    # Pass a list of indices list[int] or a single index
+    # Here, we assure that the channels variable stores list[int]
+    if channels is None:
+        channels = czi_metadata.channel_id
+    if isinstance(channels, int):
+        channels = [channels]
+
     pixel_spec, channel_dim = _parse_pixel_type(slide=czidoc_r, channels=channels)
 
-    if isinstance(channels, list):
-        # Validate that all channels are grayscale
-        if not all(c == 1 for c in channel_dim):
-            raise ValueError(
-                f"""Not all channels in CZI file are one dimensional (dimensionalities: {channel_dim}).
-                Currently, only 1D channels are supported for multi-channel images"""
-            )
+    # For multiple indices, validate that all channels are grayscale
+    # Stacking RGB images might lead to unexpected behaviour
+    if (len(channels) > 1) and (not all(c == 1 for c in channel_dim)):
+        raise ValueError(
+            f"""Not all channels in CZI file are one dimensional (dimensionalities: {channel_dim}).
+            Currently, only 1D channels are supported for multi-channel images"""
+        )
 
-        chunks = [
-            _read_chunks(
-                _get_img,
-                slide=czidoc_r,
-                coords=chunk_coords,
-                n_channel=1,
-                dtype=pixel_spec.dtype,
-                channel=c,
-                timepoint=timepoint,
-                z_stack=z_stack,
-            )
-            for c in channels
-        ]
-    else:
-        chunks = _read_chunks(
+    chunks = [
+        _read_chunks(
             _get_img,
             slide=czidoc_r,
             coords=chunk_coords,
-            n_channel=sum(channel_dim),
+            n_channel=dimensionality,
             dtype=pixel_spec.dtype,
-            channel=channels,
+            channel=channel,
             timepoint=timepoint,
             z_stack=z_stack,
         )
+        for channel, dimensionality in zip(channels, channel_dim, strict=True)
+    ]
 
     array = _assemble(chunks)
+
+    # Passed channel names (c_coords) should take precendence
+    # If no channel names are passed, use pixel_specs.
+    # This is useful for BRG images as it automatically sets the channel order correctly
+    if (channel_names := kwargs.pop("c_coords", None)) is None:
+        channel_names = pixel_spec.channel_names
+
+    # For grayscale images, extract channel names from metadata
+    # Only select channels that were also specified in the function call
+    if channel_names is None:
+        channel_names = np.array(czi_metadata.channel_names)[channels]
 
     return Image2DModel.parse(
         array,
         dims="cyx",
-        c_coords=pixel_spec.c_coords,
+        c_coords=channel_names,
         **kwargs,
     )
