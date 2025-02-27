@@ -99,6 +99,19 @@ class CZIImageMetadata(ImageMetadata):
             return
         return int(channel_name.replace("Channel:", ""))
 
+    def _parse_mpp_dim(self, mpp: list[dict[str, str]], dimension: str) -> float | None:
+        """Parse the pixel resolution entry in CZI metadata
+
+        Note
+        ----
+        Per dimension, the resolution is stored as dict with the keys @Id (X/Y/Z),
+        and optional `Value` key (resolution as float in meters per pixel).
+        """
+        entry = next((e for e in mpp if e.get("@Id") == dimension), {})
+        mpp_dim = entry.get("Value", None)
+
+        return float(mpp_dim) if mpp_dim else None
+
     @property
     def _channel_info(self) -> list[dict[str, str]]:
         """Obtain channel metadata from CZI metadata file
@@ -152,31 +165,22 @@ class CZIImageMetadata(ImageMetadata):
         ----
         Pixel resolution is stored in `Distance` field and always specified in meters per pixel
         """
-        mpp = _get_value_from_nested_dict(self.metadata, self.mpp_path, [])
-
-        # Transpose list of dictionaries to dictionary with dimension name (X, Y, Z)
-        # as keys and data as values
-        mpp = {dim.get("@Id", str(idx)): dim for idx, dim in enumerate(mpp)}
-
-        return mpp
+        return _get_value_from_nested_dict(self.metadata, self.mpp_path, [])
 
     @property
     def mpp_x(self) -> float | None:
         """Return resolution in X dimension in [meters per pixel]"""
-        mpp_x = self._mpp.get("X", {}).get("Value", None)
-        return float(mpp_x) if mpp_x else None
+        return self._parse_mpp_dim(self._mpp, dimension="X")
 
     @property
     def mpp_y(self) -> float | None:
         """Resolution in Y dimension in [meters per pixel]"""
-        mpp_y = self._mpp.get("Y", {}).get("Value", None)
-        return float(mpp_y) if mpp_y else None
+        return self._parse_mpp_dim(self._mpp, dimension="Y")
 
     @property
     def mpp_z(self) -> float | None:
         """Resolution in Z dimension in [meters per pixel]"""
-        mpp_z = self._mpp.get("Z", {}).get("Value", None)
-        return float(mpp_z) if mpp_z else None
+        return self._parse_mpp_dim(self._mpp, dimension="Z")
 
     @property
     def objective_name(self) -> str | None:
