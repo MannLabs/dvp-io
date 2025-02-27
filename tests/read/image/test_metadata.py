@@ -1,7 +1,9 @@
+from typing import Any
+
 import pytest
 from pydantic import BaseModel
 
-from dvpio.read.image._metadata import CZIImageMetadata
+from dvpio.read.image._metadata import CZIImageMetadata, _get_value_from_nested_dict
 
 CZI_GROUND_TRUTH = {
     "./data/zeiss/zeiss/rect-upper-left.czi": {
@@ -45,6 +47,28 @@ CZI_GROUND_TRUTH = {
         "objective_nominal_magnification": 20,
     },
 }
+
+
+@pytest.fixture(scope="module")
+def nested_dict():
+    nd = {"A": [], "B": {"C": "c"}}
+    return nd
+
+
+@pytest.mark.parametrize((["keys", "output"]), [(["A"], []), (["B", "C"], "c"), (["E"], None), (["B", "D"], None)])
+def test_get_value_from_nested_dict(nested_dict: dict[str, Any], keys: list[str], output: str | None) -> None:
+    assert _get_value_from_nested_dict(nested_dict, keys=keys, default_return_value=None) == output
+
+
+@pytest.mark.parametrize((["keys", "default_return_value"]), [("E", []), ("E", {}), (["B", "D"], []), (["B", "D"], {})])
+def test_get_value_from_nested_dict_return_value(
+    nested_dict: dict[str, Any], keys: list[str], default_return_value: str | None
+) -> None:
+    """Test default return value on keys that do not match any fields in the nested dict"""
+    assert (
+        _get_value_from_nested_dict(nested_dict, keys=keys, default_return_value=default_return_value)
+        == default_return_value
+    )
 
 
 @pytest.fixture(params=CZI_GROUND_TRUTH.keys())
