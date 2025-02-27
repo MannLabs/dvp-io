@@ -2,18 +2,18 @@
 
 import numpy as np
 import openslide
-from dask import delayed
 from numpy.typing import NDArray
 from spatialdata.models import Image2DModel
 
-from ._utils import _assemble, _chunk_factory, _create_tiles
+from ._utils import _assemble, _compute_chunks, _read_chunks
 
 
-@delayed
 def _get_img(
     slide: openslide.ImageSlide,
-    coords: tuple[int, int],
-    size: tuple[int, int],
+    x0: int,
+    y0: int,
+    width: int,
+    height: int,
     level: int,
 ) -> NDArray:
     """Return numpy array of slide region
@@ -22,23 +22,23 @@ def _get_img(
     ----------
     slide
         WSI
-    coords
+    x0, y0
         Upper left corner (x, y) to read
-    size
-        Size of tile
+    width, height
+        Size of tile in x direction (width) and y direction (height)
     level
         Level in pyramidal image format
 
     Returns
     -------
     np.array
-        Image in (c, y, x) format and RGBA channels
+        Image in (c=4, y, x) format and RGBA channels
     """
     # Openslide returns a PILLOW image in RGBA format
     # Shape (x, y, c)
-    img = slide.read_region(coords, level=level, size=size)
+    img = slide.read_region((x0, y0), level=level, size=(width, height))
 
-    # Return image in (c, y, x) format
+    # Return image in (c=4, y, x) format
     return np.array(img).T
 
 
@@ -74,7 +74,7 @@ def read_openslide(path: str, chunk_size: tuple[int, int] = (10000, 10000), pyra
     path
         Path to file
     chunk_size
-        Size of the individual regions that are read into memory during the process
+        Size of the individual regions that are read into memory during the process in format (x, y)
     pyramidal
         Whether to create a pyramidal image with same scales as original image
 
@@ -98,10 +98,10 @@ def read_openslide(path: str, chunk_size: tuple[int, int] = (10000, 10000), pyra
         ]
 
     # Define coordinates for chunkwise loading of the slide
-    chunk_coords = _create_tiles(dimensions=dimensions, tile_size=chunk_size, min_coordinates=(0, 0))
+    chunk_coords = _compute_chunks(dimensions=dimensions, chunk_size=chunk_size, min_coordinates=(0, 0))
 
     # Load chunkwise (parallelized with dask.delayed)
-    chunks = _chunk_factory(_get_img, slide=slide, coords=chunk_coords, n_channel=4, dtype=np.uint8, level=0)
+    chunks = _read_chunks(_get_img, slide=slide, coords=chunk_coords, n_channel=4, dtype=np.uint8, level=0)
 
     # Assemble into a single dask array
     array = _assemble(chunks)

@@ -1,14 +1,15 @@
+"""Reader for CZI file format"""
+
 from collections.abc import Mapping
 from enum import Enum
 from typing import Any
 
 import numpy as np
-from dask import delayed
 from numpy.typing import NDArray
 from pylibCZIrw import czi as pyczi
 from spatialdata.models import Image2DModel
 
-from ._utils import _assemble, _chunk_factory, _create_tiles
+from ._utils import _assemble, _compute_chunks, _read_chunks
 
 
 class CZIPixelType(Enum):
@@ -22,9 +23,9 @@ class CZIPixelType(Enum):
     Gray8 = (1, np.uint16, None)
     Gray16 = (1, np.uint16, None)
     Gray32Float = (1, np.float32, None)
-    Bgr24 = (3, np.uint16, ["r", "g", "b"])
-    Bgr48 = (3, np.uint16, ["r", "g", "b"])
-    Bgr96Float = (3, np.float32, ["r", "g", "b"])
+    Bgr24 = (3, np.uint16, ["b", "g", "r"])
+    Bgr48 = (3, np.uint16, ["b", "g", "r"])
+    Bgr96Float = (3, np.float32, ["b", "g", "r"])
     Invalid = (np.nan, np.nan, np.nan)
 
     def __init__(self, dimensionality: int, dtype: type, c_coords: list[str] | None) -> None:
@@ -74,11 +75,12 @@ def _parse_pixel_type(slide: pyczi.CziReader, channels: int | list[int]) -> tupl
     return complex_pixel_spec, channel_dim
 
 
-@delayed
 def _get_img(
     slide: pyczi.CziReader,
-    coords: tuple[int, int],
-    size: tuple[int, int],
+    x0: int,
+    y0: int,
+    width: int,
+    height: int,
     channel: int = 0,
     timepoint: int = 0,
     z_stack: int = 0,
@@ -89,10 +91,10 @@ def _get_img(
     ----------
     slide
         WSI
-    coords
-        Upper left corner (x, y) to read
-    size
-        Size of tile
+    x0/y0
+        Upper left corner (x0, y0) to read
+    width/height
+        Size of tile in x direction (width) and y direction (height)
     channel
         Channel of image
     timepoint
@@ -105,11 +107,13 @@ def _get_img(
     np.array
         Image in (c, y, x) format and RGBA channels
     """
-    # czi returns an np.ndarray
-    # Shape VIHT*Z*C*X*Y* (*: Obligatory) https://zeiss.github.io/libczi/imagedocumentconcept.html#autotoc_md7
+    # pylibCZIrw returns an np.ndarray
+    # Shape VIHT*Z*Y*X*C (*: Obligatory)
+    # https://zeiss.github.io/libczi/imagedocumentconcept.html#autotoc_md7
+    # https://zeiss.github.io/pylibczirw/#readkwargs
+    # C: Channels (1 for Grayscale, 3 for BGR)
     # X/Y: 2D plane
     # Z: Z-stack
-    # C: Channels
     # T: Time point
     # M is used in order to enumerate all tiles in a plane i.e all planes in a given plane shall have an M-index,
     # M-index starts counting from zero to the number of tiles on that plane
@@ -117,15 +121,15 @@ def _get_img(
     img = slide.read(
         plane={"C": channel, "T": timepoint, "Z": z_stack},
         roi=(
-            coords[0],  # xmin (x)
-            coords[1],  # ymin (y)
-            size[0],  # width (w)
-            size[1],  # height (h)
+            x0,  # xmin (x)
+            y0,  # ymin (y)
+            width,  # width (w)
+            height,  # height (h)
         ),
     )
 
-    # Return image in (c, y, x) format
-    return np.array(img).T
+    # Return image (y, x, c) -> (c, y, x) format
+    return np.array(img).transpose(2, 0, 1)
 
 
 def read_czi(
@@ -165,7 +169,7 @@ def read_czi(
     xmin, ymin, width, height = czidoc_r.total_bounding_rectangle
 
     # Define coordinates for chunkwise loading of the slide
-    chunk_coords = _create_tiles(dimensions=(width, height), tile_size=chunk_size, min_coordinates=(xmin, ymin))
+    chunk_coords = _compute_chunks(dimensions=(width, height), chunk_size=chunk_size, min_coordinates=(xmin, ymin))
 
     pixel_spec, channel_dim = _parse_pixel_type(slide=czidoc_r, channels=channels)
 
@@ -178,7 +182,7 @@ def read_czi(
             )
 
         chunks = [
-            _chunk_factory(
+            _read_chunks(
                 _get_img,
                 slide=czidoc_r,
                 coords=chunk_coords,
@@ -191,7 +195,7 @@ def read_czi(
             for c in channels
         ]
     else:
-        chunks = _chunk_factory(
+        chunks = _read_chunks(
             _get_img,
             slide=czidoc_r,
             coords=chunk_coords,

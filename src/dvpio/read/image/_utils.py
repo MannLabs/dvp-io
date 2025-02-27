@@ -3,57 +3,69 @@ from typing import Any
 
 import dask.array as da
 import numpy as np
+from dask import delayed
 from numpy.typing import NDArray
 
 
-def _create_tiles(
+def _compute_chunk_sizes_positions(size: int, chunk: int, min_coord: int) -> tuple[NDArray[np.int_], NDArray[np.int_]]:
+    """Calculate chunk sizes and positions for a given dimension and chunk size"""
+    # All chunks have the same size except for the last one
+    positions = np.arange(min_coord, min_coord + size, chunk)
+    lengths = np.full_like(positions, chunk, dtype=int)
+
+    # Last position coordinate exceeds maximum coordinate of slide
+    last_position_coordinate = positions[-1] + chunk
+    slide_max_coordinate = size + min_coord
+    if last_position_coordinate > slide_max_coordinate:
+        lengths[-1] = size + min_coord - positions[-1]
+
+    return positions, lengths
+
+
+def _compute_chunks(
     dimensions: tuple[int, int],
-    tile_size: tuple[int, int],
+    chunk_size: tuple[int, int],
     min_coordinates: tuple[int, int] = (0, 0),
 ) -> NDArray[np.int_]:
-    """Create rectangular tiles for a given image size.
+    """Create all chunk specs for a given image and chunk size.
+
+    Creates specifications (x, y, width, height) with (x, y) being the upper left corner
+    of chunks of size chunk_size. Chunks at the edges correspond to the remainder of
+    chunk size and dimensions
 
     Parameters
     ----------
     dimensions : tuple[int, int]
         Size of the image in (width, height).
-    tile_size : tuple[int, int]
+    chunk_size : tuple[int, int]
         Size of individual tiles in (width, height).
     min_coordinates : tuple[int, int], optional
-        Minimum coordinates in the image, defaults to (0, 0).
+        Minimum coordinates (x, y) in the image, defaults to (0, 0).
 
     Returns
     -------
     np.ndarray
-        Array of shape (n_tiles_x, n_tiles_y, 4), where each entry defines a tile
+        Array of shape (n_tiles_x, n_tiles_y, 4). Each entry defines a tile
         as (x, y, width, height).
     """
-    # Calculate tile sizes and positions
-    widths = np.full(dimensions[0] // tile_size[0], tile_size[0])
-    remainder_x = dimensions[0] % tile_size[0]
-    if remainder_x > 0:
-        widths = np.append(widths, remainder_x)
-
-    heights = np.full(dimensions[1] // tile_size[1], tile_size[1])
-    remainder_y = dimensions[1] % tile_size[1]
-    if remainder_y > 0:
-        heights = np.append(heights, remainder_y)
-
-    x_positions = min_coordinates[0] + np.cumsum(np.r_[0, widths[:-1]])
-    y_positions = min_coordinates[1] + np.cumsum(np.r_[0, heights[:-1]])
+    x_positions, widths = _compute_chunk_sizes_positions(dimensions[0], chunk_size[0], min_coord=min_coordinates[0])
+    y_positions, heights = _compute_chunk_sizes_positions(dimensions[1], chunk_size[1], min_coord=min_coordinates[1])
 
     # Generate the tiles
+    # x/width are inner list
+    # y/height are outer list
+    # in line with dask.array.block
     tiles = np.array(
         [
-            [[x, y, w, h] for y, h in zip(y_positions, heights, strict=False)]
-            for x, w in zip(x_positions, widths, strict=False)
+            [[x, y, width, height] for x, width in zip(x_positions, widths, strict=True)]
+            for y, height in zip(y_positions, heights, strict=True)
         ],
         dtype=int,
     )
     return tiles
 
 
-def _chunk_factory(
+def _read_chunks(
     func: Callable[..., NDArray], slide: Any, coords: NDArray, n_channel: int, dtype: np.dtype, **func_kwargs: Any
 ) -> list[list[NDArray]]:
     """Abstract factory method to tile a large microscopy image.
@@ -61,7 +73,16 @@ def _chunk_factory(
     Parameters
     ----------
     func
-        Function to retrieve a rectangular tile from the slide image
+        Function to retrieve a rectangular tile from the slide image. Must take the
+        arguments:
+
+            - slide Full slide image
+            - x0: x (col) coordinate of upper left corner of chunk
+            - y0: y (row) coordinate of upper left corner of chunk
+            - width: Width of chunk
+            - height: Height of chunk
+
+        and should return the chunk as numpy array of shape (c, y, x)
     slide
         Slide image in format compatible with func
     coords
@@ -77,25 +98,26 @@ def _chunk_factory(
     func_kwargs = func_kwargs if func_kwargs else {}
 
     # Collect each delayed chunk as item in list of list
-    # Inner list becomes dim=-1 (rows)
-    # Outer list becomes dim=-2 (cols)
+    # Inner list becomes dim=-1 (x in cyx)
+    # Outer list becomes dim=-2 (y in cyx)
     # see dask.array.block
-
     chunks = [
         [
             da.from_delayed(
-                func(
+                delayed(func)(
                     slide,
-                    coords=coords[x, y, [0, 1]],
-                    size=coords[x, y, [2, 3]],
+                    x0=coords[tile_y, tile_x, 0],
+                    y0=coords[tile_y, tile_x, 1],
+                    width=coords[tile_y, tile_x, 2],
+                    height=coords[tile_y, tile_x, 3],
                     **func_kwargs,
                 ),
                 dtype=dtype,
-                shape=(n_channel, *coords[x, y, [2, 3]]),
+                shape=(n_channel, *coords[tile_y, tile_x, [3, 2]]),
             )
-            for y in range(coords.shape[1])
+            for tile_x in range(coords.shape[1])
         ]
-        for x in range(coords.shape[0])
+        for tile_y in range(coords.shape[0])
     ]
     return chunks
 
