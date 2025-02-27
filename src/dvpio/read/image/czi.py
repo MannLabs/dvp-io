@@ -185,38 +185,23 @@ def read_czi(
 
     pixel_spec, channel_dim = _parse_pixel_type(slide=czidoc_r, channels=channels)
 
-    if isinstance(channels, list):
-        # Validate that all channels are grayscale
-        if not all(c == 1 for c in channel_dim):
-            raise ValueError(
-                f"""Not all channels in CZI file are one dimensional (dimensionalities: {channel_dim}).
-                Currently, only 1D channels are supported for multi-channel images"""
-            )
-
-        chunks = [
-            _read_chunks(
-                _get_img,
-                slide=czidoc_r,
-                coords=chunk_coords,
-                n_channel=1,
-                dtype=pixel_spec.dtype,
-                channel=c,
-                timepoint=timepoint,
-                z_stack=z_stack,
-            )
-            for c in channels
-        ]
-    else:
-        chunks = _read_chunks(
-            _get_img,
-            slide=czidoc_r,
-            coords=chunk_coords,
-            n_channel=sum(channel_dim),
-            dtype=pixel_spec.dtype,
-            channel=channels,
-            timepoint=timepoint,
-            z_stack=z_stack,
+    # For multiple indices, validate that all channels are grayscale
+    if (len(channels) > 1) and (not all(c == 1 for c in channel_dim)):
+        raise ValueError(
+            f"""Not all channels in CZI file are one dimensional (dimensionalities: {channel_dim}).
+            Currently, only 1D channels are supported for multi-channel images"""
         )
+
+    chunks = _read_chunks(
+        _get_img,
+        slide=czidoc_r,
+        coords=chunk_coords,
+        n_channel=sum(channel_dim),
+        dtype=pixel_spec.dtype,
+        channel=channels,
+        timepoint=timepoint,
+        z_stack=z_stack,
+    )
 
     array = _assemble(chunks)
 
