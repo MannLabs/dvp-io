@@ -69,6 +69,7 @@ class ImageMetadata(BaseModel, ABC):
 class CZIImageMetadata(ImageMetadata):
     metadata: dict[str, Any]
 
+    # *_PATH keys in nested dict that lead to the metadata field
     CHANNEL_INFO_PATH: ClassVar = (
         "ImageDocument",
         "Metadata",
