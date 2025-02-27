@@ -46,7 +46,7 @@ class CZIPixelType(Enum):
         raise ValueError("Element not in defined types")
 
 
-def _parse_pixel_type(slide: pyczi.CziReader, channels: int | list[int]) -> tuple[Any, list[int]]:
+def _parse_pixel_type(slide: pyczi.CziReader, channels: list[int]) -> tuple[Any, list[int]]:
     """Parse CZI channel info and return channel dimensionalities and pixel data types
 
     Parameters
@@ -64,9 +64,6 @@ def _parse_pixel_type(slide: pyczi.CziReader, channels: int | list[int]) -> tupl
         List of dimensions: List of dimensionalities for all channels. Used to infer total dimensionality of resulting dask array
 
     """
-    if isinstance(channels, int):
-        channels = [channels]
-
     pixel_czi_name = [slide.get_channel_pixel_type(c) for c in channels]
     pixel_spec = [CZIPixelType[c] for c in pixel_czi_name]
     complex_pixel_spec = max(pixel_spec)
