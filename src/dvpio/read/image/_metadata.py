@@ -1,7 +1,17 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, ClassVar
 
 from pydantic import BaseModel
+
+
+def _get_value_from_nested_dict(nested_dict: dict, keys: list, default_return_value: Any = None) -> Any:
+    """Get a specific value from a nested dictionary"""
+    for key in keys[:-1]:
+        if not isinstance(nested_dict, dict):
+            raise ValueError(f"Returned type of key {key} in nested dict is not expected dict but {type(dict)}")
+        nested_dict = nested_dict.get(key, {})
+
+    return nested_dict.get(keys[-1], default_return_value)
 
 
 class ImageMetadata(BaseModel, ABC):
@@ -59,6 +69,26 @@ class ImageMetadata(BaseModel, ABC):
 class CZIImageMetadata(ImageMetadata):
     metadata: dict[str, Any]
 
+    channel_info_path: ClassVar = [
+        "ImageDocument",
+        "Metadata",
+        "Information",
+        "Image",
+        "Dimensions",
+        "Channels",
+        "Channel",
+    ]
+    mpp_path: ClassVar = ["ImageDocument", "Metadata", "Scaling", "Items", "Distance"]
+    objective_name_path: ClassVar = ["ImageDocument", "Metadata", "Scaling", "AutoScaling", "ObjectiveName"]
+    objective_nominal_magnification_path: ClassVar = [
+        "ImageDocument",
+        "Metadata",
+        "Information",
+        "Instrument",
+        "Objectives",
+        "Objective",
+    ]
+
     @property
     def image_type(self) -> str:
         return "czi"
@@ -79,21 +109,13 @@ class CZIImageMetadata(ImageMetadata):
         The dict minimally contains an `@ID` and a `PixelType` key, but
         may also contain a `Name` key.
         """
-        channels = (
-            self.metadata.get("ImageDocument", {})
-            .get("Metadata", {})
-            .get("Information", {})
-            .get("Image", {})
-            .get("Dimensions", {})
-            .get("Channels", {})
-            .get("Channel")
-        )
+        channels = _get_value_from_nested_dict(self.metadata, self.channel_info_path, default_return_value=[])
 
         # For a single channel, a dict is returned
         if isinstance(channels, dict):
             channels = [channels]
 
-        return channels or []
+        return channels
 
     @property
     def channel_id(self) -> list[int]:
@@ -130,13 +152,7 @@ class CZIImageMetadata(ImageMetadata):
         ----
         Pixel resolution is stored in `Distance` field and always specified in meters per pixel
         """
-        mpp = (
-            self.metadata.get("ImageDocument", {})
-            .get("Metadata", {})
-            .get("Scaling", {})
-            .get("Items", {})
-            .get("Distance", [])
-        )
+        mpp = _get_value_from_nested_dict(self.metadata, self.mpp_path, [])
 
         # Transpose list of dictionaries to dictionary with dimension name (X, Y, Z)
         # as keys and data as values
@@ -171,12 +187,8 @@ class CZIImageMetadata(ImageMetadata):
         Objective Name is stored as string in `ObjectiveName` field. Presumably,
         this represents the currently utilized objective
         """
-        return (
-            self.metadata.get("ImageDocument", {})
-            .get("Metadata", {})
-            .get("Scaling", {})
-            .get("AutoScaling", {})
-            .get("ObjectiveName")
+        return _get_value_from_nested_dict(
+            nested_dict=self.metadata, keys=self.objective_name_path, default_return_value=None
         )
 
     @property
@@ -189,13 +201,8 @@ class CZIImageMetadata(ImageMetadata):
         from the metadata on all available Objectives. The objective_nominal_magnification of an objective
         is given as `NominalMagnification` field.
         """
-        objectives = (
-            self.metadata.get("ImageDocument", {})
-            .get("Metadata", {})
-            .get("Information", {})
-            .get("Instrument", {})
-            .get("Objectives", {})
-            .get("Objective", {})
+        objectives = _get_value_from_nested_dict(
+            self.metadata, keys=self.objective_nominal_magnification_path, default_return_value=[]
         )
 
         if isinstance(objectives, dict):
