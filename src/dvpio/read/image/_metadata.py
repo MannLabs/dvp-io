@@ -69,7 +69,7 @@ class ImageMetadata(BaseModel, ABC):
 class CZIImageMetadata(ImageMetadata):
     metadata: dict[str, Any]
 
-    channel_info_path: ClassVar = [
+    channel_info_path: ClassVar = (
         "ImageDocument",
         "Metadata",
         "Information",
@@ -77,17 +77,17 @@ class CZIImageMetadata(ImageMetadata):
         "Dimensions",
         "Channels",
         "Channel",
-    ]
-    mpp_path: ClassVar = ["ImageDocument", "Metadata", "Scaling", "Items", "Distance"]
-    objective_name_path: ClassVar = ["ImageDocument", "Metadata", "Scaling", "AutoScaling", "ObjectiveName"]
-    objective_nominal_magnification_path: ClassVar = [
+    )
+    mpp_path: ClassVar = ("ImageDocument", "Metadata", "Scaling", "Items", "Distance")
+    objective_name_path: ClassVar = ("ImageDocument", "Metadata", "Scaling", "AutoScaling", "ObjectiveName")
+    objective_nominal_magnification_path: ClassVar = (
         "ImageDocument",
         "Metadata",
         "Information",
         "Instrument",
         "Objectives",
         "Objective",
-    ]
+    )
 
     @property
     def image_type(self) -> str:
