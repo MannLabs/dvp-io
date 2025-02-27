@@ -69,7 +69,7 @@ class ImageMetadata(BaseModel, ABC):
 class CZIImageMetadata(ImageMetadata):
     metadata: dict[str, Any]
 
-    channel_info_path: ClassVar = (
+    CHANNEL_INFO_PATH: ClassVar = (
         "ImageDocument",
         "Metadata",
         "Information",
@@ -78,9 +78,9 @@ class CZIImageMetadata(ImageMetadata):
         "Channels",
         "Channel",
     )
-    mpp_path: ClassVar = ("ImageDocument", "Metadata", "Scaling", "Items", "Distance")
-    objective_name_path: ClassVar = ("ImageDocument", "Metadata", "Scaling", "AutoScaling", "ObjectiveName")
-    objective_nominal_magnification_path: ClassVar = (
+    MPP_PATH: ClassVar = ("ImageDocument", "Metadata", "Scaling", "Items", "Distance")
+    OBJECTIVE_NAME_PATH: ClassVar = ("ImageDocument", "Metadata", "Scaling", "AutoScaling", "ObjectiveName")
+    OBJECTIVE_NOMINAL_MAGNIFICATION_PATH: ClassVar = (
         "ImageDocument",
         "Metadata",
         "Information",
@@ -122,7 +122,7 @@ class CZIImageMetadata(ImageMetadata):
         The dict minimally contains an `@ID` and a `PixelType` key, but
         may also contain a `Name` key.
         """
-        channels = _get_value_from_nested_dict(self.metadata, self.channel_info_path, default_return_value=[])
+        channels = _get_value_from_nested_dict(self.metadata, self.CHANNEL_INFO_PATH, default_return_value=[])
 
         # For a single channel, a dict is returned
         if isinstance(channels, dict):
@@ -165,7 +165,7 @@ class CZIImageMetadata(ImageMetadata):
         ----
         Pixel resolution is stored in `Distance` field and always specified in meters per pixel
         """
-        return _get_value_from_nested_dict(self.metadata, self.mpp_path, [])
+        return _get_value_from_nested_dict(self.metadata, self.MPP_PATH, [])
 
     @property
     def mpp_x(self) -> float | None:
@@ -192,7 +192,7 @@ class CZIImageMetadata(ImageMetadata):
         this represents the currently utilized objective
         """
         return _get_value_from_nested_dict(
-            nested_dict=self.metadata, keys=self.objective_name_path, default_return_value=None
+            nested_dict=self.metadata, keys=self.OBJECTIVE_NAME_PATH, default_return_value=None
         )
 
     @property
@@ -206,7 +206,7 @@ class CZIImageMetadata(ImageMetadata):
         is given as `NominalMagnification` field.
         """
         objectives = _get_value_from_nested_dict(
-            self.metadata, keys=self.objective_nominal_magnification_path, default_return_value=[]
+            self.metadata, keys=self.OBJECTIVE_NOMINAL_MAGNIFICATION_PATH, default_return_value=[]
         )
 
         if isinstance(objectives, dict):
