@@ -249,11 +249,12 @@ class OpenslideImageMetadata(ImageMetadata):
 
     @property
     def image_type(self) -> str:
-        return self.metadata[openslide.PROPERTY_NAME_VENDOR]
+        return self.metadata.get(openslide.PROPERTY_NAME_VENDOR, "openslide")
 
     @property
     def objective_nominal_magnification(self) -> float | None:
-        return self.LENGTH_TO_METER_CONVERSION * float(self.metadata[openslide.PROPERTY_NAME_OBJECTIVE_POWER])
+        magnification = self.metadata.get(openslide.PROPERTY_NAME_OBJECTIVE_POWER)
+        return self.LENGTH_TO_METER_CONVERSION * float(magnification) if magnification is not None else None
 
     @property
     def channel_id(self) -> list[int]:
@@ -269,11 +270,13 @@ class OpenslideImageMetadata(ImageMetadata):
 
     @property
     def mpp_x(self) -> float | None:
-        return self.LENGTH_TO_METER_CONVERSION * float(self.metadata[openslide.PROPERTY_NAME_MPP_X])
+        mpp_x = self.metadata.get(openslide.PROPERTY_NAME_MPP_X)
+        return self.LENGTH_TO_METER_CONVERSION * float(mpp_x) if mpp_x is not None else None
 
     @property
     def mpp_y(self) -> float | None:
-        return self.LENGTH_TO_METER_CONVERSION * float(self.metadata[openslide.PROPERTY_NAME_MPP_Y])
+        mpp_y = self.metadata.get(openslide.PROPERTY_NAME_MPP_Y)
+        return self.LENGTH_TO_METER_CONVERSION * float(mpp_y) if mpp_y is not None else None
 
     @property
     def mpp_z(self) -> None:
