@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Self
+from warnings import warn
 
 import openslide
 from pydantic import BaseModel
@@ -63,7 +64,7 @@ class ImageMetadata(BaseModel, ABC):
 
     @classmethod
     @abstractmethod
-    def from_file(cls, path: str):
+    def from_file(cls, path: str) -> Self:
         """Parse metadata from file path
 
         Parameters
@@ -231,7 +232,7 @@ class CZIImageMetadata(ImageMetadata):
         return float(objective_nominal_magnification) if objective_nominal_magnification else None
 
     @classmethod
-    def from_file(cls, path: str) -> BaseModel:
+    def from_file(cls, path: str) -> Self:
         with open_czi(path) as czi:
             metadata = czi.metadata
 
@@ -247,11 +248,11 @@ class OpenslideImageMetadata(ImageMetadata):
     LENGTH_TO_METER_CONVERSION: ClassVar = 1e-6
 
     @property
-    def image_type(self):
+    def image_type(self) -> str:
         return self.metadata[openslide.PROPERTY_NAME_VENDOR]
 
     @property
-    def objective_nominal_magnification(self):
+    def objective_nominal_magnification(self) -> float | None:
         return self.LENGTH_TO_METER_CONVERSION * float(self.metadata[openslide.PROPERTY_NAME_OBJECTIVE_POWER])
 
     @property
@@ -267,14 +268,22 @@ class OpenslideImageMetadata(ImageMetadata):
         return ["R", "G", "B", "A"]
 
     @property
-    def mpp_x(self):
+    def mpp_x(self) -> float | None:
         return self.LENGTH_TO_METER_CONVERSION * float(self.metadata[openslide.PROPERTY_NAME_MPP_X])
 
     @property
-    def mpp_y(self):
+    def mpp_y(self) -> float | None:
         return self.LENGTH_TO_METER_CONVERSION * float(self.metadata[openslide.PROPERTY_NAME_MPP_Y])
 
+    @property
+    def mpp_z(self) -> None:
+        warn(
+            "Whole Slide images read by openslide do not contain a MPP property in Z dimension, return None",
+            stacklevel=1,
+        )
+        return None
+
     @classmethod
-    def from_file(cls, path):
+    def from_file(cls, path) -> Self:
         slide = openslide.OpenSlide(path)
         return cls(metadata=slide.properties)
