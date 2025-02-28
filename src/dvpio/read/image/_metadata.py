@@ -254,7 +254,7 @@ class OpenslideImageMetadata(ImageMetadata):
     @property
     def objective_nominal_magnification(self) -> float | None:
         magnification = self.metadata.get(openslide.PROPERTY_NAME_OBJECTIVE_POWER)
-        return self.LENGTH_TO_METER_CONVERSION * float(magnification) if magnification is not None else None
+        return float(magnification) if magnification is not None else None
 
     @property
     def channel_id(self) -> list[int]:
