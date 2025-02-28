@@ -281,7 +281,7 @@ class OpenslideImageMetadata(ImageMetadata):
             "Whole Slide images read by openslide do not contain a MPP property in Z dimension, return None",
             stacklevel=1,
         )
-        return None
+        return
 
     @classmethod
     def from_file(cls, path) -> Self:
