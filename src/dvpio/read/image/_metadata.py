@@ -64,7 +64,7 @@ class ImageMetadata(BaseModel, ABC):
 
     @classmethod
     @abstractmethod
-    def from_file(cls, path: str) -> Self:
+    def from_file(cls, path: str) -> BaseModel:
         """Parse metadata from file path
 
         Parameters
@@ -292,6 +292,6 @@ class OpenslideImageMetadata(ImageMetadata):
         return
 
     @classmethod
-    def from_file(cls, path) -> Self:
+    def from_file(cls, path) -> BaseModel:
         slide = openslide.OpenSlide(path)
         return cls(metadata=slide.properties)
