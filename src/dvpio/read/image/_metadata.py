@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, ClassVar
 
 from pydantic import BaseModel
+from pylibCZIrw.czi import open_czi
 
 
 def _get_value_from_nested_dict(nested_dict: dict, keys: list, default_return_value: Any = None) -> Any:
@@ -230,8 +231,6 @@ class CZIImageMetadata(ImageMetadata):
 
     @classmethod
     def from_file(cls, path: str) -> BaseModel:
-        from pylibCZIrw.czi import open_czi
-
         with open_czi(path) as czi:
             metadata = czi.metadata
 
