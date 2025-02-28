@@ -245,7 +245,11 @@ class OpenslideImageMetadata(ImageMetadata):
     # Openslide returns MPP in micrometers per pixel
     # Convert it to meters to pixel for compatibility reasons
     # See https://openslide.org/api/python/#standard-properties
-    LENGTH_TO_METER_CONVERSION: ClassVar = 1e-6
+    LENGTH_TO_METER_CONVERSION: ClassVar[float] = 1e-6
+
+    # Openslide always returns RGBA images. Set channel ids + names as constants
+    CHANNEL_IDS: ClassVar[list[int]] = [0, 1, 2, 3]
+    CHANNEL_NAMES: ClassVar[list[str]] = ["R", "G", "B", "A"]
 
     @property
     def image_type(self) -> str:
@@ -261,13 +265,13 @@ class OpenslideImageMetadata(ImageMetadata):
     def channel_id(self) -> list[int]:
         # Openslide returns RGBA images (4 channels)
         # https://openslide.org/api/python/#openslide.OpenSlide.read_region
-        return list(range(4))
+        return self.CHANNEL_IDS
 
     @property
     def channel_names(self) -> list[int]:
         # Openslide returns RGBA images (channels R, G, B, A)
         # https://openslide.org/api/python/#openslide.OpenSlide.read_region
-        return ["R", "G", "B", "A"]
+        return self.CHANNEL_NAMES
 
     @property
     def mpp_x(self) -> float | None:
