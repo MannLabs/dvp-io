@@ -61,8 +61,18 @@ class ImageMetadata(BaseModel, ABC):
 
     @classmethod
     @abstractmethod
-    def from_file(path: str):
-        """Load metadata from microscopy image in path"""
+    def from_file(cls, path: str):
+        """Parse metadata from file path
+
+        Parameters
+        ----------
+        path
+            Path to microscopy file.
+
+        Returns
+        -------
+        Parsed metadata as pydantic model
+        """
         ...
 
 
@@ -220,17 +230,6 @@ class CZIImageMetadata(ImageMetadata):
 
     @classmethod
     def from_file(cls, path: str) -> BaseModel:
-        """Parse metadata from file path
-
-        Parameters
-        ----------
-        path
-            Path to `.czi` file.
-
-        Returns
-        -------
-        Parsed metadata as pydantic model
-        """
         from pylibCZIrw.czi import open_czi
 
         with open_czi(path) as czi:
