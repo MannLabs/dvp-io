@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, ClassVar
 
+import openslide
 from pydantic import BaseModel
 from pylibCZIrw.czi import open_czi
 
@@ -235,3 +236,45 @@ class CZIImageMetadata(ImageMetadata):
             metadata = czi.metadata
 
         return cls(metadata=metadata)
+
+
+class OpenslideImageMetadata(ImageMetadata):
+    metadata: dict[str, Any]
+
+    # Openslide returns MPP in micrometers per pixel
+    # Convert it to meters to pixel for compatibility reasons
+    # See https://openslide.org/api/python/#standard-properties
+    LENGTH_TO_METER_CONVERSION: ClassVar = 1e-6
+
+    @property
+    def image_type(self):
+        return self.metadata[openslide.PROPERTY_NAME_VENDOR]
+
+    @property
+    def objective_nominal_magnification(self):
+        return self.LENGTH_TO_METER_CONVERSION * float(self.metadata[openslide.PROPERTY_NAME_OBJECTIVE_POWER])
+
+    @property
+    def channel_id(self) -> list[int]:
+        # Openslide returns RGBA images (4 channels)
+        # https://openslide.org/api/python/#openslide.OpenSlide.read_region
+        return list(range(4))
+
+    @property
+    def channel_names(self) -> list[int]:
+        # Openslide returns RGBA images (channels R, G, B, A)
+        # https://openslide.org/api/python/#openslide.OpenSlide.read_region
+        return ["R", "G", "B", "A"]
+
+    @property
+    def mpp_x(self):
+        return self.LENGTH_TO_METER_CONVERSION * float(self.metadata[openslide.PROPERTY_NAME_MPP_X])
+
+    @property
+    def mpp_y(self):
+        return self.LENGTH_TO_METER_CONVERSION * float(self.metadata[openslide.PROPERTY_NAME_MPP_Y])
+
+    @classmethod
+    def from_file(cls, path):
+        slide = openslide.OpenSlide(path)
+        return cls(metadata=slide.properties)
