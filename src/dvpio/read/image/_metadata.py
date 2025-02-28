@@ -27,7 +27,7 @@ class ImageMetadata(BaseModel, ABC):
 
         Note
         ----
-        This value does not consider the magnifications by additional optical elements
+        This value does not consider the magnification by additional optical elements
         in the specific microscopy setup
         """
         ...
@@ -249,6 +249,7 @@ class OpenslideImageMetadata(ImageMetadata):
 
     @property
     def image_type(self) -> str:
+        """Indicator of the original image format/microscopy vendor, defaults to openslide if unknown."""
         return self.metadata.get(openslide.PROPERTY_NAME_VENDOR, "openslide")
 
     @property
