@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 from pydantic import BaseModel
 
-from dvpio.read.image._metadata import CZIImageMetadata, _get_value_from_nested_dict
+from dvpio.read.image._metadata import CZIImageMetadata, OpenslideImageMetadata, _get_value_from_nested_dict
 
 CZI_GROUND_TRUTH = {
     "./data/zeiss/zeiss/rect-upper-left.czi": {
@@ -48,6 +48,17 @@ CZI_GROUND_TRUTH = {
     },
 }
 
+OPENSLIDE_GROUND_TRUTH = {
+    "./data/openslide-mirax/Miarx2.2-4-PNG.mrxs": {
+        "channel_ids": [0, 1, 2, 3],
+        "channel_names": ["R", "G", "B", "A"],
+        "mpp_x": 0.23387573964496999 * 1e-6,
+        "mpp_y": 0.234330708661417 * 1e-6,
+        "mpp_z": None,
+        "objective_nominal_magnification": 20,
+    }
+}
+
 
 @pytest.fixture(scope="module")
 def nested_dict():
@@ -75,6 +86,12 @@ def test_get_value_from_nested_dict_return_value(
 def czi_metadata_parser(request) -> BaseModel:
     path = request.param
     return (CZIImageMetadata.from_file(path), CZI_GROUND_TRUTH[path])
+
+
+@pytest.fixture(params=OPENSLIDE_GROUND_TRUTH.keys())
+def openslide_metadata_parser(request) -> BaseModel:
+    path = request.param
+    return (OpenslideImageMetadata.from_file(path), OPENSLIDE_GROUND_TRUTH[path])
 
 
 def test_czi_channel_id_parser(czi_metadata_parser):
