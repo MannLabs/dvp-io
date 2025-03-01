@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, ClassVar, Self
+from typing import Any, ClassVar
 from warnings import warn
 
 import openslide
@@ -232,7 +232,7 @@ class CZIImageMetadata(ImageMetadata):
         return float(objective_nominal_magnification) if objective_nominal_magnification else None
 
     @classmethod
-    def from_file(cls, path: str) -> Self:
+    def from_file(cls, path: str) -> BaseModel:
         with open_czi(path) as czi:
             metadata = czi.metadata
 
