@@ -3,7 +3,12 @@ from typing import Any
 import pytest
 from pydantic import BaseModel
 
-from dvpio.read.image._metadata import CZIImageMetadata, OpenslideImageMetadata, _get_value_from_nested_dict
+from dvpio.read.image._metadata import (
+    CZIImageMetadata,
+    OpenslideImageMetadata,
+    _get_value_from_nested_dict,
+    read_metadata,
+)
 
 CZI_GROUND_TRUTH = {
     "./data/zeiss/zeiss/rect-upper-left.czi": {
@@ -152,3 +157,17 @@ def test_openslide_mpp_parser(openslide_metadata_parser):
 def test_openslide_magnification_parser(openslide_metadata_parser):
     metadata, ground_truth = openslide_metadata_parser
     assert metadata.objective_nominal_magnification == ground_truth["objective_nominal_magnification"]
+
+
+@pytest.mark.parametrize(["path", "ground_truth"], ((k, v) for k, v in CZI_GROUND_TRUTH.items()))
+def test_czi_read_metadata(path, ground_truth):
+    metadata = read_metadata(path, image_type="czi", parse_metadata=True)
+
+    assert all(metadata[k] == ground_truth[k] for k in metadata.keys())
+
+
+@pytest.mark.parametrize(["path", "ground_truth"], ((k, v) for k, v in OPENSLIDE_GROUND_TRUTH.items()))
+def test_openslide_read_metadata(path, ground_truth):
+    metadata = read_metadata(path, image_type="czi", parse_metadata=True)
+
+    assert all(metadata[k] == ground_truth[k] for k in metadata.keys())
