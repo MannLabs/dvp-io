@@ -13,7 +13,7 @@ from dvpio.read.image._metadata import (
 CZI_GROUND_TRUTH = {
     "./data/zeiss/zeiss/rect-upper-left.czi": {
         "image_type": "czi",
-        "channel_ids": [0],
+        "channel_id": [0],
         "channel_names": ["0"],
         "mpp_x": 0,
         "mpp_y": 0,
@@ -22,7 +22,7 @@ CZI_GROUND_TRUTH = {
     },
     "./data/zeiss/zeiss/rect-upper-left.multi-channel.czi": {
         "image_type": "czi",
-        "channel_ids": [0, 1, 2],
+        "channel_id": [0, 1, 2],
         "channel_names": ["0", "1", "2"],
         "mpp_x": 0,
         "mpp_y": 0,
@@ -31,7 +31,7 @@ CZI_GROUND_TRUTH = {
     },
     "./data/zeiss/zeiss/rect-upper-left.rgb.czi": {
         "image_type": "czi",
-        "channel_ids": [0],
+        "channel_id": [0],
         "channel_names": ["0"],
         "mpp_x": 0,
         "mpp_y": 0,
@@ -40,7 +40,7 @@ CZI_GROUND_TRUTH = {
     },
     "./data/zeiss/zeiss/zeiss_multi-channel.czi": {
         "image_type": "czi",
-        "channel_ids": [0, 1],
+        "channel_id": [0, 1],
         "channel_names": ["DAPI", "PGC"],
         "mpp_x": 4.5502152331985306e-07,
         "mpp_y": 4.5502152331985306e-07,
@@ -49,7 +49,7 @@ CZI_GROUND_TRUTH = {
     },
     "./data/zeiss/zeiss/kabatnik2023_20211129_C1.czi": {
         "image_type": "czi",
-        "channel_ids": [0],
+        "channel_id": [0],
         "channel_names": ["TL Brightfield"],
         "mpp_x": 2.1999999999999998e-07,
         "mpp_y": 2.1999999999999998e-07,
@@ -61,7 +61,7 @@ CZI_GROUND_TRUTH = {
 OPENSLIDE_GROUND_TRUTH = {
     "./data/openslide-mirax/Mirax2.2-4-PNG.mrxs": {
         "image_type": "mirax",
-        "channel_ids": [0, 1, 2, 3],
+        "channel_id": [0, 1, 2, 3],
         "channel_names": ["R", "G", "B", "A"],
         "mpp_x": 0.23387573964496999 * 1e-6,
         "mpp_y": 0.234330708661417 * 1e-6,
@@ -101,7 +101,7 @@ def czi_metadata_parser(request) -> BaseModel:
 
 def test_czi_channel_id_parser(czi_metadata_parser):
     metadata, ground_truth = czi_metadata_parser
-    assert metadata.channel_id == ground_truth["channel_ids"]
+    assert metadata.channel_id == ground_truth["channel_id"]
 
 
 def test_czi_image_type_parser(czi_metadata_parser):
@@ -139,7 +139,7 @@ def test_openslide_image_type_parser(openslide_metadata_parser):
 
 def test_openslide_channel_id_parser(openslide_metadata_parser):
     metadata, ground_truth = openslide_metadata_parser
-    assert metadata.channel_id == ground_truth["channel_ids"]
+    assert metadata.channel_id == ground_truth["channel_id"]
 
 
 def test_openslide_channel_names_parser(openslide_metadata_parser):
