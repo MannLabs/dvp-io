@@ -333,12 +333,14 @@ class OpenslideImageMetadata(ImageMetadata):
 def read_metadata(path: str, image_type: Literal["czi", "openslide"], parse_metadata: bool = True) -> dict[str, Any]:
     """Parse relevant microscopy metadata of dvp-io supported image file
 
+    Currently only supports `czi` files and `openslide`-compatible files.
+
     Parameters
     ----------
     path
         Path to image file
     reader_type
-        One of the supported image data types (czi, openslide formats)
+        One of the supported image data types (`czi`, `openslide`)
     parse_metadata
         Whether to extract relevant metadata or return the raw metadata as json-style dictionary
 
@@ -367,6 +369,7 @@ def read_metadata(path: str, image_type: Literal["czi", "openslide"], parse_meta
     -------
 
     .. code-block:: python
+
         import spatialdata as sd
         from dvpio.read.image import read_czi, parse_metadata
 
