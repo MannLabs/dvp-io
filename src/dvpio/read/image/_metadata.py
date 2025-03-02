@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
-from collections.abc import Callable
 from typing import Any, ClassVar, Literal
 from warnings import warn
 
 import openslide
 from pydantic import BaseModel
 from pylibCZIrw.czi import open_czi
+
+from dvpio._utils import is_parsed
 
 
 def _get_value_from_nested_dict(nested_dict: dict, keys: list, default_return_value: Any = None) -> Any:
@@ -16,13 +17,6 @@ def _get_value_from_nested_dict(nested_dict: dict, keys: list, default_return_va
         nested_dict = nested_dict.get(key, {})
 
     return nested_dict.get(keys[-1], default_return_value)
-
-
-def is_parsed(func: Callable[..., Any]) -> Callable[..., Any]:
-    """Decorator function that marks a function as parsed by adding the `_is_parsed` attribute"""
-    # Properties cannot be directly modified, modify getter function instead
-    func._is_parsed = True
-    return func
 
 
 class ImageMetadata(BaseModel, ABC):

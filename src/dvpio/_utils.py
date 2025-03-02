@@ -1,5 +1,14 @@
 import functools
 import warnings
+from collections.abc import Callable
+from typing import Any
+
+
+def is_parsed(func: Callable[..., Any]) -> Callable[..., Any]:
+    """Decorator function that marks a function as parsed by adding the `_is_parsed` attribute"""
+    # Properties cannot be directly modified, modify getter function instead
+    func._is_parsed = True
+    return func
 
 
 def experimental_docs(func):
