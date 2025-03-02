@@ -14,6 +14,18 @@
     read_custom
 ```
 
+#### Image metadata
+
+Automatically extract a controlled vocabulary of image metadata.
+
+```{eval-rst}
+.. currentmodule:: dvpio.read.image
+.. autosummary::
+    :toctree: generated
+
+    read_metadata
+```
+
 ### Shapes
 
 ```{eval-rst}
