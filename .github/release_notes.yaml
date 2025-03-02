@@ -1,6 +1,7 @@
-# Release notes
+name: Release Notes
 # Automatically generate summary of all channges since last release
 # https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes#configuring-automatically-generated-release-notes
+
 changelog:
   exclude:
     labels:
