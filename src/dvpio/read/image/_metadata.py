@@ -360,7 +360,7 @@ def read_metadata(path: str, image_type: Literal["czi", "openslide"], parse_meta
             Resolution in `meters per pixel` in y-dimension
         - mpp_x: float | None
             Resolution in `meters per pixel` in z-dimension
-        - channel_ids: list[int] | None
+        - channel_id: list[int] | None
             List of indices of microscopy channels
         - channel_names: list[str] | None
             List of channel names
