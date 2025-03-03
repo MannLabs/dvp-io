@@ -416,7 +416,7 @@ def read_metadata(path: str, image_type: Literal["czi", "openslide"], parse_meta
         metadata = OpenslideImageMetadata.from_file(path)
     else:
         raise NotImplementedError(
-            "Currently only support czi or openslide compatible image formats for automated metadata parsing"
+            "Parameter image_type needs to be `czi` or `openslide` for automated metadata parsing"
         )
 
     if parse_metadata:
