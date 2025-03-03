@@ -41,6 +41,29 @@ conda create -n dvpio python=3.11 -y  && conda activate dvpio
 pip install git+https://github.com/lucas-diedrich/dvp-io.git@main
 ```
 
+#### C++ dependencies
+
+Some critical dependencies of `dvpio` require C++ bindings, so a suitable C++ compiler must be installed.
+
+##### For Unix Users (Linux, macOS)
+
+Ensure `cmake` is installed by running:
+
+```shell
+# Unix
+conda install -n dvpio conda-forge::cmake
+```
+
+##### Windows users
+
+Windows users require the **Microsoft Visual C++ (MSVC) compiler**. Before creating the dvpio environment, follow these steps:
+
+1. Download and install [Visual Studio](https://visualstudio.microsoft.com/downloads/).
+2. In the installer, select **Desktop Development with C++** as a workload.
+3. Complete the installation and restart your system if necessary.
+
+After installation, proceed with the dvp-io installation steps above.
+
 ## Release notes
 
 Refer to the [Releases page](https://github.com/lucas-diedrich/dvp-io/releases) for information on releases and the changelog.
