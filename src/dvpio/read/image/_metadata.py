@@ -1,7 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Any, ClassVar
+from warnings import warn
 
+import openslide
 from pydantic import BaseModel
+from pylibCZIrw.czi import open_czi
 
 
 def _get_value_from_nested_dict(nested_dict: dict, keys: list, default_return_value: Any = None) -> Any:
@@ -24,7 +27,7 @@ class ImageMetadata(BaseModel, ABC):
 
         Note
         ----
-        This value does not consider the magnifications by additional optical elements
+        This value does not consider the magnification by additional optical elements
         in the specific microscopy setup
         """
         ...
@@ -61,8 +64,18 @@ class ImageMetadata(BaseModel, ABC):
 
     @classmethod
     @abstractmethod
-    def from_file(path: str):
-        """Load metadata from microscopy image in path"""
+    def from_file(cls, path: str) -> BaseModel:
+        """Parse metadata from file path
+
+        Parameters
+        ----------
+        path
+            Path to microscopy file.
+
+        Returns
+        -------
+        Parsed metadata as pydantic model
+        """
         ...
 
 
@@ -70,7 +83,7 @@ class CZIImageMetadata(ImageMetadata):
     metadata: dict[str, Any]
 
     # *_PATH keys in nested dict that lead to the metadata field
-    CHANNEL_INFO_PATH: ClassVar = (
+    _CHANNEL_INFO_PATH: ClassVar = (
         "ImageDocument",
         "Metadata",
         "Information",
@@ -79,9 +92,9 @@ class CZIImageMetadata(ImageMetadata):
         "Channels",
         "Channel",
     )
-    MPP_PATH: ClassVar = ("ImageDocument", "Metadata", "Scaling", "Items", "Distance")
-    OBJECTIVE_NAME_PATH: ClassVar = ("ImageDocument", "Metadata", "Scaling", "AutoScaling", "ObjectiveName")
-    OBJECTIVE_NOMINAL_MAGNIFICATION_PATH: ClassVar = (
+    _MPP_PATH: ClassVar = ("ImageDocument", "Metadata", "Scaling", "Items", "Distance")
+    _OBJECTIVE_NAME_PATH: ClassVar = ("ImageDocument", "Metadata", "Scaling", "AutoScaling", "ObjectiveName")
+    _OBJECTIVE_NOMINAL_MAGNIFICATION_PATH: ClassVar = (
         "ImageDocument",
         "Metadata",
         "Information",
@@ -123,7 +136,7 @@ class CZIImageMetadata(ImageMetadata):
         The dict minimally contains an `@ID` and a `PixelType` key, but
         may also contain a `Name` key.
         """
-        channels = _get_value_from_nested_dict(self.metadata, self.CHANNEL_INFO_PATH, default_return_value=[])
+        channels = _get_value_from_nested_dict(self.metadata, self._CHANNEL_INFO_PATH, default_return_value=[])
 
         # For a single channel, a dict is returned
         if isinstance(channels, dict):
@@ -166,7 +179,7 @@ class CZIImageMetadata(ImageMetadata):
         ----
         Pixel resolution is stored in `Distance` field and always specified in meters per pixel
         """
-        return _get_value_from_nested_dict(self.metadata, self.MPP_PATH, [])
+        return _get_value_from_nested_dict(self.metadata, self._MPP_PATH, [])
 
     @property
     def mpp_x(self) -> float | None:
@@ -193,7 +206,7 @@ class CZIImageMetadata(ImageMetadata):
         this represents the currently utilized objective
         """
         return _get_value_from_nested_dict(
-            nested_dict=self.metadata, keys=self.OBJECTIVE_NAME_PATH, default_return_value=None
+            nested_dict=self.metadata, keys=self._OBJECTIVE_NAME_PATH, default_return_value=None
         )
 
     @property
@@ -207,7 +220,7 @@ class CZIImageMetadata(ImageMetadata):
         is given as `NominalMagnification` field.
         """
         objectives = _get_value_from_nested_dict(
-            self.metadata, keys=self.OBJECTIVE_NOMINAL_MAGNIFICATION_PATH, default_return_value=[]
+            self.metadata, keys=self._OBJECTIVE_NOMINAL_MAGNIFICATION_PATH, default_return_value=[]
         )
 
         if isinstance(objectives, dict):
@@ -220,20 +233,65 @@ class CZIImageMetadata(ImageMetadata):
 
     @classmethod
     def from_file(cls, path: str) -> BaseModel:
-        """Parse metadata from file path
-
-        Parameters
-        ----------
-        path
-            Path to `.czi` file.
-
-        Returns
-        -------
-        Parsed metadata as pydantic model
-        """
-        from pylibCZIrw.czi import open_czi
-
         with open_czi(path) as czi:
             metadata = czi.metadata
 
         return cls(metadata=metadata)
+
+
+class OpenslideImageMetadata(ImageMetadata):
+    metadata: dict[str, Any]
+
+    # Openslide returns MPP in micrometers per pixel
+    # Convert it to meters to pixel for compatibility reasons
+    # See https://openslide.org/api/python/#standard-properties
+    _MICROMETER_TO_METER_CONVERSION: ClassVar[float] = 1e-6
+
+    # Openslide always returns RGBA images. Set channel ids + names as constants
+    _CHANNEL_IDS: ClassVar[list[int]] = [0, 1, 2, 3]
+    _CHANNEL_NAMES: ClassVar[list[str]] = ["R", "G", "B", "A"]
+
+    @property
+    def image_type(self) -> str:
+        """Indicator of the original image format/microscopy vendor, defaults to openslide if unknown."""
+        return self.metadata.get(openslide.PROPERTY_NAME_VENDOR, "openslide")
+
+    @property
+    def objective_nominal_magnification(self) -> float | None:
+        magnification = self.metadata.get(openslide.PROPERTY_NAME_OBJECTIVE_POWER)
+        return float(magnification) if magnification is not None else None
+
+    @property
+    def channel_id(self) -> list[int]:
+        # Openslide returns RGBA images (4 channels)
+        # https://openslide.org/api/python/#openslide.OpenSlide.read_region
+        return self._CHANNEL_IDS
+
+    @property
+    def channel_names(self) -> list[int]:
+        # Openslide returns RGBA images (channels R, G, B, A)
+        # https://openslide.org/api/python/#openslide.OpenSlide.read_region
+        return self._CHANNEL_NAMES
+
+    @property
+    def mpp_x(self) -> float | None:
+        mpp_x = self.metadata.get(openslide.PROPERTY_NAME_MPP_X)
+        return self._MICROMETER_TO_METER_CONVERSION * float(mpp_x) if mpp_x is not None else None
+
+    @property
+    def mpp_y(self) -> float | None:
+        mpp_y = self.metadata.get(openslide.PROPERTY_NAME_MPP_Y)
+        return self._MICROMETER_TO_METER_CONVERSION * float(mpp_y) if mpp_y is not None else None
+
+    @property
+    def mpp_z(self) -> None:
+        warn(
+            "Whole Slide images read by openslide do not contain a MPP property in Z dimension, return None",
+            stacklevel=1,
+        )
+        return
+
+    @classmethod
+    def from_file(cls, path) -> BaseModel:
+        slide = openslide.OpenSlide(path)
+        return cls(metadata=slide.properties)
