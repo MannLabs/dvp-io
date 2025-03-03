@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Literal
 from warnings import warn
 
 import openslide
 from pydantic import BaseModel
 from pylibCZIrw.czi import open_czi
+
+from dvpio._utils import is_parsed
 
 
 def _get_value_from_nested_dict(nested_dict: dict, keys: list, default_return_value: Any = None) -> Any:
@@ -62,6 +64,16 @@ class ImageMetadata(BaseModel, ABC):
         """Indicator of the original image format/microscopy vendor"""
         ...
 
+    @property
+    def parsed_properties(self) -> dict[str, Any]:
+        """Return a dictionary of all parsed metadata fields marked with the `_is_parsed` attribute"""
+        return {
+            attr: getattr(self, attr)
+            for attr in dir(self.__class__)
+            if isinstance(getattr(self.__class__, attr), property)
+            and getattr(getattr(self.__class__, attr).fget, "_is_parsed", False)
+        }
+
     @classmethod
     @abstractmethod
     def from_file(cls, path: str) -> BaseModel:
@@ -104,6 +116,7 @@ class CZIImageMetadata(ImageMetadata):
     )
 
     @property
+    @is_parsed
     def image_type(self) -> str:
         return "czi"
 
@@ -145,6 +158,7 @@ class CZIImageMetadata(ImageMetadata):
         return channels
 
     @property
+    @is_parsed
     def channel_id(self) -> list[int]:
         """Parse channel metadata to list of channel ids
 
@@ -156,6 +170,7 @@ class CZIImageMetadata(ImageMetadata):
         return [self._parse_channel_id(channel.get("@Id")) for channel in self._channel_info]
 
     @property
+    @is_parsed
     def channel_names(self) -> list[str]:
         """Parse channel metadata to list of channel ids
 
@@ -182,16 +197,19 @@ class CZIImageMetadata(ImageMetadata):
         return _get_value_from_nested_dict(self.metadata, self._MPP_PATH, [])
 
     @property
+    @is_parsed
     def mpp_x(self) -> float | None:
         """Return resolution in X dimension in [meters per pixel]"""
         return self._parse_mpp_dim(self._mpp, dimension="X")
 
     @property
+    @is_parsed
     def mpp_y(self) -> float | None:
         """Resolution in Y dimension in [meters per pixel]"""
         return self._parse_mpp_dim(self._mpp, dimension="Y")
 
     @property
+    @is_parsed
     def mpp_z(self) -> float | None:
         """Resolution in Z dimension in [meters per pixel]"""
         return self._parse_mpp_dim(self._mpp, dimension="Z")
@@ -210,6 +228,7 @@ class CZIImageMetadata(ImageMetadata):
         )
 
     @property
+    @is_parsed
     def objective_nominal_magnification(self) -> float | None:
         """Utilized objective_nominal_magnification
 
@@ -252,38 +271,45 @@ class OpenslideImageMetadata(ImageMetadata):
     _CHANNEL_NAMES: ClassVar[list[str]] = ["R", "G", "B", "A"]
 
     @property
+    @is_parsed
     def image_type(self) -> str:
         """Indicator of the original image format/microscopy vendor, defaults to openslide if unknown."""
         return self.metadata.get(openslide.PROPERTY_NAME_VENDOR, "openslide")
 
     @property
+    @is_parsed
     def objective_nominal_magnification(self) -> float | None:
         magnification = self.metadata.get(openslide.PROPERTY_NAME_OBJECTIVE_POWER)
         return float(magnification) if magnification is not None else None
 
     @property
+    @is_parsed
     def channel_id(self) -> list[int]:
         # Openslide returns RGBA images (4 channels)
         # https://openslide.org/api/python/#openslide.OpenSlide.read_region
         return self._CHANNEL_IDS
 
     @property
+    @is_parsed
     def channel_names(self) -> list[int]:
         # Openslide returns RGBA images (channels R, G, B, A)
         # https://openslide.org/api/python/#openslide.OpenSlide.read_region
         return self._CHANNEL_NAMES
 
     @property
+    @is_parsed
     def mpp_x(self) -> float | None:
         mpp_x = self.metadata.get(openslide.PROPERTY_NAME_MPP_X)
         return self._MICROMETER_TO_METER_CONVERSION * float(mpp_x) if mpp_x is not None else None
 
     @property
+    @is_parsed
     def mpp_y(self) -> float | None:
         mpp_y = self.metadata.get(openslide.PROPERTY_NAME_MPP_Y)
         return self._MICROMETER_TO_METER_CONVERSION * float(mpp_y) if mpp_y is not None else None
 
     @property
+    @is_parsed
     def mpp_z(self) -> None:
         warn(
             "Whole Slide images read by openslide do not contain a MPP property in Z dimension, return None",
@@ -292,6 +318,108 @@ class OpenslideImageMetadata(ImageMetadata):
         return
 
     @classmethod
+    @is_parsed
     def from_file(cls, path) -> BaseModel:
         slide = openslide.OpenSlide(path)
         return cls(metadata=slide.properties)
+
+
+def read_metadata(path: str, image_type: Literal["czi", "openslide"], parse_metadata: bool = True) -> dict[str, Any]:
+    """Parse relevant microscopy metadata of dvp-io supported image file
+
+    Currently only supports `czi` files and `openslide`-compatible files.
+
+    Parameters
+    ----------
+    path
+        Path to image file
+    reader_type
+        One of the supported image data types (`czi`, `openslide`)
+    parse_metadata
+        Whether to extract relevant metadata or return the raw metadata as json-style dictionary
+
+    Returns
+    -------
+    Metadata as dictionary
+
+    If `parse_metadata` is true, returns a dict with the following keys and associated values
+
+        - image_type: str | None
+            Name of original type: czi for Carl Zeiss, vendor name for openslide
+        - objective_nominal_magnification: float | None
+            Nominal magnification of objective, not considering additional optical setups
+        - mpp_x: float | None
+            Resolution in `meters per pixel` in x-dimension
+        - mpp_x: float | None
+            Resolution in `meters per pixel` in y-dimension
+        - mpp_x: float | None
+            Resolution in `meters per pixel` in z-dimension
+        - channel_id: list[int] | None
+            List of indices of microscopy channels
+        - channel_names: list[str] | None
+            List of channel names
+
+    Example
+    -------
+
+    .. code-block:: python
+
+        import spatialdata as sd
+        from dvpio.read.image import read_czi, parse_metadata
+
+        img_path = "./data/kabatnik2023_20211129_C1.czi"
+
+        # Initialize spatialdata
+        sdata = sd.SpatialData()
+
+        # Assign image
+        sdata.images["image"] = read_czi(img_path)
+
+        # Get controlled attributes from metadata
+        image_metadata = parse_metadata(img_path, image_type="czi", parse_metadata=True)
+        image_metadata
+        > {
+            'channel_id': [0],
+            'channel_names': ['TL Brightfield'],
+            'image_type': 'czi',
+            'mpp_x': 2.1999999999999998e-07,
+            'mpp_y': 2.1999999999999998e-07,
+            'mpp_z': 1.5e-06,
+            'objective_nominal_magnification': 20.0
+        }
+
+        # Get the full metadata document
+        image_metadata = parse_metadata(img_path, image_type="czi", parse_metadata=False)
+        > {
+        'ImageDocument':
+            {'Metadata':
+                ...
+                }
+            ...
+            }
+        ...
+        }
+
+        # Assign it to spatialdata.SpatialData.attrs slot for future reference
+        # It is recommended to use the same name as the image
+        sdata.attrs["metadata"] = {
+            "image": image_metadata
+        }
+
+        # Write
+        # sdata.write("/path/to/sdata.zarr")
+
+    """
+    if image_type == "czi":
+        metadata = CZIImageMetadata.from_file(path)
+    elif image_type == "openslide":
+        metadata = OpenslideImageMetadata.from_file(path)
+    else:
+        raise NotImplementedError(
+            "Parameter image_type needs to be `czi` or `openslide` for automated metadata parsing"
+        )
+
+    if parse_metadata:
+        return metadata.parsed_properties
+
+    return metadata.metadata
