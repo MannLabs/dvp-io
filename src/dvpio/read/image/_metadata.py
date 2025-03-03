@@ -245,7 +245,7 @@ class OpenslideImageMetadata(ImageMetadata):
     # Openslide returns MPP in micrometers per pixel
     # Convert it to meters to pixel for compatibility reasons
     # See https://openslide.org/api/python/#standard-properties
-    LENGTH_TO_METER_CONVERSION: ClassVar[float] = 1e-6
+    MICROMETER_TO_METER_CONVERSION: ClassVar[float] = 1e-6
 
     # Openslide always returns RGBA images. Set channel ids + names as constants
     CHANNEL_IDS: ClassVar[list[int]] = [0, 1, 2, 3]
@@ -276,12 +276,12 @@ class OpenslideImageMetadata(ImageMetadata):
     @property
     def mpp_x(self) -> float | None:
         mpp_x = self.metadata.get(openslide.PROPERTY_NAME_MPP_X)
-        return self.LENGTH_TO_METER_CONVERSION * float(mpp_x) if mpp_x is not None else None
+        return self.MICROMETER_TO_METER_CONVERSION * float(mpp_x) if mpp_x is not None else None
 
     @property
     def mpp_y(self) -> float | None:
         mpp_y = self.metadata.get(openslide.PROPERTY_NAME_MPP_Y)
-        return self.LENGTH_TO_METER_CONVERSION * float(mpp_y) if mpp_y is not None else None
+        return self.MICROMETER_TO_METER_CONVERSION * float(mpp_y) if mpp_y is not None else None
 
     @property
     def mpp_z(self) -> None:
