@@ -83,7 +83,7 @@ class CZIImageMetadata(ImageMetadata):
     metadata: dict[str, Any]
 
     # *_PATH keys in nested dict that lead to the metadata field
-    CHANNEL_INFO_PATH: ClassVar = (
+    _CHANNEL_INFO_PATH: ClassVar = (
         "ImageDocument",
         "Metadata",
         "Information",
@@ -92,9 +92,9 @@ class CZIImageMetadata(ImageMetadata):
         "Channels",
         "Channel",
     )
-    MPP_PATH: ClassVar = ("ImageDocument", "Metadata", "Scaling", "Items", "Distance")
-    OBJECTIVE_NAME_PATH: ClassVar = ("ImageDocument", "Metadata", "Scaling", "AutoScaling", "ObjectiveName")
-    OBJECTIVE_NOMINAL_MAGNIFICATION_PATH: ClassVar = (
+    _MPP_PATH: ClassVar = ("ImageDocument", "Metadata", "Scaling", "Items", "Distance")
+    _OBJECTIVE_NAME_PATH: ClassVar = ("ImageDocument", "Metadata", "Scaling", "AutoScaling", "ObjectiveName")
+    _OBJECTIVE_NOMINAL_MAGNIFICATION_PATH: ClassVar = (
         "ImageDocument",
         "Metadata",
         "Information",
@@ -136,7 +136,7 @@ class CZIImageMetadata(ImageMetadata):
         The dict minimally contains an `@ID` and a `PixelType` key, but
         may also contain a `Name` key.
         """
-        channels = _get_value_from_nested_dict(self.metadata, self.CHANNEL_INFO_PATH, default_return_value=[])
+        channels = _get_value_from_nested_dict(self.metadata, self._CHANNEL_INFO_PATH, default_return_value=[])
 
         # For a single channel, a dict is returned
         if isinstance(channels, dict):
@@ -179,7 +179,7 @@ class CZIImageMetadata(ImageMetadata):
         ----
         Pixel resolution is stored in `Distance` field and always specified in meters per pixel
         """
-        return _get_value_from_nested_dict(self.metadata, self.MPP_PATH, [])
+        return _get_value_from_nested_dict(self.metadata, self._MPP_PATH, [])
 
     @property
     def mpp_x(self) -> float | None:
@@ -206,7 +206,7 @@ class CZIImageMetadata(ImageMetadata):
         this represents the currently utilized objective
         """
         return _get_value_from_nested_dict(
-            nested_dict=self.metadata, keys=self.OBJECTIVE_NAME_PATH, default_return_value=None
+            nested_dict=self.metadata, keys=self._OBJECTIVE_NAME_PATH, default_return_value=None
         )
 
     @property
@@ -220,7 +220,7 @@ class CZIImageMetadata(ImageMetadata):
         is given as `NominalMagnification` field.
         """
         objectives = _get_value_from_nested_dict(
-            self.metadata, keys=self.OBJECTIVE_NOMINAL_MAGNIFICATION_PATH, default_return_value=[]
+            self.metadata, keys=self._OBJECTIVE_NOMINAL_MAGNIFICATION_PATH, default_return_value=[]
         )
 
         if isinstance(objectives, dict):
@@ -245,11 +245,11 @@ class OpenslideImageMetadata(ImageMetadata):
     # Openslide returns MPP in micrometers per pixel
     # Convert it to meters to pixel for compatibility reasons
     # See https://openslide.org/api/python/#standard-properties
-    MICROMETER_TO_METER_CONVERSION: ClassVar[float] = 1e-6
+    _MICROMETER_TO_METER_CONVERSION: ClassVar[float] = 1e-6
 
     # Openslide always returns RGBA images. Set channel ids + names as constants
-    CHANNEL_IDS: ClassVar[list[int]] = [0, 1, 2, 3]
-    CHANNEL_NAMES: ClassVar[list[str]] = ["R", "G", "B", "A"]
+    _CHANNEL_IDS: ClassVar[list[int]] = [0, 1, 2, 3]
+    _CHANNEL_NAMES: ClassVar[list[str]] = ["R", "G", "B", "A"]
 
     @property
     def image_type(self) -> str:
@@ -265,23 +265,23 @@ class OpenslideImageMetadata(ImageMetadata):
     def channel_id(self) -> list[int]:
         # Openslide returns RGBA images (4 channels)
         # https://openslide.org/api/python/#openslide.OpenSlide.read_region
-        return self.CHANNEL_IDS
+        return self._CHANNEL_IDS
 
     @property
     def channel_names(self) -> list[int]:
         # Openslide returns RGBA images (channels R, G, B, A)
         # https://openslide.org/api/python/#openslide.OpenSlide.read_region
-        return self.CHANNEL_NAMES
+        return self._CHANNEL_NAMES
 
     @property
     def mpp_x(self) -> float | None:
         mpp_x = self.metadata.get(openslide.PROPERTY_NAME_MPP_X)
-        return self.MICROMETER_TO_METER_CONVERSION * float(mpp_x) if mpp_x is not None else None
+        return self._MICROMETER_TO_METER_CONVERSION * float(mpp_x) if mpp_x is not None else None
 
     @property
     def mpp_y(self) -> float | None:
         mpp_y = self.metadata.get(openslide.PROPERTY_NAME_MPP_Y)
-        return self.MICROMETER_TO_METER_CONVERSION * float(mpp_y) if mpp_y is not None else None
+        return self._MICROMETER_TO_METER_CONVERSION * float(mpp_y) if mpp_y is not None else None
 
     @property
     def mpp_z(self) -> None:
