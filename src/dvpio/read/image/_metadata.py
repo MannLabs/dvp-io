@@ -65,8 +65,8 @@ class ImageMetadata(BaseModel, ABC):
         ...
 
     @property
-    def parsed_properties(self):
-        # Find all properties that are marked as parsed
+    def parsed_properties(self) -> dict[str, Any]:
+        """Return a dictionary of all parsed metadata fields marked with the `_is_parsed` attribute"""
         return {
             attr: getattr(self, attr)
             for attr in dir(self.__class__)
