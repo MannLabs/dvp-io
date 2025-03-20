@@ -3,7 +3,7 @@ from typing import Any
 
 import anndata as ad
 import pandas as pd
-from alphabase.anndata.anndata_factory import AnnDataFactory
+from alphabase._anndata.anndata_factory import AnnDataFactory
 from alphabase.psm_reader.psm_reader import psm_reader_provider
 from spatialdata.models import TableModel
 

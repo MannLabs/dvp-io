@@ -23,7 +23,7 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-  "alphabase @ git+https://github.com/MannLabs/alphabase.git@additional_diann_fdr",
+  "alphabase @ git+https://github.com/MannLabs/alphabase.git@7faa365df569bffd2d10b7ab45efdfa90fcce733",
   "anndata",
   "napari-spatialdata",
   "openslide-bin",
