@@ -47,11 +47,11 @@ Some critical dependencies of `dvpio` require C++ bindings, so a suitable C++ co
 
 ##### For Unix Users (Linux, macOS)
 
-Ensure `cmake` is installed by running:
+Ensure `cmake` and `libssh2` are installed by running:
 
 ```shell
 # Unix
-conda install -n dvpio conda-forge::cmake
+conda install -n dvpio conda-forge::cmake conda-forge::libssh2
 ```
 
 ##### Windows users
