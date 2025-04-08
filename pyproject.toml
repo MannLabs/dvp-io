@@ -25,7 +25,6 @@ classifiers = [
 dependencies = [
   "alphabase @ git+https://github.com/MannLabs/alphabase.git@7faa365df569bffd2d10b7ab45efdfa90fcce733",
   "anndata",
-  "napari-spatialdata",
   "openslide-bin",
   "openslide-python",
   "py-lmd",
@@ -42,9 +41,11 @@ optional-dependencies.doc = [
   "ipykernel",
   "ipython",
   "myst-nb>=1.1",
+  "napari-spatialdata",
   "pandas",
   # Until pybtex >0.23.0 releases: https://bitbucket.org/pybtex-devs/pybtex/issues/169/
   "setuptools",
+  "spatialdata-plot",
   "sphinx>=4",
   "sphinx-autodoc-typehints",
   "sphinx-book-theme>=1",
