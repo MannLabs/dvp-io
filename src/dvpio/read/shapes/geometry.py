@@ -33,9 +33,6 @@ def compute_affine_transformation(
     if query_points.shape[0] < 3:
         raise ValueError("At least three points are required to compute the transformation.")
 
-    # query_points = np.concatenate([query_points, np.ones(shape=(query_points.shape[0], 1))], axis=1)
-    # reference_points = np.concatenate([reference_points, np.ones(shape=(reference_points.shape[0], 1))], axis=1)
-    # affine_matrix, _, _, _ = np.linalg.lstsq(query_points, reference_points, rcond=None)
     affine_matrix = estimate_transform(ttype="affine", src=query_points, dst=reference_points)
 
     if precision is not None:
