@@ -72,7 +72,10 @@ def transform_shapes(
     # (Full affine transformation) Compute scaling, rotation+reflection, translation + shearing. In this case, angles are not preserved
     # (Similarity transformation) Constrain the affine transformation to scaling, rotation+reflection, translation. In this case, angles are preserved
     affine_transformation = compute_affine_transformation(
-        calibration_points_source, calibration_points_target, precision=precision
+        calibration_points_source,
+        calibration_points_target,
+        precision=precision,
+        transformation_type=transformation_type,
     )
 
     affine_transformation_inverse = np.around(np.linalg.inv(affine_transformation), precision)
