@@ -4,7 +4,7 @@ import shapely
 from spatialdata.models import PointsModel, ShapesModel
 from spatialdata.transformations import Affine, set_transformation
 
-from .geometry import apply_affine_transformation, compute_affine_transformation
+from .geometry import apply_affine_transformation, compute_affine_transformation, compute_similarity_transformation
 
 
 def transform_shapes(
@@ -12,6 +12,8 @@ def transform_shapes(
     calibration_points_target: PointsModel,
     calibration_points_source: PointsModel,
     precision: int = 3,
+    *,
+    full_affine_transformation: bool = False,
 ) -> ShapesModel:
     """Apply coordinate transformation to shapes based on calibration points from a target and a source
 
@@ -29,6 +31,11 @@ def transform_shapes(
         Expects :class:`spatialdata.models.PointsModel` with calibration points in `x`/`y` column
     precision
         Precision of affine transformation
+    full_affine_transformation:
+        Whether to compute the full affine transformation between the point sets. This includes scaling,
+        rotation, reflection, translation, and shearing. This operation does not preserve the angles in the shapes.
+        If you only want to map between image and microscopy coordinates only the subset of similarity transformations
+        (scaling, rotation, reflection, translation) is required.
 
     Returns
     -------
@@ -54,10 +61,16 @@ def transform_shapes(
     calibration_points_source = calibration_points_source[["x", "y"]].to_dask_array().compute()
     calibration_points_target = calibration_points_target[["x", "y"]].to_dask_array().compute()
 
-    # Compute rotation (2x2) and translation (2x1) matrices
-    affine_transformation = compute_affine_transformation(
-        calibration_points_source, calibration_points_target, precision=precision
-    )
+    # (Full affine transformation) Compute scaling, rotation+reflection, translation + shearing. In this case, angles are not preserved
+    # (Similarity transformation) Constrain the affine transformation to scaling, rotation+reflection, translation. In this case, angles are preserved
+    if full_affine_transformation:
+        affine_transformation = compute_affine_transformation(
+            calibration_points_source, calibration_points_target, precision=precision
+        )
+    else:
+        affine_transformation = compute_similarity_transformation(
+            calibration_points_source, calibration_points_target, precision=precision
+        )
 
     affine_transformation_inverse = np.around(np.linalg.inv(affine_transformation), precision)
 
