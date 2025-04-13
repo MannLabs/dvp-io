@@ -1,19 +1,21 @@
+from typing import Literal
+
 import lmd.lib as pylmd
 import numpy as np
 import shapely
 from spatialdata.models import PointsModel, ShapesModel
 from spatialdata.transformations import Affine, set_transformation
 
-from .geometry import apply_affine_transformation, compute_affine_transformation, compute_similarity_transformation
+from .geometry import apply_affine_transformation, compute_affine_transformation
 
 
 def transform_shapes(
     shapes: ShapesModel,
     calibration_points_target: PointsModel,
     calibration_points_source: PointsModel,
-    precision: int = 3,
     *,
-    full_affine_transformation: bool = False,
+    precision: int = 3,
+    transformation_type: Literal["similarity", "affine", "euclidean"] = "similarity",
 ) -> ShapesModel:
     """Apply coordinate transformation to shapes based on calibration points from a target and a source
 
@@ -31,11 +33,17 @@ def transform_shapes(
         Expects :class:`spatialdata.models.PointsModel` with calibration points in `x`/`y` column
     precision
         Precision of affine transformation
-    full_affine_transformation:
-        Whether to compute the full affine transformation between the point sets. This includes scaling,
-        rotation, reflection, translation, and shearing. This operation does not preserve the angles in the shapes.
-        If you only want to map between image and microscopy coordinates only the subset of similarity transformations
-        (scaling, rotation, reflection, translation) is required.
+    transformation type:
+        - affine
+            Full affine transformation (scaling, rotation/reflexion, translation, shearing). This operation does not preserve
+            the angles within or distances the shapes
+        - similarity (recommended)
+            Similarity transformation. Compared to an affine transformation, a similarity transformation constraints
+            the solution space to scaling, rotations, reflections, and translations, i.e. angles of shapes are retained.
+            If you only want to map between image and microscopy coordinates only the subset of similarity transformations
+            (scaling, rotation, reflection, translation) is required.
+        - euclidean (Rigid transform)
+            Only translation and rotation are allowed
 
     Returns
     -------
@@ -63,14 +71,12 @@ def transform_shapes(
 
     # (Full affine transformation) Compute scaling, rotation+reflection, translation + shearing. In this case, angles are not preserved
     # (Similarity transformation) Constrain the affine transformation to scaling, rotation+reflection, translation. In this case, angles are preserved
-    if full_affine_transformation:
+    if transformation_type in ("similarity", "affine", "euclidean"):
         affine_transformation = compute_affine_transformation(
             calibration_points_source, calibration_points_target, precision=precision
         )
     else:
-        affine_transformation = compute_similarity_transformation(
-            calibration_points_source, calibration_points_target, precision=precision
-        )
+        raise ValueError(f"Transformation type must be euclidean/similarity/affine, not {transformation_type}")
 
     affine_transformation_inverse = np.around(np.linalg.inv(affine_transformation), precision)
 
