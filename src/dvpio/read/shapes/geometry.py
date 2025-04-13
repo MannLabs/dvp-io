@@ -1,5 +1,6 @@
 import numpy as np
 from numpy.typing import NDArray
+from skimage.transform._geometric import _umeyama
 
 
 def compute_affine_transformation(
@@ -35,6 +36,50 @@ def compute_affine_transformation(
     query_points = np.concatenate([query_points, np.ones(shape=(query_points.shape[0], 1))], axis=1)
     reference_points = np.concatenate([reference_points, np.ones(shape=(reference_points.shape[0], 1))], axis=1)
     affine_matrix, _, _, _ = np.linalg.lstsq(query_points, reference_points, rcond=None)
+
+    if precision is not None:
+        affine_matrix = np.around(affine_matrix, precision)
+
+    return affine_matrix
+
+
+def compute_similarity_transformation(
+    query_points: NDArray[np.float64], reference_points: NDArray[np.float64], precision: int | None = None
+):
+    """Compute the similarity transformation that maps query_points to reference_points
+
+    Compared to an affine transformation, a similarity transformation constraints the solution space
+    to scaling, rotations, reflections, and translations, i.e. angles of shapes are retained.
+
+    .. math::
+            Aq = r
+
+    Parameters
+    ----------
+    query_points
+        An (N, 2) array of points in the query coordinate system.
+    reference_points
+        An (N, 2) array of corresponding points in the reference coordinate system.
+    precision
+        Rounding of affine transformation matrix
+
+    Returns
+    -------
+    similarity_transformation
+        Similarity transformation as (3 x 3) matrix
+
+    References
+    ----------
+    Least-squares estimation of transformation parameters between two point patterns, Shinji Umeyama, PAMI 1991, DOI: 10.1109/34.88573
+    """
+    if query_points.shape != reference_points.shape:
+        raise ValueError("Point sets must have the same shape.")
+    if query_points.shape[1] != 2:
+        raise ValueError("Points must be 2D.")
+    if query_points.shape[0] < 3:
+        raise ValueError("At least three points are required to compute the transformation.")
+
+    affine_matrix = _umeyama(query_points, reference_points, estimate_scale=True)
 
     if precision is not None:
         affine_matrix = np.around(affine_matrix, precision)
