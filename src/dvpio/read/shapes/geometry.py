@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.typing import NDArray
-from skimage.transform._geometric import _umeyama
+from skimage.transform import estimate_transform
 
 
 def compute_affine_transformation(
@@ -79,7 +79,7 @@ def compute_similarity_transformation(
     if query_points.shape[0] < 3:
         raise ValueError("At least three points are required to compute the transformation.")
 
-    affine_matrix = _umeyama(query_points, reference_points, estimate_scale=True)
+    affine_matrix = estimate_transform(ttype="similarity", src=query_points, dst=reference_points)
 
     if precision is not None:
         affine_matrix = np.around(affine_matrix, precision)
