@@ -31,7 +31,7 @@ def transform_shapes(
     calibration_points_source
         3 Calibration points, matched to `calibration_points_target` in source coordinate system (usually LMD coordinates)
         Expects :class:`spatialdata.models.PointsModel` with calibration points in `x`/`y` column
-    transformation type:
+    transformation_type
         - affine
             Full affine transformation (scaling, rotation/reflexion, translation, shearing). This operation does not preserve
             the angles within or distances the shapes
@@ -52,7 +52,7 @@ def transform_shapes(
 
     Object has special attributes
 
-    - `ShapesModel.attrs.transformation`
+    - `attrs.transformation`
         - `global`: (image coordinates)
         - `to_lmd`: Leica coordinate system transformation
 
@@ -127,7 +127,7 @@ def read_lmd(
     calibration_points_image
         Calibration points of the image as DataFrame, with 3 calibration points. Point coordinates are
         stored as seperate columns in `x` and `y` column.
-    transformation type:
+    transformation_type
         - affine
             Full affine transformation (scaling, rotation/reflexion, translation, shearing). This operation does not preserve
             the angles within or distances the shapes
@@ -153,9 +153,9 @@ def read_lmd(
 
         Object has special attributes
 
-            - `ShapesModel.attrs.transformation`
-                - global: (image coordinates)
-                - to_lmd: Transformation back to leica coordinate system
+        - `attrs.transformation`
+            - `global` (image coordinates)
+            - `to_lmd` Transformation back to leica coordinate system
     """
     PointsModel.validate(calibration_points_image)
 
