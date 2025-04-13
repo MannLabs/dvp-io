@@ -31,8 +31,6 @@ def compute_affine_transformation(
             precision
         - euclidean (Rigid transform)
             Only translation and rotation are allowed
-    precision
-        Rounding of affine transformation matrix
 
     Returns
     -------
@@ -47,10 +45,7 @@ def compute_affine_transformation(
     if query_points.shape[0] < 3:
         raise ValueError("At least three points are required to compute the transformation.")
 
-    affine_matrix = estimate_transform(ttype=transformation_type, src=query_points, dst=reference_points)
-
-    if precision is not None:
-        affine_matrix = np.around(affine_matrix, precision)
+    affine_matrix = estimate_transform(ttype=transformation_type, src=query_points, dst=reference_points).params
 
     return affine_matrix.T
 
