@@ -98,10 +98,8 @@ def apply_affine_transformation(
     ----------
     shape
         (N, 2) array of points representing a polygon, with (x, y) as last dimension
-    rotation
-        Rotation matrix (2, 2), representing the rotation between the coordinate systems
-    translation
-        Translation vector (1, 2), representing a translation [=systematic shift] between the coordinate systems
+    affine_transformation
+        Affine transformation applied to shapes
 
     Returns
     -------
