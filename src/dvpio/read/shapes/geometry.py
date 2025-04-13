@@ -38,7 +38,7 @@ def compute_affine_transformation(
     if precision is not None:
         affine_matrix = np.around(affine_matrix, precision)
 
-    return affine_matrix
+    return affine_matrix.T
 
 
 def compute_similarity_transformation(
@@ -82,7 +82,7 @@ def compute_similarity_transformation(
     if precision is not None:
         affine_matrix = np.around(affine_matrix, precision)
 
-    return affine_matrix
+    return affine_matrix.T
 
 
 def apply_affine_transformation(
