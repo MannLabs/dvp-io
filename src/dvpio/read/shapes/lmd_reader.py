@@ -104,7 +104,12 @@ def transform_shapes(
     return transformed_shapes
 
 
-def read_lmd(path: str, calibration_points_image: PointsModel, switch_orientation: bool = False) -> ShapesModel:
+def read_lmd(
+    path: str,
+    calibration_points_image: PointsModel,
+    transformation_type: Literal["similarity", "affine", "euclidean"] = "similarity",
+    switch_orientation: bool = False,
+) -> ShapesModel:
     """Read and parse LMD-formatted masks for the use in spatialdata
 
     Wrapper for pyLMD functions.
@@ -116,6 +121,17 @@ def read_lmd(path: str, calibration_points_image: PointsModel, switch_orientatio
     calibration_points_image
         Calibration points of the image as DataFrame, with 3 calibration points. Point coordinates are
         stored as seperate columns in `x` and `y` column.
+    transformation type:
+        - affine
+            Full affine transformation (scaling, rotation/reflexion, translation, shearing). This operation does not preserve
+            the angles within or distances the shapes
+        - similarity (recommended)
+            Similarity transformation. Compared to an affine transformation, a similarity transformation constraints
+            the solution space to scaling, rotations, reflections, and translations, i.e. angles of shapes are retained.
+            If you only want to map between image and microscopy coordinates only the subset of similarity transformations
+            (scaling, rotation, reflection, translation) is required.
+        - euclidean (Rigid transform)
+            Only translation and rotation are allowed
     switch_orientation
         Per default, LMD is working in a (x, y) coordinate system while the image coordinates are in a (row=y, col=x)
         coordinate system. If True, transform the coordinate systems by mirroring the coordinate system at the
@@ -154,6 +170,7 @@ def read_lmd(path: str, calibration_points_image: PointsModel, switch_orientatio
         shapes=shapes,
         calibration_points_target=calibration_points_image,
         calibration_points_source=calibration_points_lmd,
+        transformation_type=transformation_type,
     )
 
     if switch_orientation:
