@@ -6,7 +6,7 @@ import shapely
 from spatialdata.models import PointsModel, ShapesModel
 from spatialdata.transformations import Affine, set_transformation
 
-from .geometry import apply_affine_transformation, compute_affine_transformation
+from .geometry import apply_transformation, compute_transformation
 
 
 def transform_shapes(
@@ -71,7 +71,7 @@ def transform_shapes(
 
     # (Full affine transformation) Compute scaling, rotation+reflection, translation + shearing. In this case, angles are not preserved
     # (Similarity transformation) Constrain the affine transformation to scaling, rotation+reflection, translation. In this case, angles are preserved
-    affine_transformation = compute_affine_transformation(
+    affine_transformation = compute_transformation(
         calibration_points_source,
         calibration_points_target,
         precision=precision,
@@ -89,7 +89,7 @@ def transform_shapes(
     # Iterate through shapes and apply affine transformation
     transformed_shapes = shapes["geometry"].apply(
         lambda shape: shapely.transform(
-            shape, transformation=lambda geom: apply_affine_transformation(geom, affine_transformation)
+            shape, transformation=lambda geom: apply_transformation(geom, affine_transformation)
         )
     )
 

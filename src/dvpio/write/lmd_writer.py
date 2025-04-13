@@ -5,7 +5,7 @@ import numpy as np
 import shapely
 import spatialdata as sd
 
-from dvpio.read.shapes.geometry import apply_affine_transformation
+from dvpio.read.shapes.geometry import apply_transformation
 
 
 def write_lmd(
@@ -95,14 +95,14 @@ def write_lmd(
         ).to_affine_matrix(("x", "y"), ("x", "y"))
 
     # Convert calibration points dataframe to (N, 2) array for pylmd
-    calibration_points_transformed = apply_affine_transformation(
+    calibration_points_transformed = apply_transformation(
         calibration_points[["x", "y"]].to_dask_array().compute(), affine_transformation
     )
 
     annotation_transformed = annotation["geometry"].apply(
         lambda shape: shapely.transform(
             shape,
-            transformation=lambda geom: apply_affine_transformation(geom, affine_transformation),
+            transformation=lambda geom: apply_transformation(geom, affine_transformation),
         )
     )
 

@@ -5,7 +5,7 @@ from numpy.typing import NDArray
 from skimage.transform import estimate_transform
 
 
-def compute_affine_transformation(
+def compute_transformation(
     query_points: NDArray[np.float64],
     reference_points: NDArray[np.float64],
     transformation_type: Literal["similarity", "affine", "euclidean"],
@@ -50,7 +50,7 @@ def compute_affine_transformation(
     return affine_matrix.T
 
 
-def apply_affine_transformation(
+def apply_transformation(
     shape: NDArray[np.float64],
     affine_transformation: NDArray[np.float64],
 ) -> NDArray[np.float64]:

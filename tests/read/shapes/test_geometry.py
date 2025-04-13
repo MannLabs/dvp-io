@@ -3,8 +3,8 @@ import pytest
 from numpy.typing import NDArray
 
 from dvpio.read.shapes.geometry import (
-    apply_affine_transformation,
-    compute_affine_transformation,
+    apply_transformation,
+    compute_transformation,
 )
 
 test_cases = [
@@ -51,24 +51,24 @@ test_cases_shear = [
 
 @pytest.mark.parametrize(["transformation_type"], [("similarity",), ("affine",)])
 @pytest.mark.parametrize(["query", "reference", "affine_transformation"], test_cases)
-def test_compute_affine_transformation(
+def test_compute_transformation(
     query: NDArray[np.float64],
     reference: NDArray[np.int64],
     affine_transformation: NDArray[np.int64],
     transformation_type: str,
 ) -> None:
-    inferred_transformation = compute_affine_transformation(query, reference, transformation_type=transformation_type)
+    inferred_transformation = compute_transformation(query, reference, transformation_type=transformation_type)
     assert np.isclose(inferred_transformation, affine_transformation, rtol=0.001).all()
 
 
 @pytest.mark.parametrize(["query", "reference", "affine_transformation", "similarity_transformation"], test_cases_shear)
-def test_compute_affine_transformation_shear(
+def test_compute_transformation_shear(
     query: NDArray[np.float64],
     reference: NDArray[np.int64],
     affine_transformation: NDArray[np.int64],
     similarity_transformation: NDArray[np.int64],
 ) -> None:
-    inferred_transformation = compute_affine_transformation(query, reference, transformation_type="affine")
+    inferred_transformation = compute_transformation(query, reference, transformation_type="affine")
     assert np.isclose(inferred_transformation, affine_transformation, rtol=0.001).all()
 
 
@@ -79,17 +79,15 @@ def test_compute_similarity_transformation_shear(
     affine_transformation: NDArray[np.int64],
     similarity_transformation: NDArray[np.int64],
 ) -> None:
-    inferred_transformation = compute_affine_transformation(
-        query, reference, transformation_type="similarity", precision=3
-    )
+    inferred_transformation = compute_transformation(query, reference, transformation_type="similarity", precision=3)
     assert np.isclose(inferred_transformation, similarity_transformation, rtol=0.001).all()
 
 
 @pytest.mark.parametrize(["query", "reference", "affine_transformation"], test_cases)
-def test_apply_affine_transformation(
+def test_apply_transformation(
     query: NDArray[np.float64],
     reference: NDArray[np.float64],
     affine_transformation: NDArray[np.float64],
 ) -> None:
-    target = apply_affine_transformation(query, affine_transformation)
+    target = apply_transformation(query, affine_transformation)
     assert np.isclose(target, reference, rtol=0.001).all()
