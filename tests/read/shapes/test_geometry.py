@@ -57,9 +57,7 @@ def test_compute_affine_transformation(
     affine_transformation: NDArray[np.int64],
     transformation_type: str,
 ) -> None:
-    inferred_transformation = compute_affine_transformation(
-        query, reference, precision=3, transformation_type=transformation_type
-    )
+    inferred_transformation = compute_affine_transformation(query, reference, transformation_type=transformation_type)
     assert np.isclose(inferred_transformation, affine_transformation, rtol=0.001).all()
 
 
@@ -70,7 +68,7 @@ def test_compute_affine_transformation_shear(
     affine_transformation: NDArray[np.int64],
     similarity_transformation: NDArray[np.int64],
 ) -> None:
-    inferred_transformation = compute_affine_transformation(query, reference, transformation_type="affine", precision=3)
+    inferred_transformation = compute_affine_transformation(query, reference, transformation_type="affine")
     assert np.isclose(inferred_transformation, affine_transformation, rtol=0.001).all()
 
 
