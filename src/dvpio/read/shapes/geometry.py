@@ -1,9 +1,15 @@
+from typing import Literal
+
 import numpy as np
 from numpy.typing import NDArray
+from skimage.transform import estimate_transform
 
 
-def compute_affine_transformation(
-    query_points: NDArray[np.float64], reference_points: NDArray[np.float64], precision: int | None = None
+def compute_transformation(
+    query_points: NDArray[np.float64],
+    reference_points: NDArray[np.float64],
+    transformation_type: Literal["similarity", "affine", "euclidean"],
+    precision: int | None = None,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Computes the affine transformation mapping query_points to reference_points.
 
@@ -16,8 +22,15 @@ def compute_affine_transformation(
         An (N, 2) array of points in the query coordinate system.
     reference_points
         An (N, 2) array of corresponding points in the reference coordinate system.
-    precision
-        Rounding of affine transformation matrix
+    transformation_type
+        - affine
+            Full affine transformation (scaling, rotation/reflexion, translation, shearing)
+        - similarity
+            Similarity transformation. Compared to an affine transformation, a similarity transformation constraints
+            the solution space to scaling, rotations, reflections, and translations, i.e. angles of shapes are retained.
+            precision
+        - euclidean (Rigid transform)
+            Only translation and rotation are allowed
 
     Returns
     -------
@@ -32,17 +45,12 @@ def compute_affine_transformation(
     if query_points.shape[0] < 3:
         raise ValueError("At least three points are required to compute the transformation.")
 
-    query_points = np.concatenate([query_points, np.ones(shape=(query_points.shape[0], 1))], axis=1)
-    reference_points = np.concatenate([reference_points, np.ones(shape=(reference_points.shape[0], 1))], axis=1)
-    affine_matrix, _, _, _ = np.linalg.lstsq(query_points, reference_points, rcond=None)
+    affine_matrix = estimate_transform(ttype=transformation_type, src=query_points, dst=reference_points).params
 
-    if precision is not None:
-        affine_matrix = np.around(affine_matrix, precision)
-
-    return affine_matrix
+    return affine_matrix.T
 
 
-def apply_affine_transformation(
+def apply_transformation(
     shape: NDArray[np.float64],
     affine_transformation: NDArray[np.float64],
 ) -> NDArray[np.float64]:
@@ -55,10 +63,8 @@ def apply_affine_transformation(
     ----------
     shape
         (N, 2) array of points representing a polygon, with (x, y) as last dimension
-    rotation
-        Rotation matrix (2, 2), representing the rotation between the coordinate systems
-    translation
-        Translation vector (1, 2), representing a translation [=systematic shift] between the coordinate systems
+    affine_transformation
+        Affine transformation applied to shapes
 
     Returns
     -------

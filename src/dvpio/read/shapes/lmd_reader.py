@@ -1,17 +1,21 @@
+from typing import Literal
+
 import lmd.lib as pylmd
 import numpy as np
 import shapely
 from spatialdata.models import PointsModel, ShapesModel
 from spatialdata.transformations import Affine, set_transformation
 
-from .geometry import apply_affine_transformation, compute_affine_transformation
+from .geometry import apply_transformation, compute_transformation
 
 
 def transform_shapes(
     shapes: ShapesModel,
     calibration_points_target: PointsModel,
     calibration_points_source: PointsModel,
-    precision: int = 3,
+    *,
+    precision: int | None = None,
+    transformation_type: Literal["similarity", "affine", "euclidean"] = "similarity",
 ) -> ShapesModel:
     """Apply coordinate transformation to shapes based on calibration points from a target and a source
 
@@ -27,8 +31,19 @@ def transform_shapes(
     calibration_points_source
         3 Calibration points, matched to `calibration_points_target` in source coordinate system (usually LMD coordinates)
         Expects :class:`spatialdata.models.PointsModel` with calibration points in `x`/`y` column
+    transformation type:
+        - affine
+            Full affine transformation (scaling, rotation/reflexion, translation, shearing). This operation does not preserve
+            the angles within or distances the shapes
+        - similarity (recommended)
+            Similarity transformation. Compared to an affine transformation, a similarity transformation constraints
+            the solution space to scaling, rotations, reflections, and translations, i.e. angles of shapes are retained.
+            If you only want to map between image and microscopy coordinates only the subset of similarity transformations
+            (scaling, rotation, reflection, translation) is required.
+        - euclidean (Rigid transform)
+            Only translation and rotation are allowed
     precision
-        Precision of affine transformation
+        Rounding digit of affine transformation matrix. Small values (~6) might be necessary for numerical stability of shape transformations.
 
     Returns
     -------
@@ -54,18 +69,27 @@ def transform_shapes(
     calibration_points_source = calibration_points_source[["x", "y"]].to_dask_array().compute()
     calibration_points_target = calibration_points_target[["x", "y"]].to_dask_array().compute()
 
-    # Compute rotation (2x2) and translation (2x1) matrices
-    affine_transformation = compute_affine_transformation(
-        calibration_points_source, calibration_points_target, precision=precision
+    # (Full affine transformation) Compute scaling, rotation+reflection, translation + shearing. In this case, angles are not preserved
+    # (Similarity transformation) Constrain the affine transformation to scaling, rotation+reflection, translation. In this case, angles are preserved
+    affine_transformation = compute_transformation(
+        calibration_points_source,
+        calibration_points_target,
+        precision=precision,
+        transformation_type=transformation_type,
     )
 
-    affine_transformation_inverse = np.around(np.linalg.inv(affine_transformation), precision)
+    affine_transformation_inverse = np.linalg.inv(affine_transformation)
+
+    # Rounding might be required for numerical stability of shapely transformation
+    if precision is not None:
+        affine_transformation = np.around(affine_transformation, precision)
+        affine_transformation_inverse = np.around(affine_transformation_inverse, precision)
 
     # Transform shapes
     # Iterate through shapes and apply affine transformation
     transformed_shapes = shapes["geometry"].apply(
         lambda shape: shapely.transform(
-            shape, transformation=lambda geom: apply_affine_transformation(geom, affine_transformation)
+            shape, transformation=lambda geom: apply_transformation(geom, affine_transformation)
         )
     )
 
@@ -85,7 +109,13 @@ def transform_shapes(
     return transformed_shapes
 
 
-def read_lmd(path: str, calibration_points_image: PointsModel, switch_orientation: bool = False) -> ShapesModel:
+def read_lmd(
+    path: str,
+    calibration_points_image: PointsModel,
+    transformation_type: Literal["similarity", "affine", "euclidean"] = "similarity",
+    precision: int | None = 6,
+    switch_orientation: bool = False,
+) -> ShapesModel:
     """Read and parse LMD-formatted masks for the use in spatialdata
 
     Wrapper for pyLMD functions.
@@ -97,6 +127,20 @@ def read_lmd(path: str, calibration_points_image: PointsModel, switch_orientatio
     calibration_points_image
         Calibration points of the image as DataFrame, with 3 calibration points. Point coordinates are
         stored as seperate columns in `x` and `y` column.
+    transformation type:
+        - affine
+            Full affine transformation (scaling, rotation/reflexion, translation, shearing). This operation does not preserve
+            the angles within or distances the shapes
+        - similarity (recommended)
+            Similarity transformation. Compared to an affine transformation, a similarity transformation constraints
+            the solution space to scaling, rotations, reflections, and translations, i.e. angles of shapes are retained.
+            If you only want to map between image and microscopy coordinates only the subset of similarity transformations
+            (scaling, rotation, reflection, translation) is required.
+        - euclidean (Rigid transform)
+            Only translation and rotation are allowed
+    precision
+        Default 6. Rounding of affine transformation matrix, which can be necessary for numerical stability of shape transformations.
+        Passing `None` skips rounding.
     switch_orientation
         Per default, LMD is working in a (x, y) coordinate system while the image coordinates are in a (row=y, col=x)
         coordinate system. If True, transform the coordinate systems by mirroring the coordinate system at the
@@ -135,6 +179,8 @@ def read_lmd(path: str, calibration_points_image: PointsModel, switch_orientatio
         shapes=shapes,
         calibration_points_target=calibration_points_image,
         calibration_points_source=calibration_points_lmd,
+        transformation_type=transformation_type,
+        precision=precision,
     )
 
     if switch_orientation:

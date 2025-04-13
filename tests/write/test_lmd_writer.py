@@ -74,7 +74,7 @@ def test_write_lmd_overwrite(
         annotation_well_column=annotation_well_column,
         overwrite=True,
     )
-    assert True
+    assert os.path.exists(path)
 
     # Write file without overwrite raises error
     with pytest.raises(ValueError):
@@ -97,7 +97,7 @@ def test_read_write_lmd(read_path, calibration_points):
     write_path = os.path.join(mkdtemp(), "test.xml")
 
     # Read in example data
-    gdf = read_lmd(read_path, calibration_points_image=calibration_points)
+    gdf = read_lmd(read_path, calibration_points_image=calibration_points, precision=3)
 
     # Write
     write_lmd(write_path, annotation=gdf, calibration_points=calibration_points)

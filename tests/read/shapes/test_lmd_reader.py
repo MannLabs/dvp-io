@@ -44,7 +44,7 @@ def test_transform_shapes() -> None:
     ],
 )
 def test_read_lmd(path: str, calibration_points: NDArray[np.float64], ground_truth_path: str) -> None:
-    lmd_shapes = read_lmd(path, calibration_points, switch_orientation=False)
+    lmd_shapes = read_lmd(path, calibration_points, switch_orientation=False, precision=3)
     lmd_centroids = _get_centroid_xy(lmd_shapes["geometry"])
 
     ground_truth = gpd.read_file(ground_truth_path)
@@ -70,7 +70,7 @@ def test_read_lmd(path: str, calibration_points: NDArray[np.float64], ground_tru
     ],
 )
 def test_read_lmd_transformation(path: str, calibration_points: NDArray[np.float64], ground_truth_path: str) -> None:
-    lmd_shapes = read_lmd(path, calibration_points, switch_orientation=False)
+    lmd_shapes = read_lmd(path, calibration_points, switch_orientation=False, precision=3)
 
     assert "to_lmd" in lmd_shapes.attrs.get("transform")
     assert isinstance(lmd_shapes.attrs.get("transform").get("to_lmd"), BaseTransformation)
