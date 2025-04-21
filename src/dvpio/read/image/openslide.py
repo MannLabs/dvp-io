@@ -9,7 +9,7 @@ from ._utils import _assemble, _compute_chunks, _read_chunks
 
 
 def _get_img(
-    slide: openslide.ImageSlide,
+    slide: openslide.OpenSlide,
     x0: int,
     y0: int,
     width: int,
