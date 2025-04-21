@@ -38,8 +38,9 @@ def _get_img(
     # Shape (x, y, c)
     img = slide.read_region((x0, y0), level=level, size=(width, height))
 
+    # Pillow stores images in (y, x, c) format
     # Return image in (c=4, y, x) format
-    return np.array(img).T
+    return np.array(img).transpose(2, 0, 1)
 
 
 def read_openslide(path: str, chunk_size: tuple[int, int] = (10000, 10000), pyramidal: bool = True) -> Image2DModel:
