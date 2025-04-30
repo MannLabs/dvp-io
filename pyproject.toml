@@ -30,7 +30,7 @@ dependencies = [
   "py-lmd==1.3.2",
   "pydantic",
   "pylibczirw",
-  "spatialdata",
+  "spatialdata>=0.4",
 ]
 optional-dependencies.dev = [
   "pre-commit",
@@ -78,6 +78,9 @@ scripts.clean = "git clean -fdX -- {args:docs}"
 
 [tool.hatch.envs.hatch-test]
 features = [ "test" ]
+matrix = [
+  { python = [ "3.10", "3.11", "3.12" ] },
+]
 
 [tool.hatch.metadata]
 allow-direct-references = true
