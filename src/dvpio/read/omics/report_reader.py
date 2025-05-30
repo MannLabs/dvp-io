@@ -3,11 +3,12 @@ from typing import Any
 
 import anndata as ad
 import pandas as pd
-from alphabase._anndata.anndata_factory import AnnDataFactory
 from alphabase.psm_reader.psm_reader import psm_reader_provider
 from spatialdata.models import TableModel
 
 from dvpio._utils import experimental_docs, experimental_log
+
+from ._anndata import AnnDataFactory
 
 
 def available_reader() -> list[str]:
@@ -109,7 +110,7 @@ def read_precursor_table(
     protein_id_column: str | None = None,
     raw_name_column: str | None = None,
     reader_kwargs: Mapping[str, Any] | None = None,
-    **kwargs: Mapping[str, Any],
+    **kwargs: Mapping[str, Any] | None,
 ) -> ad.AnnData:
     """Parse proteomics precursor reports to the :class:`anndata.AnnData` format
 
@@ -178,6 +179,7 @@ def read_precursor_table(
         raise ValueError(f"Argument reader_type must be one of {''.join(available_reader())}, not {reader_type}")
 
     reader_kwargs = {} if reader_kwargs is None else reader_kwargs
+    kwargs = {} if kwargs is None else kwargs
 
     factory = AnnDataFactory.from_files(
         path,
