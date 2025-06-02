@@ -23,8 +23,8 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-  "alphabase @ git+https://github.com/MannLabs/alphabase.git@7faa365df569bffd2d10b7ab45efdfa90fcce733",
-  "anndata",                                                                                            # TODO Remove when this is fixed https://github.com/zarr-developers/zarr-python/issues/2963
+  "alphabase",
+  "anndata",          # TODO Remove when this is fixed https://github.com/zarr-developers/zarr-python/issues/2963
   "openslide-bin",
   "openslide-python",
   "py-lmd==1.3.2",
