@@ -204,12 +204,24 @@ def test_parse_df_real_data(
 @pytest.mark.parametrize(
     ("path", "reader_type", "func_kwargs", "shape"),
     [
+        # Read protein groups
         ("./data/omics/alphadia/alphadia.precursors.tsv", "alphadia", {}, (3, 7497)),
         (
             "./data/omics/diann/diann_report.tsv",
             "diann",
             {"intensity_column": "PG.Normalised", "protein_id_column": "Protein.Group", "raw_name_column": "File.Name"},
             (3, 380),
+        ),
+        # Get precursor intensities
+        (
+            "./data/omics/diann/diann_report.tsv",
+            "diann",
+            {
+                "intensity_column": "Precursor.Normalised",
+                "protein_id_column": "Precursor.Id",
+                "raw_name_column": "File.Name",
+            },
+            (3, 1088),
         ),
     ],
 )
