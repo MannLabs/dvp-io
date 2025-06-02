@@ -20,17 +20,9 @@ and the [FAQs][].
 
 You need to have Python 3.10 or newer installed on your system.
 
-<!--
-1) Install the latest release of `dvp-io` from [PyPI][]:
-
-```bash
-pip install dvp-io
-```
--->
-
 ### Users
 
-Install the latest development version:
+Install the latest release of `dvp-io` from [PyPI][https://pypi.org/project/dvp-io]:
 
 ```bash
 # Optional: Create a suitable conda envionemnt
@@ -38,7 +30,7 @@ conda create -n dvpio python=3.11 -y  && conda activate dvpio
 ```
 
 ```bash
-pip install git+https://github.com/lucas-diedrich/dvp-io.git@main
+pip install dvp-io
 ```
 
 #### C++ dependencies
@@ -63,6 +55,26 @@ Windows users require the **Microsoft Visual C++ (MSVC) compiler**. Before creat
 3. Complete the installation and restart your system if necessary.
 
 After installation, proceed with the dvp-io installation steps above.
+
+### Developers
+
+Install the latest development version
+
+In your shell, go to your favorite directory and clone the repository. Then, make an editable install
+
+```shell
+# Optional create environment
+# conda install -n dvpio-dev python=3.11 && conda activate dvpio-dev
+
+# Clone
+git clone https://github.com/lucas-diedrich/dvp-io.git
+
+# Go into the directory
+cd dvp-io
+
+# Make editable, local installation, including development dependencies
+pip install -e ".[dev,doc]"
+```
 
 ## Release notes
 
