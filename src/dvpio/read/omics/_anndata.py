@@ -54,6 +54,8 @@ class AnnDataFactory:
 
         """
         # Create pivot table: raw names x proteins with intensity values
+        # Note that precursor reports contain redundant information in case of the protein group intensity
+        # (each precursor gets assigned the same PG intensity). We can therefore pick the first occurence
         pivot_df = pd.pivot_table(
             self._psm_df,
             index=PsmDfCols.RAW_NAME,
