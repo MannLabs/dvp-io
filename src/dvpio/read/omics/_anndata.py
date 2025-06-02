@@ -13,6 +13,7 @@ from alphabase.psm_reader import PSMReaderBase
 from alphabase.psm_reader.keys import PsmDfCols
 
 
+# TODO Remove when alphatools goes public
 class AnnDataFactory:
     """Factory class to convert AlphaBase PSM DataFrames to AnnData format."""
 
