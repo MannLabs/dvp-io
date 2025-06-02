@@ -110,7 +110,7 @@ def read_precursor_table(
     protein_id_column: str | None = None,
     raw_name_column: str | None = None,
     reader_kwargs: Mapping[str, Any] | None = None,
-    **kwargs: Mapping[str, Any] | None,
+    **kwargs: Any,
 ) -> ad.AnnData:
     """Parse proteomics precursor reports to the :class:`anndata.AnnData` format
 
@@ -179,7 +179,6 @@ def read_precursor_table(
         raise ValueError(f"Argument reader_type must be one of {''.join(available_reader())}, not {reader_type}")
 
     reader_kwargs = {} if reader_kwargs is None else reader_kwargs
-    kwargs = {} if kwargs is None else kwargs
 
     factory = AnnDataFactory.from_files(
         path,
