@@ -80,6 +80,7 @@ def _get_img(
     width: int,
     height: int,
     channel: int = 0,
+    scene: int | None = None,
     timepoint: int = 0,
     z_stack: int = 0,
 ) -> NDArray:
@@ -95,6 +96,8 @@ def _get_img(
         Size of tile in x direction (width) and y direction (height)
     channel
         Channel of image
+    scene
+        Scene index (None for all scenes)
     timepoint
         Timepoint in image series (0 if only one timepoint exists)
     z_stack
@@ -116,15 +119,23 @@ def _get_img(
     # M is used in order to enumerate all tiles in a plane i.e all planes in a given plane shall have an M-index,
     # M-index starts counting from zero to the number of tiles on that plane
     # S: Tag-like- tags images of similar interest
-    img = slide.read(
-        plane={"C": channel, "T": timepoint, "Z": z_stack},
-        roi=(
+    
+    # Build read parameters
+    read_kwargs = {
+        "plane": {"C": channel, "T": timepoint, "Z": z_stack},
+        "roi": (
             x0,  # xmin (x)
             y0,  # ymin (y)
             width,  # width (w)
             height,  # height (h)
         ),
-    )
+    }
+    
+    # Add scene parameter if specified
+    if scene is not None:
+        read_kwargs["scene"] = scene
+    
+    img = slide.read(**read_kwargs)
 
     # Return image (y, x, c) -> (c, y, x) format
     return np.array(img).transpose(2, 0, 1)
@@ -134,6 +145,7 @@ def read_czi(
     path: str,
     chunk_size: tuple[int, int] = (10000, 10000),
     channels: int | list[int] | None = None,
+    scene: int | None = None,
     timepoint: int = 0,
     z_stack: int = 0,
     **kwargs: Mapping[str, Any],
@@ -151,10 +163,13 @@ def read_czi(
     channels
         Defaults to `None` which automatically selects all available channels. Passing the numeric index of a single or multiple channels
         subsets the data to the specified channels.
+    scene
+        Index of the scene to read. If `None` (default), all scenes will be considered.
+        If specified, only subblocks of the specified scene contribute to the parsed image.
     timepoint
         If timeseries, select the given index (defaults to 0 [first])
     z_stack
-        If z_stack, selects the the given z-plane (defaults to 0 [first])
+        If z_stack, selects the given z-plane (defaults to 0 [first])
     kwargs
         Keyword arguments passed to :meth:`spatialdata.models.Image2DModel.parse`
 
@@ -168,9 +183,16 @@ def read_czi(
     # Parse metadata
     czi_metadata = CZIImageMetadata(metadata=czidoc_r.metadata)
 
-    # Chunked loading
-    # Read dimensions
-    xmin, ymin, width, height = czidoc_r.total_bounding_rectangle
+    # Determine bounding rectangle based on scene selection
+    if scene is not None:
+        # Get scene-specific bounding rectangle
+        scenes_rect = czidoc_r.scenes_bounding_rectangle
+        if scene not in scenes_rect:
+            raise ValueError(f"Scene {scene} not found in CZI file. Available scenes: {list(scenes_rect.keys())}")
+        xmin, ymin, width, height = scenes_rect[scene]
+    else:
+        # Use total bounding rectangle for all scenes
+        xmin, ymin, width, height = czidoc_r.total_bounding_rectangle
 
     # Define coordinates for chunkwise loading of the slide
     chunk_coords = _compute_chunks(dimensions=(width, height), chunk_size=chunk_size, min_coordinates=(xmin, ymin))
@@ -201,6 +223,7 @@ def read_czi(
             n_channel=dimensionality,
             dtype=pixel_spec.dtype,
             channel=channel,
+            scene=scene,
             timepoint=timepoint,
             z_stack=z_stack,
         )
