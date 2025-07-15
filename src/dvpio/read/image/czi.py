@@ -118,24 +118,9 @@ def _get_img(
     # T: Time point
     # M is used in order to enumerate all tiles in a plane i.e all planes in a given plane shall have an M-index,
     # M-index starts counting from zero to the number of tiles on that plane
-    # S: Tag-like- tags images of similar interest
-    
-    # Build read parameters
-    read_kwargs = {
-        "plane": {"C": channel, "T": timepoint, "Z": z_stack},
-        "roi": (
-            x0,  # xmin (x)
-            y0,  # ymin (y)
-            width,  # width (w)
-            height,  # height (h)
-        ),
-    }
-    
+    # S: Scence: Tag-like- tags images of similar interest, default None considers all scenes
     # Add scene parameter if specified
-    if scene is not None:
-        read_kwargs["scene"] = scene
-    
-    img = slide.read(**read_kwargs)
+    img = slide.read(plane={"C": channel, "T": timepoint, "Z": z_stack}, roi=(x0, y0, width, height), scene=scene)
 
     # Return image (y, x, c) -> (c, y, x) format
     return np.array(img).transpose(2, 0, 1)
