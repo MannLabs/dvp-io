@@ -186,7 +186,7 @@ def read_czi(
     # Pass a list of indices list[int] or a single index
     # Here, we assure that the channels variable stores list[int]
     if channels is None:
-        channels = czi_metadata.channel_id
+        channels: int | list[int] = czi_metadata.channel_id
     if isinstance(channels, int):
         channels = [channels]
 
