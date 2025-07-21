@@ -14,20 +14,19 @@ maintainers = [
 authors = [
   { name = "Lucas Diedrich" },
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.13"
 classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
   "alphabase",
   "anndata",
   "openslide-bin",
   "openslide-python",
-  "py-lmd==1.3.2",
+  "py-lmd>=1.3.2",
   "pydantic",
   "pylibczirw",
   "spatialdata>=0.4",
