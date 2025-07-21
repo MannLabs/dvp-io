@@ -118,7 +118,7 @@ def _get_img(
     # T: Time point
     # M is used in order to enumerate all tiles in a plane i.e all planes in a given plane shall have an M-index,
     # M-index starts counting from zero to the number of tiles on that plane
-    # S: Scence: Tag-like- tags images of similar interest, default None considers all scenes
+    # S: Scene: Tag-like- tags images of similar interest, default None considers all scenes
     # Add scene parameter if specified
     img = slide.read(plane={"C": channel, "T": timepoint, "Z": z_stack}, roi=(x0, y0, width, height), scene=scene)
 
@@ -224,15 +224,15 @@ def read_czi(
     # Pass a list of indices list[int] or a single index
     # Here, we assure that the channels variable stores list[int]
     if channels is None:
-        channels: int | list[int] = czi_metadata.channel_id
+        channels = czi_metadata.channel_id
     if isinstance(channels, int):
         channels = [channels]
 
-    pixel_spec, channel_dim = _parse_pixel_type(slide=czidoc_r, channels=channels)
+    pixel_spec, channel_dim = _parse_pixel_type(slide=czidoc_r, channels=channels)  # type: ignore # channels argument is actually typed. At this point, it is assured that it is of type list[int]
 
     # For multiple indices, validate that all channels are grayscale
     # Stacking RGB images might lead to unexpected behaviour
-    if (len(channels) > 1) and (not all(c == 1 for c in channel_dim)):
+    if (len(channels) > 1) and (not all(c == 1 for c in channel_dim)):  # type: ignore # channels argument is actually typed. At this point, it is assured that it is of type list[int]
         raise ValueError(
             f"""Not all channels in CZI file are one dimensional (dimensionalities: {channel_dim}).
             Currently, only 1D channels are supported for multi-channel images"""
@@ -250,7 +250,7 @@ def read_czi(
             timepoint=timepoint,
             z_stack=z_stack,
         )
-        for channel, dimensionality in zip(channels, channel_dim, strict=True)
+        for channel, dimensionality in zip(channels, channel_dim, strict=True)  # type: ignore
     ]
 
     array = _assemble(chunks)
