@@ -4,7 +4,7 @@ requires = [ "hatchling" ]
 
 [project]
 name = "dvp-io"
-version = "0.2.2"
+version = "0.3.0"
 description = "Read and write funtionalities from and to spatialdata for deep vizual proteomics"
 readme = "README.md"
 license = { file = "LICENSE" }
