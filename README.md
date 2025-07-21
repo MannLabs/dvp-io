@@ -22,7 +22,7 @@ You need to have Python 3.10 or newer installed on your system.
 
 ### Users
 
-Install the latest release of `dvp-io` from [PyPI][https://pypi.org/project/dvp-io]:
+Install the latest release of `dvp-io` from [PyPI](https://pypi.org/project/dvp-io):
 
 ```bash
 # Optional: Create a suitable conda envionemnt
