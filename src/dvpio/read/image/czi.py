@@ -174,7 +174,7 @@ def read_czi(
 
         czi_path = ...
         read_czi(czi_path)
-        > <xarray.DataArray 'image' (c: 2, y: 1440, x: 21718)> Size: 125MB
+        # > <xarray.DataArray 'image' (c: 2, y: 1440, x: 21718)> Size: 125MB
 
     Note that you can also select subsets of the data that you would like to read.
     Currently, the function supports reading specific channel indices, scenes (regions of interest),
@@ -185,7 +185,7 @@ def read_czi(
         czi_path_multi_scene = ...
         # Only read the first scene
         read_czi(czi_path_multi_scene, scene=0)
-        > <xarray.DataArray 'image' (c: 2, y: 1416, x: 1960)> Size: 11MB
+        # > <xarray.DataArray 'image' (c: 2, y: 1416, x: 1960)> Size: 11MB
 
     You can pass additional keyword arguments to :meth:`spatialdata.models.Image2DModel.parse`. For example,
     to generate a pyramidal image for overall faster data access, pass the `scale_factors` argument
@@ -194,11 +194,11 @@ def read_czi(
 
         # Create a pyramidal data representation
         read_czi(czi_path_multi_scene, scale_factors=[2, 2, 2])
-        > <xarray.DataTree>
-          Group: /
-          ├── Group: /scale0
-          ├── Group: /scale1
-          └── Group: /scale2
+        # > <xarray.DataTree>
+        #   Group: /
+        #   |-- Group: /scale0
+        #   |-- Group: /scale1
+        #   `-- Group: /scale2
     """
     # Read slide
     czidoc_r = pyczi.CziReader(path)
