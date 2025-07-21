@@ -194,11 +194,14 @@ def read_czi(
 
         # Create a pyramidal data representation
         read_czi(czi_path_multi_scene, scale_factors=[2, 2, 2])
+
+    .. code-block:: text
+
         > <xarray.DataTree>
-          Group: /
-          ├── Group: /scale0
-          ├── Group: /scale1
-          └── Group: /scale2
+        Group: /
+        ├── Group: /scale0
+        ├── Group: /scale1
+        └── Group: /scale2
     """
     # Read slide
     czidoc_r = pyczi.CziReader(path)
