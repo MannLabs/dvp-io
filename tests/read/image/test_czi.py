@@ -67,3 +67,30 @@ def test_read_czi_multichannel(
 
     assert img_test.shape == (result_dim, total_height, total_width)
     assert (img_test.transpose("y", "x", "c") == img_ref).all()
+
+
+@pytest.mark.parametrize(
+    ("dataset", "scene", "result_shape"),
+    [
+        ("./data/zeiss/zeiss/zeiss_multi-scenes.czi", None, (2, 1440, 21718)),
+        ("./data/zeiss/zeiss/zeiss_multi-scenes.czi", 0, (2, 1416, 1960)),
+        ("./data/zeiss/zeiss/zeiss_multi-scenes.czi", 1, (2, 1416, 1960)),
+    ],
+)
+def test_read_czi_scene(dataset: str, scene: int | None, result_shape: tuple[int]) -> None:
+    """Test to read a single scene from a multi-scene czi image"""
+    img_test = read_czi(dataset, scene=scene)
+
+    assert img_test.shape == result_shape
+
+
+@pytest.mark.parametrize(
+    ("dataset", "scene"),
+    [
+        ("./data/zeiss/zeiss/zeiss_multi-scenes.czi", 2),
+    ],
+)
+def test_read_czi_scene_error(dataset: str, scene: int | None) -> None:
+    """Test to read a non-existent scene from a multi-scene czi image"""
+    with pytest.raises(ValueError, match="not found in CZI file"):
+        read_czi(dataset, scene=scene)

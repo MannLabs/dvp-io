@@ -80,6 +80,7 @@ def _get_img(
     width: int,
     height: int,
     channel: int = 0,
+    scene: int | None = None,
     timepoint: int = 0,
     z_stack: int = 0,
 ) -> NDArray:
@@ -95,6 +96,8 @@ def _get_img(
         Size of tile in x direction (width) and y direction (height)
     channel
         Channel of image
+    scene
+        Scene index (None for all scenes)
     timepoint
         Timepoint in image series (0 if only one timepoint exists)
     z_stack
@@ -115,16 +118,9 @@ def _get_img(
     # T: Time point
     # M is used in order to enumerate all tiles in a plane i.e all planes in a given plane shall have an M-index,
     # M-index starts counting from zero to the number of tiles on that plane
-    # S: Tag-like- tags images of similar interest
-    img = slide.read(
-        plane={"C": channel, "T": timepoint, "Z": z_stack},
-        roi=(
-            x0,  # xmin (x)
-            y0,  # ymin (y)
-            width,  # width (w)
-            height,  # height (h)
-        ),
-    )
+    # S: Scene: Tag-like- tags images of similar interest, default None considers all scenes
+    # Add scene parameter if specified
+    img = slide.read(plane={"C": channel, "T": timepoint, "Z": z_stack}, roi=(x0, y0, width, height), scene=scene)
 
     # Return image (y, x, c) -> (c, y, x) format
     return np.array(img).transpose(2, 0, 1)
@@ -134,6 +130,7 @@ def read_czi(
     path: str,
     chunk_size: tuple[int, int] = (10000, 10000),
     channels: int | list[int] | None = None,
+    scene: int | None = None,
     timepoint: int = 0,
     z_stack: int = 0,
     **kwargs: Mapping[str, Any],
@@ -151,16 +148,57 @@ def read_czi(
     channels
         Defaults to `None` which automatically selects all available channels. Passing the numeric index of a single or multiple channels
         subsets the data to the specified channels.
+    scene
+        Index of the scene to read. If `None` (default), all scenes will be considered.
+        If specified, only subblocks of the specified scene contribute to the parsed image.
     timepoint
         If timeseries, select the given index (defaults to 0 [first])
     z_stack
-        If z_stack, selects the the given z-plane (defaults to 0 [first])
+        If z_stack, selects the given z-plane (defaults to 0 [first])
     kwargs
         Keyword arguments passed to :meth:`spatialdata.models.Image2DModel.parse`
 
     Returns
     -------
     :class:`spatialdata.models.Image2DModel`
+
+
+    Example
+    -------
+
+    We can read czi images with a very simple API
+
+    .. code-block:: python
+
+        from dvpio.read.image import read_czi
+
+        czi_path = ...
+        read_czi(czi_path)
+        > <xarray.DataArray 'image' (c: 2, y: 1440, x: 21718)> Size: 125MB
+
+    Note that you can also select subsets of the data that you would like to read.
+    Currently, the function supports reading specific channel indices, scenes (regions of interest),
+    timepoint indices, or z-stack indices. This might significantly reduce the storage demands of your data
+
+    .. code-block:: python
+
+        czi_path_multi_scene = ...
+        # Only read the first scene
+        read_czi(czi_path_multi_scene, scene=0)
+        > <xarray.DataArray 'image' (c: 2, y: 1416, x: 1960)> Size: 11MB
+
+    You can pass additional keyword arguments to :meth:`spatialdata.models.Image2DModel.parse`. For example,
+    to generate a pyramidal image for overall faster data access, pass the `scale_factors` argument
+
+    .. code-block:: python
+
+        # Create a pyramidal data representation
+        read_czi(czi_path_multi_scene, scale_factors=[2, 2, 2])
+        > <xarray.DataTree>
+          Group: /
+          ├── Group: /scale0
+          ├── Group: /scale1
+          └── Group: /scale2
     """
     # Read slide
     czidoc_r = pyczi.CziReader(path)
@@ -168,9 +206,16 @@ def read_czi(
     # Parse metadata
     czi_metadata = CZIImageMetadata(metadata=czidoc_r.metadata)
 
-    # Chunked loading
-    # Read dimensions
-    xmin, ymin, width, height = czidoc_r.total_bounding_rectangle
+    # Determine bounding rectangle based on scene selection
+    if scene is not None:
+        # Get scene-specific bounding rectangle
+        scenes_rect = czidoc_r.scenes_bounding_rectangle
+        if scene not in scenes_rect:
+            raise ValueError(f"Scene {scene} not found in CZI file. Available scenes: {list(scenes_rect.keys())}")
+        xmin, ymin, width, height = scenes_rect[scene]
+    else:
+        # Use total bounding rectangle for all scenes
+        xmin, ymin, width, height = czidoc_r.total_bounding_rectangle
 
     # Define coordinates for chunkwise loading of the slide
     chunk_coords = _compute_chunks(dimensions=(width, height), chunk_size=chunk_size, min_coordinates=(xmin, ymin))
@@ -183,11 +228,11 @@ def read_czi(
     if isinstance(channels, int):
         channels = [channels]
 
-    pixel_spec, channel_dim = _parse_pixel_type(slide=czidoc_r, channels=channels)
+    pixel_spec, channel_dim = _parse_pixel_type(slide=czidoc_r, channels=channels)  # type: ignore # channels argument is actually typed. At this point, it is assured that it is of type list[int]
 
     # For multiple indices, validate that all channels are grayscale
     # Stacking RGB images might lead to unexpected behaviour
-    if (len(channels) > 1) and (not all(c == 1 for c in channel_dim)):
+    if (len(channels) > 1) and (not all(c == 1 for c in channel_dim)):  # type: ignore # channels argument is actually typed. At this point, it is assured that it is of type list[int]
         raise ValueError(
             f"""Not all channels in CZI file are one dimensional (dimensionalities: {channel_dim}).
             Currently, only 1D channels are supported for multi-channel images"""
@@ -201,10 +246,11 @@ def read_czi(
             n_channel=dimensionality,
             dtype=pixel_spec.dtype,
             channel=channel,
+            scene=scene,
             timepoint=timepoint,
             z_stack=z_stack,
         )
-        for channel, dimensionality in zip(channels, channel_dim, strict=True)
+        for channel, dimensionality in zip(channels, channel_dim, strict=True)  # type: ignore
     ]
 
     array = _assemble(chunks)
