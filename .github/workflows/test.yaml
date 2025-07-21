@@ -34,8 +34,6 @@ jobs:
           - os: ubuntu-latest
             python: "3.12"
           - os: ubuntu-latest
-            python: "3.13"
-          - os: ubuntu-latest
             python: "3.12"
             pip-flags: "--pre"
             name: PRE-RELEASE DEPENDENCIES
