@@ -29,7 +29,7 @@ dependencies = [
   "py-lmd>=1.3.2",
   "pydantic",
   "pylibczirw",
-  "spatialdata>=0.4",
+  "spatialdata",
 ]
 optional-dependencies.dev = [
   "pre-commit",
