@@ -313,6 +313,8 @@ def read_pg_table(
     df = reader.import_file(path)
 
     # Observations x Features
-    adata = ad.AnnData(X=df.values.T, var=df.index.to_frame(), obs=df.columns.to_frame(name=SAMPLE_ID_NAME))
+    adata = ad.AnnData(
+        X=df.values.T, var=df.index.to_frame(index=False), obs=df.columns.to_frame(index=False, name=SAMPLE_ID_NAME)
+    )
 
     return TableModel.parse(adata, **kwargs)
