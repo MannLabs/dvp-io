@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, Literal
 
 import anndata as ad
 import pandas as pd
@@ -14,9 +14,21 @@ from ._anndata import AnnDataFactory
 SAMPLE_ID_NAME: str = "sample_id"
 
 
-def available_reader() -> list[str]:
-    """Get a list of all available readers, as provided by alphabase"""
-    return sorted(psm_reader_provider.reader_dict.keys())
+def available_reader(reader_type: Literal["psm_reader", "pg_reader"] = "psm_reader") -> list[str]:
+    """Get a list of all available readers, as provided by alphabase
+
+    Parameters
+    ----------
+    reader_type
+        Whether to return readers for peptice spectrum matches (`psm_reader`) or protein group
+        intensities (`pg_reader`)
+    """
+    if reader_type == "psm_reader":
+        return sorted(psm_reader_provider.reader_dict.keys())
+    elif reader_type == "pg_reader":
+        return sorted(pg_reader_provider.reader_dict.keys())
+    else:
+        raise KeyError(f"Pass either `psm_reader` or `pg_reader`, not {reader_type}")
 
 
 def _parse_pandas_index(index: pd.Index | pd.MultiIndex, set_index: str | None = None) -> pd.DataFrame:
