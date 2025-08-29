@@ -3,12 +3,15 @@ from typing import Any
 
 import anndata as ad
 import pandas as pd
+from alphabase.pg_reader.pg_reader import pg_reader_provider
 from alphabase.psm_reader.psm_reader import psm_reader_provider
 from spatialdata.models import TableModel
 
-from dvpio._utils import experimental_docs, experimental_log
+from dvpio._utils import deprecated_docs, deprecated_log, experimental_docs, experimental_log
 
 from ._anndata import AnnDataFactory
+
+SAMPLE_ID_NAME: str = "sample_id"
 
 
 def available_reader() -> list[str]:
@@ -43,6 +46,10 @@ def _parse_pandas_index(index: pd.Index | pd.MultiIndex, set_index: str | None =
     return df
 
 
+@deprecated_log(
+    "This function is deprecated and will be removed in the next minor release. Use `dvpio.read.omics.read_pg_table` instead."
+)
+@deprecated_docs
 def parse_df(
     df: pd.DataFrame, obs_index: str | None = None, var_index: str | None = None, **table_kwargs
 ) -> ad.AnnData:
@@ -190,5 +197,110 @@ def read_precursor_table(
     )
 
     adata = factory.create_anndata()
+
+    return TableModel.parse(adata, **kwargs)
+
+
+def read_pg_table(
+    path: str,
+    search_engine: str,
+    *,
+    column_mapping: dict[str, Any] | None = None,
+    measurement_regex: str | None = None,
+    **kwargs: Any,
+) -> TableModel:
+    """Read protein group table to the :class:`anndata.AnnData` format
+
+    Read (features x observations) protein group matrices from proteomics search engines into
+    the :class:`anndata.AnnData` format (observations x features). Per default,
+    raw intensities are returned, which can be modified dependening on the search engine.
+
+    Supported formats include
+
+        - AlphaDIA (`alphadia`)
+        - AlphaPept (`alphapept`, csv+hdf)
+        - DIANN (`diann`)
+        - MaxQuant (`maxquant`)
+        - Spectronaut (`spectronaut`, parquet + tsv)
+
+    see :func:`dvpio.read.omics.available_reader` for a complete list.
+
+    See `alphabase.pg_reader` module for more information
+
+    Parameters
+    ----------
+    path
+        Path to protein group matrix
+    reader_type
+        Name of engine output, pass the method name of the corresponding reader. You can
+        list all available readers with the :func:`dvpio.read.omics.available_reader` helper function
+    column_mapping
+        Mapping of additional columns in protein group table to a unified name, defaults to standard colum mapping in alphabase.
+        Passed to :meth:`alphabase.pg_reader.pg_reader_provider.get_reader`.
+        Expected format is
+
+        .. code-block:: python
+            {"new_column_name": "column_name_pg_matrix", ...}
+
+    measurement_regex
+        Regular expression that subsets feature columns to the correct quantification type. Only relevant if PG matrix contains multiple
+        quantification methods per sample. Defaults to raw intensities. Options depend on the reader
+            - None (default): Raw intensities
+            - Reader-specific pre-configured names (e.g. `lfq`): Available intensities in the report (e.g. LFQ)
+            - A valid regular expression
+
+        Use classmethod `get_preconfigured_regex` for the respective reader in `alphabase`
+
+    kwargs
+        Passed to :meth:`spatialdata.models.TableModel.parse`
+
+    Returns
+    -------
+    :class:`anndata.AnnData`
+        AnnData object that can be further processed with scVerse packages.
+
+        - adata.X
+            Stores values of the intensity columns in the report of shape observations x features
+        - adata.obs
+            Stores observations with protein group matrix sample names as `sample_id` column.
+        - adata.var
+            Stores features and feature metadata.
+
+    Example
+    -------
+
+    .. code-block:: python
+
+        from dvpio.io.read.omics import read_report
+
+        alphadia_path = ...
+        adata = read_pg_table(alphadia_path, reader_type="alphadia")
+
+        maxquant_path = ...
+        # Read LFQ values from MaxQuant report
+        adata = read_pg_table(maxquant_path, reader_type="maxquant", measurement_regex="lfq")
+
+    Get available regular expressions
+
+    .. code-block:: python
+
+        from alphabase.pg_reader import pg_reader_provider
+
+        alphapept_reader = pg_reader_provider.get_reader("alphapept")
+        alphapept_reader.get_preconfigured_regex()
+        > {'raw': '^.*(?<!_LFQ)$', 'lfq': '_LFQ$'}
+
+    See Also
+    --------
+    - `alphabase.pg_reader` module
+    """
+    reader = pg_reader_provider.get_reader(
+        search_engine, column_mapping=column_mapping, measurement_regex=measurement_regex
+    )
+    # Features x Observations
+    df = reader.import_file(path)
+
+    # Observations x Features
+    adata = ad.AnnData(X=df.values.T, var=df.index.to_frame(), obs=df.columns.to_frame(name=SAMPLE_ID_NAME))
 
     return TableModel.parse(adata, **kwargs)
