@@ -48,12 +48,11 @@ def test_write_lmd(
 
 
 @pytest.mark.parametrize(
-    ["annotation_name_column", "annotation_well_column"],
+    ["annotation_name_column", "annotation_well_column", "custom_attribute_columns"],
     [
-        (None, None),
-        ("name", None),
-        (None, "well"),
-        ("name", "well"),
+        ("name", "well", "custom_A"),
+        ("name", "well", ["custom_A", "custom_B"]),
+        ("name", "well", None),
     ],
 )
 def test_write_custom_attributes(
@@ -61,12 +60,22 @@ def test_write_custom_attributes(
     dummy_data,
     annotation_name_column: str | None,
     annotation_well_column: str | None,
+    custom_attribute_columns: str | list[str] | None,
 ) -> None:
     path = tmp_path / "test.xml"
     gdf, calibration_points = dummy_data
-
     gdf = gdf.copy()
-    gdf["custom_column"] = "CUSTOM_VALUE"
+
+    if custom_attribute_columns is None:
+        custom_attribute_columns_list = []
+    else:
+        if isinstance(custom_attribute_columns, str):
+            custom_attribute_columns_list = [custom_attribute_columns]
+        else:
+            custom_attribute_columns_list = custom_attribute_columns
+
+    for col in custom_attribute_columns_list:
+        gdf[col] = "CUSTOM_VALUE"
 
     write_lmd(
         path=path,
@@ -74,8 +83,15 @@ def test_write_custom_attributes(
         calibration_points=calibration_points,
         annotation_name_column=annotation_name_column,
         annotation_well_column=annotation_well_column,
+        custom_attribute_columns=custom_attribute_columns,
         overwrite=True,
     )
+
+    collection = pylmd.Collection()
+    collection.load(path)
+
+    assert all(col in gdf for col in custom_attribute_columns_list)
+    assert all((gdf[col] == "CUSTOM_VALUE").all() for col in custom_attribute_columns_list)
 
 
 @pytest.mark.parametrize(
