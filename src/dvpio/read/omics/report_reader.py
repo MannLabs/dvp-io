@@ -252,11 +252,13 @@ def read_pg_table(
         Expected format is
 
         .. code-block:: python
+
             {"new_column_name": "column_name_pg_matrix", ...}
 
     measurement_regex
         Regular expression that subsets feature columns to the correct quantification type. Only relevant if PG matrix contains multiple
         quantification methods per sample. Defaults to raw intensities. Options depend on the reader
+
             - None (default): Raw intensities
             - Reader-specific pre-configured names (e.g. `lfq`): Available intensities in the report (e.g. LFQ)
             - A valid regular expression
@@ -304,7 +306,7 @@ def read_pg_table(
 
     See Also
     --------
-    - `alphabase.pg_reader` module
+    :mod:`alphabase.pg_reader`
     """
     reader = pg_reader_provider.get_reader(
         search_engine, column_mapping=column_mapping, measurement_regex=measurement_regex
