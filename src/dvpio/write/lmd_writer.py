@@ -61,7 +61,8 @@ def write_lmd(
 
         annotation = ShapesModel.parse(
             gpd.GeoDataFrame(
-                data={"name": ["001"], "well": ["A1"]}, geometry=[shapely.Polygon([[0, 0], [0, 1], [1, 0], [0, 0]])]
+                data={"name": ["001"], "well": ["A1"], "area": [0.8], "cell_type": ["T cell"]},
+                geometry=[shapely.Polygon([[0, 0], [0, 1], [1, 0], [0, 0]])],
             )
         )
 
@@ -75,6 +76,7 @@ def write_lmd(
             calibration_points=calibration_points,
             annotation_name_column=annotation_name_column,
             annotation_well_column=annotation_well_column,
+            custom_attribute_columns=["area", "cell_type"],
             overwrite=True,
         )
 
