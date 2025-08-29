@@ -1,10 +1,11 @@
 import numpy as np
 import pandas as pd
 import pytest
+from alphabase.pg_reader.pg_reader import pg_reader_provider
 from alphabase.psm_reader.psm_reader import psm_reader_provider
 from spatialdata.models import TableModel
 
-from dvpio.read.omics import available_reader, parse_df, read_precursor_table
+from dvpio.read.omics import available_reader, parse_df, read_pg_table, read_precursor_table
 from dvpio.read.omics.report_reader import _parse_pandas_index
 
 
@@ -57,10 +58,14 @@ def alphadia_pg_report() -> pd.DataFrame:
     return df.T
 
 
-def test_available_reader() -> None:
-    list_of_available_reader = available_reader()
+@pytest.mark.parametrize(("reader_type",), [("psm_reader",), ("pg_reader",)])
+def test_available_reader(reader_type: str) -> None:
+    list_of_available_reader = available_reader(reader_type)
 
-    assert len(list_of_available_reader) == len(psm_reader_provider.reader_dict)
+    if reader_type == "psm_reader":
+        assert len(list_of_available_reader) == len(psm_reader_provider.reader_dict)
+    elif reader_type == "pg_reader":
+        assert len(list_of_available_reader) == len(pg_reader_provider.reader_dict)
     assert "alphadia" in list_of_available_reader
 
 
@@ -228,3 +233,21 @@ def test_parse_df_real_data(
 def test_read_precursor_table(path: str, reader_type: str, func_kwargs: dict, shape: tuple[int]) -> None:
     adata = read_precursor_table(path, reader_type=reader_type, **func_kwargs)
     assert adata.shape == shape
+
+
+@pytest.mark.parametrize(
+    ("path", "reader_type", "func_kwargs", "shape", "var_shape"),
+    [
+        ("./data/omics/alphadia/alphadia.protein-group.tsv", "alphadia", {}, (3, 7497), (7497, 1)),
+        ("./data/omics/alphapept/alphapept.protein-group.csv", "alphapept", {}, (4, 3781), (3781, 5)),
+    ],
+)
+def test_read_pg_table(
+    path: str, reader_type: str, func_kwargs: dict, shape: tuple[int], var_shape: tuple[int]
+) -> None:
+    """Test read pg table with real data"""
+
+    adata = read_pg_table(path, search_engine=reader_type, **func_kwargs)
+
+    assert adata.shape == shape
+    assert adata.var.shape == var_shape
