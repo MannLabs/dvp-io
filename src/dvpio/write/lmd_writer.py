@@ -15,6 +15,7 @@ def write_lmd(
     affine_transformation: np.ndarray | None = None,
     annotation_name_column: str | None = None,
     annotation_well_column: str | None = None,
+    custom_attribute_columns: str | list[str] | None = None,
     overwrite: bool = True,
 ) -> None:
     """Write cell annotations to Leica-compatible .xml file
@@ -39,6 +40,10 @@ def write_lmd(
         Optional. Provide column that specifies a well in the `annotation`
         :class:`spatialdata.models.ShapesModel` object. Will be stored in as the `CapID` attribute of
         the Shape.
+    custom_attribute_columns
+        Columns in `annotation` that should be exported as custom tags in the `xml` file. The column name
+        will become the tag name in the respective shape element. Users must assure themselves that they
+        pass valid arguments.
     overwrite
         Default `True`. Whether to overwrite existing data.
 
@@ -56,7 +61,8 @@ def write_lmd(
 
         annotation = ShapesModel.parse(
             gpd.GeoDataFrame(
-                data={"name": ["001"], "well": ["A1"]}, geometry=[shapely.Polygon([[0, 0], [0, 1], [1, 0], [0, 0]])]
+                data={"name": ["001"], "well": ["A1"], "area": [0.8], "cell_type": ["T cell"]},
+                geometry=[shapely.Polygon([[0, 0], [0, 1], [1, 0], [0, 0]])],
             )
         )
 
@@ -70,6 +76,7 @@ def write_lmd(
             calibration_points=calibration_points,
             annotation_name_column=annotation_name_column,
             annotation_well_column=annotation_well_column,
+            custom_attribute_columns=["area", "cell_type"],
             overwrite=True,
         )
 
@@ -115,6 +122,7 @@ def write_lmd(
         name_column=annotation_name_column,
         well_column=annotation_well_column,
         calibration_points=calibration_points_transformed,
+        custom_attribute_columns=custom_attribute_columns,
     )
 
     # Save
