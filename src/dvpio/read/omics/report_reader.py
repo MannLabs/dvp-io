@@ -219,6 +219,7 @@ def read_pg_table(
     *,
     column_mapping: dict[str, Any] | None = None,
     measurement_regex: str | None = None,
+    reader_provider_kwargs: dict | None = None,
     **kwargs: Any,
 ) -> TableModel:
     """Read protein group table to the :class:`anndata.AnnData` format
@@ -264,7 +265,8 @@ def read_pg_table(
             - A valid regular expression
 
         Use classmethod `get_preconfigured_regex` for the respective reader in `alphabase`
-
+    reader_provider_kwargs
+        Passed to :meth:`spatialdata.models.TableModel.parse`
     kwargs
         Passed to :meth:`spatialdata.models.TableModel.parse`
 
@@ -308,9 +310,15 @@ def read_pg_table(
     --------
     :mod:`alphabase.pg_reader`
     """
-    reader = pg_reader_provider.get_reader(
-        search_engine, column_mapping=column_mapping, measurement_regex=measurement_regex
-    )
+    # Build reader_provider_kwargs
+    # This assures that the default values of the readers are considered (e.g. if `column_mapping="raw"`)
+    reader_provider_kwargs = {} if reader_provider_kwargs is None else reader_provider_kwargs
+    if column_mapping is not None:
+        reader_provider_kwargs["column_mapping"] = column_mapping
+    if measurement_regex is not None:
+        reader_provider_kwargs["measurement_regex"] = measurement_regex
+
+    reader = pg_reader_provider.get_reader(search_engine, **reader_provider_kwargs)
     # Features x Observations
     df = reader.import_file(path)
 
