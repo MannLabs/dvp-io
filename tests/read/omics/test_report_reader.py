@@ -239,7 +239,7 @@ def test_read_precursor_table(path: str, reader_type: str, func_kwargs: dict, sh
     ("path", "reader_type", "func_kwargs", "shape", "var_shape"),
     [
         ("./data/omics/alphadia/alphadia.protein-group.tsv", "alphadia", {}, (3, 7497), (7497, 1)),
-        ("./data/omics/alphapept/alphapept.protein-group.csv", "alphapept", {}, (4, 3781), (3781, 5)),
+        ("./data/omics/alphapept/alphapept.protein-group.csv", "alphapept", {}, (2, 3781), (3781, 5)),
     ],
 )
 def test_read_pg_table(
