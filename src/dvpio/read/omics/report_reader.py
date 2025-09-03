@@ -266,7 +266,7 @@ def read_pg_table(
 
         Use classmethod `get_preconfigured_regex` for the respective reader in `alphabase`
     reader_provider_kwargs
-        Passed to :meth:`spatialdata.models.TableModel.parse`
+        Passed to :meth:`alphabase.pg_reader.pg_reader_provider.get_reader`
     kwargs
         Passed to :meth:`spatialdata.models.TableModel.parse`
 
