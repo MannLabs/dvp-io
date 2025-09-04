@@ -59,7 +59,7 @@ def deprecated_log(message=None):
 
             warnings.warn(
                 warning_message,
-                category=UserWarning,
+                category=DeprecationWarning,
                 stacklevel=2,
             )
             return func(*args, **kwargs)
