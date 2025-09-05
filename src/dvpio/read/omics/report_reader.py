@@ -255,7 +255,6 @@ def read_pg_table(
         Regular expression that identifies correct measurement type. Only relevant if PG matrix contains multiple
         measurement types. For example, alphapept returns the raw protein intensity per sample in column `A` and the
         LFQ corrected value in `A_LFQ`. If `None` uses all columns. Passed to :meth:`alphabase.pg_reader.pg_reader_provider.get_reader`.
-
     reader_provider_kwargs
         Passed to :meth:`alphabase.pg_reader.pg_reader_provider.get_reader`
     kwargs
