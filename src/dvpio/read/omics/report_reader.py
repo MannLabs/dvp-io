@@ -250,13 +250,13 @@ def read_pg_table(
     column_mapping
         A dictionary of mapping alphabase columns (keys) to the corresponding columns in the other
         search engine (values). If `None` will be loaded from the `column_mapping` key of the respective
-        search engine in `pg_reader.yaml`. Passed to :meth:`alphabase.pg_reader.pg_reader_provider.get_reader`.
+        search engine in `pg_reader.yaml`. Passed to :meth:`alphabase.pg_reader.pg_reader.PGReaderProvider.get_reader`.
     measurement_regex
         Regular expression that identifies correct measurement type. Only relevant if PG matrix contains multiple
         measurement types. For example, alphapept returns the raw protein intensity per sample in column `A` and the
-        LFQ corrected value in `A_LFQ`. If `None` uses all columns. Passed to :meth:`alphabase.pg_reader.pg_reader_provider.get_reader`.
+        LFQ corrected value in `A_LFQ`. If `None` uses all columns. Passed to :meth:`alphabase.pg_reader.pg_reader.PGReaderProvider.get_reader`.
     reader_provider_kwargs
-        Passed to :meth:`alphabase.pg_reader.pg_reader_provider.get_reader`
+        Passed to :meth:`alphabase.pg_reader.pg_reader.PGReaderProvider.get_reader`
     kwargs
         Passed to :meth:`spatialdata.models.TableModel.parse`
 
@@ -298,7 +298,7 @@ def read_pg_table(
 
     See Also
     --------
-    :mod:`alphabase.pg_reader`
+    `alphabase.pg_reader`
     """
     # Build reader_provider_kwargs
     # This assures that the default values of the readers are considered (e.g. if `column_mapping="raw"`)
