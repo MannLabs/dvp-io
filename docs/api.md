@@ -47,6 +47,7 @@ Automatically extract a controlled vocabulary of image metadata.
     available_reader
     parse_df
     read_precursor_table
+    read_pg_table
 ```
 
 ## Write
