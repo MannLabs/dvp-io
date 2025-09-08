@@ -39,17 +39,11 @@ def test_deprecated_docs(function_factory):
 
 def test_deprecated_log_default_message(function_factory):
     """Test deprecated_log with default message using @ syntax."""
-    sample_func = deprecated_log(function_factory)
-
-    with pytest.warns(UserWarning, match="Function sample_func is deprecated and will be removed"):
-        sample_func()
-
-
-def test_deprecated_log_with_parentheses(function_factory):
-    """Test deprecated_log with default message using @deprecated_log() syntax."""
     sample_func = deprecated_log()(function_factory)
 
-    with pytest.warns(UserWarning, match="Function sample_func is deprecated and will be removed"):
+    with pytest.warns(
+        DeprecationWarning, match="Function sample_func is deprecated and will be removed in future versions"
+    ):
         sample_func()
 
 
@@ -58,7 +52,7 @@ def test_deprecated_log_custom_message(function_factory):
     custom_message = "This function is obsolete. Use new_function() instead."
     sample_func = deprecated_log(custom_message)(function_factory)
 
-    with pytest.warns(UserWarning, match="This function is obsolete. Use new_function\\(\\) instead."):
+    with pytest.warns(DeprecationWarning, match="This function is obsolete. Use new_function\\(\\) instead."):
         sample_func()
 
 
@@ -78,7 +72,7 @@ def test_deprecated_log_preserves_return_value(function_factory):
 
     decorated_func = deprecated_log(func_with_return)
 
-    with pytest.warns(UserWarning):
+    with pytest.warns(DeprecationWarning):
         result = decorated_func()
 
     assert result == "test_value"
@@ -92,7 +86,7 @@ def test_deprecated_log_preserves_arguments():
 
     decorated_func = deprecated_log(func_with_args)
 
-    with pytest.warns(UserWarning):
+    with pytest.warns(DeprecationWarning):
         result = decorated_func(1, 2, c=3)
 
     assert result == (1, 2, 3)
@@ -106,5 +100,5 @@ def test_deprecated_log_warning_category():
 
     decorated_func = deprecated_log(sample_func)
 
-    with pytest.warns(UserWarning):
+    with pytest.warns(DeprecationWarning):
         decorated_func()
