@@ -2,10 +2,11 @@
 
 [![Tests][badge-tests]][tests]
 [![Documentation][badge-docs]][documentation]
-[![codecov](https://codecov.io/gh/lucas-diedrich/dvp-io/graph/badge.svg?token=RO2UBP3JQ0)](https://codecov.io/gh/lucas-diedrich/dvp-io)
+[![Code Coverage][badge-coverage]][tests]
 
 [badge-tests]: https://img.shields.io/github/actions/workflow/status/lucas-diedrich/dvp-io/test.yaml?branch=main
 [badge-docs]: https://img.shields.io/readthedocs/dvp-io
+[badge-coverage]: https://codecov.io/github/MannLabs/dvp-io/graph/badge.svg?token=RO2UBP3JQ0
 
 Read and write funtionalities from and to spatialdata for deep visual proteomics
 
@@ -91,7 +92,7 @@ Refer to the [Releases page](https://github.com/lucas-diedrich/dvp-io/releases) 
 [mambaforge]: https://github.com/conda-forge/miniforge#mambaforge
 [scverse discourse]: https://discourse.scverse.org/
 [issue tracker]: https://github.com/lucas-diedrich/dvp-io/issues
-[tests]: https://github.com/lucas-diedrich/dvp-io/actions/workflows/test.yml
+[tests]: https://github.com/MannLabs/dvp-io/actions/workflows/test.yaml
 [documentation]: https://dvp-io.readthedocs.io
 [changelog]: https://dvp-io.readthedocs.io/en/latest/changelog.html
 [api documentation]: https://dvp-io.readthedocs.io/en/latest/api.html
