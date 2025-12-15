@@ -26,6 +26,7 @@ dependencies = [
   "anndata",
   "openslide-bin",
   "openslide-python",
+  "pandas<3",         # TODO: Remove dependeny bound as soon as pandas 3.0 API is stable
   "py-lmd>=1.3.2",
   "pydantic",
   "pylibczirw",
