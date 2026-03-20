@@ -92,9 +92,8 @@ def apply_transformation(
     NDArray[np.float64]
         Shape (N, 2) after affine transformation.
     """
-    # Extend shape with ones
+    # Pad with ones to create homogeneous coordinates, allowing a single matrix
+    # to represent both linear transformation (scale, rotation, shear) and translation
     shape_mod = np.hstack([shape, np.ones(shape=(shape.shape[0], 1))])
-    # Apply affine transformation
-    shape_transformed = shape_mod @ affine_transformation
-    # Return shape without padded ones
+    shape_transformed = shape_mod @ affine_transformation.T
     return shape_transformed[:, :-1]
