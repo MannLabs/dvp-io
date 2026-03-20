@@ -151,7 +151,7 @@ def test_read_write_lmd(tmp_path, dummy_data, read_path):
     _, calibration_points = dummy_data
 
     # Read in example data
-    gdf = read_lmd(read_path, calibration_points_image=calibration_points, precision=3)
+    gdf = read_lmd(read_path, calibration_points_image=calibration_points)
 
     # Write
     write_lmd(write_path, annotation=gdf, calibration_points=calibration_points)
