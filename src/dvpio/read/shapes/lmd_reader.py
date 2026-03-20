@@ -6,7 +6,7 @@ import shapely
 from spatialdata.models import PointsModel, ShapesModel
 from spatialdata.transformations import Affine, set_transformation
 
-from .geometry import apply_transformation, compute_transformation
+from .geometry import affine_matrix_to_shapely, compute_transformation
 
 
 def transform_shapes(
@@ -87,11 +87,8 @@ def transform_shapes(
 
     # Transform shapes
     # Iterate through shapes and apply affine transformation
-    transformed_shapes = shapes["geometry"].apply(
-        lambda shape: shapely.transform(
-            shape, transformation=lambda geom: apply_transformation(geom, affine_transformation)
-        )
-    )
+    shapely_affine_transformation = affine_matrix_to_shapely(affine_matrix=affine_transformation)
+    transformed_shapes = shapes.geometry.affine_transform(shapely_affine_transformation)
 
     # Reassign as DataFrame and parse with spatialdata
     transformed_shapes = ShapesModel.parse(shapes.assign(geometry=transformed_shapes))
