@@ -56,11 +56,11 @@ def affine_matrix_to_shapely(affine_matrix: np.ndarray) -> np.ndarray:
 
     .. code-block:: python
 
-        array = [
+        array = np.array([
             ['a', 'b', 'x0'],
             ['c', 'd', 'y0'],
-            [0, 0, 1]
-        ]
+            ['0', '0', '1']
+        ])
 
         affine_matrix_to_shapely(array)
         > ['a', 'b', 'c', 'd', 'x0', 'y0']
