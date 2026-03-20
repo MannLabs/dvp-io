@@ -101,7 +101,6 @@ def read_lmd(
     path: str,
     calibration_points_image: PointsModel,
     transformation_type: Literal["similarity", "affine", "euclidean"] = "similarity",
-    precision: int | None = 6,
     switch_orientation: bool = False,
 ) -> ShapesModel:
     """Read and parse LMD-formatted masks for the use in spatialdata
@@ -126,9 +125,6 @@ def read_lmd(
             (scaling, rotation, reflection, translation) is required.
         - euclidean (Rigid transform)
             Only translation and rotation are allowed
-    precision
-        Default 6. Rounding of affine transformation matrix, which can be necessary for numerical stability of shape transformations.
-        Passing `None` skips rounding.
     switch_orientation
         Per default, LMD is working in a (x, y) coordinate system while the image coordinates are in a (row=y, col=x)
         coordinate system. If True, transform the coordinate systems by mirroring the coordinate system at the
@@ -168,7 +164,6 @@ def read_lmd(
         calibration_points_target=calibration_points_image,
         calibration_points_source=calibration_points_lmd,
         transformation_type=transformation_type,
-        precision=precision,
     )
 
     if switch_orientation:
