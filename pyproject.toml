@@ -80,7 +80,7 @@ scripts.clean = "git clean -fdX -- {args:docs}"
 [tool.hatch.envs.hatch-test]
 features = [ "test" ]
 matrix = [
-  { python = [ "3.10", "3.11", "3.12" ] },
+  { python = [ "3.10", "3.11", "3.12", "3.13" ] },
 ]
 
 [tool.hatch.metadata]
