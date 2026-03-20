@@ -4,31 +4,30 @@ from numpy.typing import NDArray
 
 from dvpio.read.shapes.geometry import affine_matrix_to_shapely, apply_transformation, compute_transformation
 
-# TODO: Fix matrices so that transposal is unnecsary
 test_cases = [
     # Scale
     (
         np.array([[0, 0], [1, 0], [0, 1]]),
         np.array([[0, 0], [2, 0], [0, 2]]),
-        np.array([[2, 0, 0], [0, 2, 0], [0, 0, 1]]).T,
+        np.array([[2, 0, 0], [0, 2, 0], [0, 0, 1]]),
     ),
     # Translation
     (
         np.array([[0, 0], [1, 0], [0, 1]]),
         np.array([[1, 1], [2, 1], [1, 2]]),
-        np.array([[1, 0, 0], [0, 1, 0], [1, 1, 1]]).T,
+        np.array([[1, 0, 1], [0, 1, 1], [0, 0, 1]]),
     ),
     # Rotation
     (
         np.array([[0, 0], [1, 0], [0, 1]]),
         np.array([[0, 0], [0, -1], [1, 0]]),
-        np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]]).T,
+        np.array([[0, 1, 0], [-1, 0, 0], [0, 0, 1]]),
     ),
     # Rotate (-90degrees), scale (x2), translate (1,1)
     (
         np.array([[0, 0], [1, 0], [0, 1]]),
         np.array([[1, 1], [1, 3], [-1, 1]]),
-        np.array([[0, 2, 0], [-2, 0, 0], [1, 1, 1]]).T,
+        np.array([[0, -2, 1], [2, 0, 1], [0, 0, 1]]),
     ),
 ]
 
@@ -40,9 +39,9 @@ test_cases_shear = [
         # Point 3 is sheared
         np.array([[0, 0], [1, 0], [0.5, 1]]),
         # Affine transformation
-        np.array([[1.0, -0.0, 0.0], [0.5, 1.0, 0.0], [-0.0, 0.0, 1.0]]).T,
+        np.array([[1.0, 0.5, -0.0], [-0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]),
         # Similarity transformation
-        np.array([[0.875, -0.25, 0.0], [0.25, 0.875, 0.0], [0.125, 0.125, 1.0]]).T,
+        np.array([[0.875, 0.25, 0.125], [-0.25, 0.875, 0.125], [0.0, 0.0, 1.0]]),
     ),
 ]
 
@@ -87,7 +86,7 @@ def test_apply_transformation(
     reference: NDArray[np.float64],
     affine_transformation: NDArray[np.float64],
 ) -> None:
-    target = apply_transformation(query, affine_transformation.T)  # TODO: Remove transposal
+    target = apply_transformation(query, affine_transformation)
     assert np.isclose(target, reference, rtol=0.001).all()
 
 
