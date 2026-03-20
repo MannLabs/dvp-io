@@ -77,7 +77,7 @@ def test_compute_similarity_transformation_shear(
     affine_transformation: NDArray[np.int64],
     similarity_transformation: NDArray[np.int64],
 ) -> None:
-    inferred_transformation = compute_transformation(query, reference, transformation_type="similarity", precision=3)
+    inferred_transformation = compute_transformation(query, reference, transformation_type="similarity")
     assert np.isclose(inferred_transformation, similarity_transformation, rtol=0.001).all()
 
 
