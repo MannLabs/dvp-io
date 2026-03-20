@@ -27,7 +27,6 @@ def compute_transformation(
         - similarity
             Similarity transformation. Compared to an affine transformation, a similarity transformation constraints
             the solution space to scaling, rotations, reflections, and translations, i.e. angles of shapes are retained.
-            precision
         - euclidean (Rigid transform)
             Only translation and rotation are allowed
 
