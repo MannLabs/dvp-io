@@ -47,7 +47,7 @@ def compute_transformation(
 
     affine_matrix = estimate_transform(ttype=transformation_type, src=query_points, dst=reference_points).params
 
-    return affine_matrix.T
+    return affine_matrix
 
 
 def apply_transformation(
