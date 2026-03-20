@@ -75,5 +75,5 @@ def apply_transformation(
     shape_mod = np.hstack([shape, np.ones(shape=(shape.shape[0], 1))])
     # Apply affine transformation
     shape_transformed = shape_mod @ affine_transformation
-    # Reuturn shape without padded ones
+    # Return shape without padded ones
     return shape_transformed[:, :-1]
