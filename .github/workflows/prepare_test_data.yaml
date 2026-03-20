@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - name: Download test datasets
         run: |
@@ -40,7 +40,7 @@ jobs:
           rm ./data/omics.zip
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v19
         with:
           name: data
           path: ./data
