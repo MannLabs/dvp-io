@@ -2,10 +2,9 @@ name: Prepare test data
 
 on:
   workflow_dispatch:
-  # Pushing to branch dataset will create a new artifact
-  push:
-    branches:
-      - dataset
+  # Artifacts expire after 90 days - ensure that they are retained
+  schedule:
+    - cron: "0 5 1 * *"
 jobs:
   prepare-data:
     runs-on: ubuntu-latest
