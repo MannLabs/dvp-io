@@ -14,7 +14,6 @@ def transform_shapes(
     calibration_points_target: PointsModel,
     calibration_points_source: PointsModel,
     *,
-    precision: int | None = None,
     transformation_type: Literal["similarity", "affine", "euclidean"] = "similarity",
 ) -> ShapesModel:
     """Apply coordinate transformation to shapes based on calibration points from a target and a source
@@ -42,8 +41,6 @@ def transform_shapes(
             (scaling, rotation, reflection, translation) is required.
         - euclidean (Rigid transform)
             Only translation and rotation are allowed
-    precision
-        Rounding digit of affine transformation matrix. Small values (~6) might be necessary for numerical stability of shape transformations.
 
     Returns
     -------
@@ -74,19 +71,13 @@ def transform_shapes(
     affine_transformation = compute_transformation(
         calibration_points_source,
         calibration_points_target,
-        precision=precision,
         transformation_type=transformation_type,
     )
 
     affine_transformation_inverse = np.linalg.inv(affine_transformation)
 
-    # Rounding might be required for numerical stability of shapely transformation
-    if precision is not None:
-        affine_transformation = np.around(affine_transformation, precision)
-        affine_transformation_inverse = np.around(affine_transformation_inverse, precision)
-
-    # Transform shapes
-    # Iterate through shapes and apply affine transformation
+    # Geopandas expects shapely-convention for affine transformation (flat list of parameters)
+    # Use .geometry accessor to make the function independent of naming conventions
     shapely_affine_transformation = affine_matrix_to_shapely(affine_matrix=affine_transformation)
     transformed_shapes = shapes.geometry.affine_transform(shapely_affine_transformation)
 
