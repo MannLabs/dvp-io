@@ -9,7 +9,6 @@ def compute_transformation(
     query_points: NDArray[np.float64],
     reference_points: NDArray[np.float64],
     transformation_type: Literal["similarity", "affine", "euclidean"],
-    precision: int | None = None,  # TODO: Remove unused argument
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Computes the affine transformation mapping query_points to reference_points.
 
