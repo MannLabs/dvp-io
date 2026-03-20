@@ -101,3 +101,11 @@ def test_affine_matrix_to_shapely(affine_matrix: np.ndarray, expected: np.ndarra
     """Test that shapely convention works"""
     result = affine_matrix_to_shapely(affine_matrix=affine_matrix)
     assert np.array_equal(result, expected)
+
+
+@pytest.mark.parametrize("matrix_shape", [(1, 1), (2, 2), (3, 4), (4, 4)], ids=("1x1", "2x2", "3x4", "4x4"))
+def test_affine_matrix_to_shapely__raises_incorrect_shape(matrix_shape: tuple[int, int]) -> None:
+    """Test that function raises if shape is incorrect"""
+    affine_matrix = np.zeros(shape=matrix_shape)
+    with pytest.raises(ValueError, match="Expected matrix of shape"):
+        _ = affine_matrix_to_shapely(affine_matrix=affine_matrix)
