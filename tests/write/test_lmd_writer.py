@@ -13,7 +13,7 @@ from dvpio.write import write_lmd
 @pytest.fixture
 def dummy_data() -> tuple[ShapesModel, PointsModel]:
     """Example data - calibration points and triangular shapes"""
-    calibration_points_image = PointsModel.parse(np.array([[0, 2], [2, 2], [2, 0]]))
+    calibration_points_image = PointsModel.parse(np.array([[0, 200], [200, 200], [200, 0]]))
     gdf = read_lmd("./data/triangles/collection.xml", calibration_points_image=calibration_points_image)
 
     return gdf, calibration_points_image
@@ -157,11 +157,11 @@ def test_read_write_lmd(tmp_path, dummy_data, read_path):
     write_lmd(write_path, annotation=gdf, calibration_points=calibration_points)
 
     # Compare original (ref) with rewritten copy
-    ref = pylmd.Collection()
+    ref = pylmd.Collection(scale=1, orientation_transform=np.eye(2))
     ref.load(read_path)
     ref = ref.to_geopandas()
 
-    query = pylmd.Collection()
+    query = pylmd.Collection(scale=1, orientation_transform=np.eye(2))
     query.load(write_path)
     query = query.to_geopandas()
 
