@@ -99,7 +99,7 @@ def transform_shapes(
     # Set inverse transformation as transformation to leica coordinate system
     set_transformation(
         transformed_shapes,
-        transformation=Affine(affine_transformation_inverse.T, input_axes=("x", "y"), output_axes=("x", "y")),
+        transformation=Affine(affine_transformation_inverse, input_axes=("x", "y"), output_axes=("x", "y")),
         to_coordinate_system="to_lmd",
     )
 
