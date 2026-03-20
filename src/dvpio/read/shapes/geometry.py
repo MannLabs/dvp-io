@@ -50,6 +50,29 @@ def compute_transformation(
     return affine_matrix
 
 
+def affine_matrix_to_shapely(affine_matrix: np.ndarray) -> np.ndarray:
+    """Transform an affine matrix to the shapely syntax
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+        array = [
+            ['a', 'b', 'x0'],
+            ['c', 'd', 'y0'],
+            [0, 0, 1]
+        ]
+
+        affine_matrix_to_shapely(array)
+        > ['a', 'b', 'c', 'd', 'x0', 'y0']
+    """
+    if affine_matrix.shape != (3, 3):
+        raise ValueError(f"Expected matrix of shape (3, 3), got {affine_matrix.shape}")
+
+    return affine_matrix[[0, 0, 1, 1, 0, 1], [0, 1, 0, 1, 2, 2]]
+
+
 def apply_transformation(
     shape: NDArray[np.float64],
     affine_transformation: NDArray[np.float64],
