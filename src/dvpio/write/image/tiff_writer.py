@@ -2,12 +2,14 @@
 
 import warnings
 from collections.abc import Generator
+from typing import Any
 
 import dask.array as da
 import numpy as np
 import spatialdata as sd
 import tifffile
 import xarray as xr
+from ome_types import OME
 
 
 def get_raster(raster: sd.models.Image2DModel | sd.models.Labels2DModel, level: str = "scale0") -> xr.DataArray:
@@ -72,7 +74,11 @@ def _iter_tiles(array: da.Array, tile_shape=(512, 512)) -> Generator[np.ndarray,
 
 
 def write_ome_tiff(
-    path: str, image: sd.models.Image2DModel, tile_shape: tuple[int, int] = (1024, 1024), level: str | None = None
+    path: str,
+    image: sd.models.Image2DModel,
+    metadata: dict[str, Any] | None = None,
+    tile_shape: tuple[int, int] = (1024, 1024),
+    level: str | None = None,
 ) -> None:
     """Export image data to ome-tiff
 
@@ -80,10 +86,12 @@ def write_ome_tiff(
 
     Parameters
     ----------
+    path
+        Output path for the ome-tiff file.
     image
         Spatialdata Image2DModel. Only writes top-level for pyramidal images.
-    path : Path
-        Output path for the ome-tiff file.
+    metadata
+        Metadata dictionary compatible with the `OME` schema.
     tile_shape
         (height, width) of each tile written to the TIFF image. Tile shape must be a multiple of 16.
     level
@@ -109,6 +117,7 @@ def write_ome_tiff(
     sd.models.Image2DModel.validate(image)
 
     image = get_raster(image, level=level)
+    metadata = OME(**metadata).to_xml() if metadata is not None else None
 
     with tifffile.TiffWriter(path, bigtiff=True) as tw:
         tw.write(
@@ -118,6 +127,5 @@ def write_ome_tiff(
             tile=tile_shape,
             photometric="minisblack",
             subifds=None,
-            description=None,
             metadata=None,
         )
