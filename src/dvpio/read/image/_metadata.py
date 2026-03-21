@@ -3,6 +3,8 @@ from typing import Any, ClassVar, Literal
 from warnings import warn
 
 import openslide
+from ome_types.model import OME, Channel, Image, Pixels, Pixels_DimensionOrder, PixelType
+from ome_types.model.simple_types import UnitsLength
 from pydantic import BaseModel
 from pylibCZIrw.czi import open_czi
 
@@ -20,7 +22,43 @@ def _get_value_from_nested_dict(nested_dict: dict, keys: list, default_return_va
 
 
 class ImageMetadata(BaseModel, ABC):
+    """Base class for image metadata"""
+
+    X_DIM: ClassVar[str] = "x"
+    """x dimension (space)"""
+
+    Y_DIM: ClassVar[str] = "y"
+    """y dimension (space)"""
+
+    Z_DIM: ClassVar[str] = "z"
+    """z dimension (space)"""
+
+    C_DIM: ClassVar[str] = "c"
+    """Channel dimension"""
+
+    T_DIM: ClassVar[str] = "c"
+    """Time dimension"""
+
+    NUMPY_TO_OME_DTYPE_MAPPING: ClassVar[dict[str, Any]] = {
+        "uint8": PixelType.UINT8,
+        "uint16": PixelType.UINT16,
+        "uint32": PixelType.UINT32,
+        "int8": PixelType.INT8,
+        "int16": PixelType.INT16,
+        "int32": PixelType.INT32,
+        "float32": PixelType.FLOAT,
+        "float64": PixelType.DOUBLE,
+    }
+    """Mapping to OME datatypes"""
+
+    dtype: str
     metadata: dict[str, dict | list | str]
+
+    @property
+    @abstractmethod
+    def dimensions(self) -> dict[str, int]:
+        """Dimensionality of image in pixels"""
+        ...
 
     @property
     @abstractmethod
@@ -74,6 +112,49 @@ class ImageMetadata(BaseModel, ABC):
             and getattr(getattr(self.__class__, attr).fget, "_is_parsed", False)
         }
 
+    @property
+    def ome(self) -> OME:
+        """Return ome-model as pydantic model"""
+        pixels = Pixels(
+            dimension_order=Pixels_DimensionOrder.XYZCT,
+            type=self.NUMPY_TO_OME_DTYPE_MAPPING.get(str(self.dtype)),
+            size_x=self.dimensions.get(self.X_DIM, 1),
+            size_y=self.dimensions.get(self.Y_DIM, 1),
+            size_z=self.dimensions.get(self.Z_DIM, 1),
+            size_c=self.dimensions.get(self.C_DIM, 1),
+            size_t=self.dimensions.get(self.T_DIM, 1),
+            channels=[Channel(name=channel) for channel in self.channel_names]
+            if self.channel_names is not None
+            else None,
+            physical_size_x=self.mpp_x,
+            physical_size_x_unit=UnitsLength.METER,
+            physical_size_y=self.mpp_y,
+            physical_size_y_unit=UnitsLength.METER,
+        )
+
+        image_metadata = Image(pixels=pixels)
+        return OME(images=[image_metadata])
+
+    def to_ome_xml(self, **kwargs) -> str:
+        """Parse metadata to ome-compatible xml string representation
+
+        Parameters
+        ----------
+        **kwargs
+            Passed to :meth:`ome_types.models.OME.to_xml`
+        """
+        return self.ome.to_xml()
+
+    def to_ome_json(self, **kwargs) -> str:
+        """Parse metadata to ome-compatible json string representation
+
+        Parameters
+        ----------
+        **kwargs
+            Passed to :meth:`ome_types.models.OME.model_dump_json`
+        """
+        return self.ome.model_dump_json(**kwargs)
+
     @classmethod
     @abstractmethod
     def from_file(cls, path: str) -> BaseModel:
@@ -92,6 +173,8 @@ class ImageMetadata(BaseModel, ABC):
 
 
 class CZIImageMetadata(ImageMetadata):
+    """Parse CZI image metadata"""
+
     metadata: dict[str, Any]
 
     # *_PATH keys in nested dict that lead to the metadata field
@@ -114,6 +197,15 @@ class CZIImageMetadata(ImageMetadata):
         "Objectives",
         "Objective",
     )
+
+    CZI_TO_OME_DTYPE = {
+        "Gray8": PixelType.UINT8,
+        "Gray16": PixelType.UINT16,
+        "Gray32Float": PixelType.FLOAT,
+        "Bgr24": PixelType.UINT8,
+        "Bgr48": PixelType.UINT16,
+        "Bgr96Float": PixelType.FLOAT,
+    }
 
     @property
     @is_parsed
@@ -259,6 +351,8 @@ class CZIImageMetadata(ImageMetadata):
 
 
 class OpenslideImageMetadata(ImageMetadata):
+    """Parse openslide image metadata"""
+
     metadata: dict[str, Any]
 
     # Openslide returns MPP in micrometers per pixel
@@ -269,6 +363,8 @@ class OpenslideImageMetadata(ImageMetadata):
     # Openslide always returns RGBA images. Set channel ids + names as constants
     _CHANNEL_IDS: ClassVar[list[int]] = [0, 1, 2, 3]
     _CHANNEL_NAMES: ClassVar[list[str]] = ["R", "G", "B", "A"]
+
+    # Openslide always returns images in (x, y, c=4) format
 
     @property
     @is_parsed
