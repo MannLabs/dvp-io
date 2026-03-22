@@ -47,6 +47,24 @@ def test_write_lmd(
     )
 
 
+def test_write_lmd__raises_to_few_points(
+    tmp_path,
+    dummy_data,
+) -> None:
+    path = tmp_path / "test.xml"
+    gdf, _ = dummy_data
+    # To few calibration points (at least 3)
+    calibration_points = PointsModel.parse(np.array([[0, 0], [1, 0]]))
+
+    with pytest.raises(ValueError, match="There must be at least 3 points"):
+        write_lmd(
+            path=path,
+            annotation=gdf,
+            calibration_points=calibration_points,
+            overwrite=True,
+        )
+
+
 @pytest.mark.parametrize(
     ["annotation_name_column", "annotation_well_column", "custom_attribute_columns"],
     [
