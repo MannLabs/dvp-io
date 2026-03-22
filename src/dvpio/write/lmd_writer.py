@@ -2,10 +2,9 @@ import os
 
 import lmd.lib as pylmd
 import numpy as np
-import shapely
 import spatialdata as sd
 
-from dvpio.read.shapes.geometry import apply_transformation
+from dvpio.read.shapes.geometry import affine_matrix_to_shapely, apply_transformation
 
 
 def write_lmd(
@@ -106,14 +105,10 @@ def write_lmd(
         calibration_points[["x", "y"]].to_dask_array().compute(), affine_transformation
     )
 
-    annotation_transformed = annotation["geometry"].apply(
-        lambda shape: shapely.transform(
-            shape,
-            transformation=lambda geom: apply_transformation(geom, affine_transformation),
-        )
-    )
+    shapely_affine_transformation = affine_matrix_to_shapely(affine_matrix=affine_transformation)
+    transformed_shapes = annotation.geometry.affine_transform(shapely_affine_transformation)
 
-    annotation_transformed = annotation.assign(geometry=annotation_transformed)
+    annotation_transformed = annotation.assign(geometry=transformed_shapes)
 
     # Load annotation and optional columns
     collection.load_geopandas(
