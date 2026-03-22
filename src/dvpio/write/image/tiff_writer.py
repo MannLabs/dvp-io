@@ -114,7 +114,7 @@ def write_ome_tiff(
         write_ome_tiff(path, sdata["multiscale_image"], level="scale2")
 
     """
-    sd.models.Image2DModel.validate(image)
+    sd.models.Image2DModel().validate(image)
 
     image = get_raster(image, level=level)
     metadata = OME(**metadata).to_xml() if metadata is not None else None
