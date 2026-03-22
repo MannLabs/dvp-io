@@ -100,7 +100,7 @@ def write_ome_tiff(
 
     Returns
     -------
-    Writes an `OME-TIFF` image of the form ... to disk
+    Writes an `OME-TIFF` image to `path`
 
     Example
     -------
@@ -111,7 +111,7 @@ def write_ome_tiff(
         write_ome_tiff(path, sdata["image"])
 
         # Write a multiscale image at a lower resolution level
-        write_ome_tiff(path, sdata["image"], level="scale2")
+        write_ome_tiff(path, sdata["multiscale_image"], level="scale2")
 
     """
     sd.models.Image2DModel.validate(image)
