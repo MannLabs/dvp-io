@@ -1,12 +1,14 @@
+from pathlib import Path
 from typing import Any, Literal
 
 import dask.array as da
 import numpy as np
 import pytest
 import spatialdata as sd
+import tifffile as tiff
 import xarray as xr
 
-from dvpio.write.image.tiff_writer import _iter_tiles, get_raster
+from dvpio.write.image.tiff_writer import _iter_tiles, get_raster, write_ome_tiff
 
 
 @pytest.fixture
@@ -97,3 +99,40 @@ class TestIterTilesGenerator:
         tiles = list(iterator)
 
         assert all(tile.shape == reference_shape for tile, reference_shape in zip(tiles, resulting_shapes, strict=True))
+
+
+class TestWriteOmeTiff:
+    @pytest.fixture
+    def image_path(self, tmp_path) -> Path:
+        return tmp_path / "image.tiff"
+
+    @pytest.mark.parametrize("tile_shape", [(256, 256), (512, 512), (1024, 1024)])
+    def test_write_ome_tiff__dataarray(
+        self, image_path, image: sd.models.Image2DModel, tile_shape: tuple[int, int]
+    ) -> None:
+        write_ome_tiff(image_path, image, tile_shape=tile_shape)
+
+        new_image = tiff.imread(image_path)
+
+        assert np.array_equal(new_image, image.data.compute())
+
+    @pytest.mark.parametrize("tile_shape", [(256, 256), (512, 512), (1024, 1024)])
+    @pytest.mark.parametrize("level", ["scale0", "scale1", "scale2"])
+    def test_write_ome_tiff__datatree(
+        self, image_path, multiscale_image: sd.models.Image2DModel, level: str, tile_shape: tuple[int, int]
+    ) -> None:
+        write_ome_tiff(image_path, multiscale_image, level=level, tile_shape=tile_shape)
+
+        new_image = tiff.imread(image_path)
+
+        # Get image at correct resolution
+        ref_image = (
+            multiscale_image.get(key=level)
+            .to_dataset()
+            .to_array(dim="variable")
+            .drop_vars("variable")
+            .squeeze()
+            .data.compute()
+        )
+
+        assert np.array_equal(new_image, ref_image)
