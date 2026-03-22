@@ -8,6 +8,8 @@ from spatialdata.transformations import Affine, set_transformation
 
 from .geometry import affine_matrix_to_shapely, compute_transformation
 
+LMD_COORD_NAME = "to_lmd"
+
 
 def transform_shapes(
     shapes: ShapesModel,
@@ -88,7 +90,7 @@ def transform_shapes(
     set_transformation(
         transformed_shapes,
         transformation=Affine(affine_transformation_inverse, input_axes=("x", "y"), output_axes=("x", "y")),
-        to_coordinate_system="to_lmd",
+        to_coordinate_system=LMD_COORD_NAME,
     )
 
     # Store original calibration points

@@ -5,6 +5,7 @@ import numpy as np
 import spatialdata as sd
 
 from dvpio.read.shapes.geometry import affine_matrix_to_shapely, apply_transformation
+from dvpio.read.shapes.lmd_reader import LMD_COORD_NAME
 
 
 def write_lmd(
@@ -96,7 +97,7 @@ def write_lmd(
     # Transform annotation to leica coordinate system based on transformation
     if affine_transformation is None:
         affine_transformation = sd.transformations.get_transformation(
-            annotation, to_coordinate_system="to_lmd"
+            annotation, to_coordinate_system=LMD_COORD_NAME
         ).to_affine_matrix(("x", "y"), ("x", "y"))
 
     # Convert calibration points dataframe to (N, 2) array for pylmd
