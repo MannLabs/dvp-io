@@ -91,8 +91,7 @@ def write_lmd(
         raise ValueError(f"Path {path} exists and overwrite is False")
 
     # Create pylmd collection
-    collection = pylmd.Collection(orientation_transform=np.eye(2))
-    collection.scale = 1
+    collection = pylmd.Collection(orientation_transform=np.eye(2), scale=1)
 
     # Transform annotation to leica coordinate system based on transformation
     if affine_transformation is None:
