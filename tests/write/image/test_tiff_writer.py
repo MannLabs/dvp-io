@@ -42,10 +42,16 @@ class TestGetRaster:
         assert isinstance(result, xr.DataArray)
 
     @pytest.mark.parametrize("image", [np.zeros(shape=(512, 512)), da.zeros(shape=(512, 512))])
-    def test_get_raster__raises(self, image: Any) -> None:
+    def test_get_raster__raises_value_error(self, image: Any) -> None:
         """Test that get_raster raisese for unknown data types"""
         with pytest.raises(ValueError):
             _ = get_raster(image)
+
+    @pytest.mark.parametrize("key", "non-existent")
+    def test_get_raster__raises_key_error(self, multiscale_image: Any, key: str) -> None:
+        """Test that get_raster raisese for unknown data types"""
+        with pytest.raises(KeyError):
+            _ = get_raster(multiscale_image, level=key)
 
 
 class TestIterTilesGenerator:
