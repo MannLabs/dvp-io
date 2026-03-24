@@ -51,6 +51,21 @@ def get_raster(raster: sd.models.Image2DModel | sd.models.Labels2DModel, level: 
         raise ValueError(f"Unknown raster type, {type(raster)}")
 
 
+def _check_is_rgb(image: sd.models.Image2DModel) -> bool:
+    """Check if an image is an RGB
+
+    Checks if the channel names represent typical aliases for RGB images ("r"/"red", "g"/"green", "b"/"blue")
+
+    References
+    ----------
+    - https://github.com/cgohlke/tifffile
+    """
+    RGB_ALIASES = ({"r", "g", "b"}, {"red", "green", "blue"})
+    channel_names = {str(c).lower() for c in sd.models.get_channel_names(image)}
+
+    return any(channel_names == rgb_alias for rgb_alias in RGB_ALIASES)
+
+
 def _iter_tiles(array: da.Array, tile_shape=(512, 512)) -> Generator[np.ndarray, None, None]:
     """Yield (y, x) tiles from a dask array for memory-efficient TIFF writing.
 
@@ -80,6 +95,8 @@ def write_ome_tiff(
     metadata: dict[str, Any] | None = None,
     tile_shape: tuple[int, int] = (1024, 1024),
     level: str | None = None,
+    *,
+    rgb: bool | None = None,
 ) -> None:
     """Export image data to ome-tiff
 
@@ -98,6 +115,8 @@ def write_ome_tiff(
     level
         Level in mulitscale image to write. If `None`, defaults to highest level. Is ignored for
         single-scale images.
+    rgb
+        Whether the image is RGB or grayscale. If `None`, infers the image type from the channel names.
 
     Returns
     -------
@@ -117,6 +136,11 @@ def write_ome_tiff(
     """
     sd.models.Image2DModel().validate(image)
 
+    # Autodetect RGB images if `rgb=None`
+    if rgb is None:
+        rgb = _check_is_rgb(image)
+    photometric_type = "rgb" if rgb else "minisblack"
+
     image = get_raster(image, level=level)
     metadata = OME(**metadata).to_xml() if metadata is not None else None
 
@@ -126,7 +150,7 @@ def write_ome_tiff(
             shape=image.data.shape,
             dtype=image.data.dtype,
             tile=tile_shape,
-            photometric="minisblack",
+            photometric=photometric_type,
             subifds=None,
             metadata=None,
         )
