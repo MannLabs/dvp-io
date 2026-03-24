@@ -12,7 +12,7 @@ import xarray as xr
 from ome_types import OME
 
 
-def get_raster(raster: sd.models.Image2DModel | sd.models.Labels2DModel, level: str = "scale0") -> xr.DataArray:
+def get_raster(raster: sd.models.Image2DModel | sd.models.Labels2DModel, level: str | None = None) -> xr.DataArray:
     """Get raster layer of spatialdata object as :class:`xr.DataArray`
 
     Parameters
@@ -33,7 +33,8 @@ def get_raster(raster: sd.models.Image2DModel | sd.models.Labels2DModel, level: 
         return raster
 
     elif isinstance(raster, xr.DataTree):
-        data_at_level = raster.get(key=level)
+        # Get first descendant (highest resolution) per default
+        data_at_level = raster.get(key=level) if level is not None else raster.descendants[0]
 
         if data_at_level is None:
             raise KeyError(f"Level '{level}' not found in layer with levels {list(raster.children.keys())}")
