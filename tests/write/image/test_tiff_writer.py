@@ -26,7 +26,9 @@ def image(sdata: sd.SpatialData) -> xr.DataArray:
 
 @pytest.fixture
 def multiscale_image(sdata: sd.SpatialData) -> xr.DataTree:
-    return sdata.images["blobs_multiscale_image"]
+    multiscale_image = sdata.images["blobs_multiscale_image"]
+    assert all(scale in multiscale_image.children for scale in ("scale0", "scale1", "scale2"))
+    return multiscale_image
 
 
 class TestGetRaster:
@@ -35,7 +37,7 @@ class TestGetRaster:
         result = get_raster(image)
         assert isinstance(result, xr.DataArray)
 
-    @pytest.mark.parametrize("level", ["scale1", "scale2", "scale3"])
+    @pytest.mark.parametrize("level", ["scale1", "scale2", "scale3", None])
     def test_get_raster__datatree(self, image: xr.DataTree, level: str) -> None:
         """Test that get_raster returns a data array"""
         result = get_raster(image, level=level)
@@ -123,7 +125,7 @@ class TestWriteOmeTiff:
         assert np.array_equal(new_image, image.data.compute())
 
     @pytest.mark.parametrize("tile_shape", [(256, 256), (512, 512), (1024, 1024)])
-    @pytest.mark.parametrize("level", ["scale0", "scale1", "scale2"])
+    @pytest.mark.parametrize("level", ["scale0", "scale1", "scale2", None])
     def test_write_ome_tiff__datatree(
         self, image_path, multiscale_image: sd.models.Image2DModel, level: str, tile_shape: tuple[int, int]
     ) -> None:
@@ -132,13 +134,7 @@ class TestWriteOmeTiff:
         new_image = tiff.imread(image_path)
 
         # Get image at correct resolution
-        ref_image = (
-            multiscale_image.get(key=level)
-            .to_dataset()
-            .to_array(dim="variable")
-            .drop_vars("variable")
-            .squeeze()
-            .data.compute()
-        )
+        ref_image_multiscale = get_raster(multiscale_image, level=level)
+        ref_image = ref_image_multiscale.data.compute()
 
         assert np.array_equal(new_image, ref_image)
