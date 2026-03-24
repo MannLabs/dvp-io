@@ -2,7 +2,6 @@ from typing import Literal
 
 import lmd.lib as pylmd
 import numpy as np
-import shapely
 from spatialdata.models import PointsModel, ShapesModel
 from spatialdata.transformations import Affine, set_transformation
 
@@ -103,7 +102,6 @@ def read_lmd(
     path: str,
     calibration_points_image: PointsModel,
     transformation_type: Literal["similarity", "affine", "euclidean"] = "similarity",
-    switch_orientation: bool = False,
 ) -> ShapesModel:
     """Read and parse LMD-formatted masks for the use in spatialdata
 
@@ -127,10 +125,6 @@ def read_lmd(
             (scaling, rotation, reflection, translation) is required.
         - euclidean (Rigid transform)
             Only translation and rotation are allowed
-    switch_orientation
-        Per default, LMD is working in a (x, y) coordinate system while the image coordinates are in a (row=y, col=x)
-        coordinate system. If True, transform the coordinate systems by mirroring the coordinate system at the
-        main diagonal.
 
     Returns
     -------
@@ -167,12 +161,5 @@ def read_lmd(
         calibration_points_source=calibration_points_lmd,
         transformation_type=transformation_type,
     )
-
-    if switch_orientation:
-        # Transformation switches x/y coordinates (mirror at main diagonal)
-        switch_axes = lambda geom: geom @ np.array([[0, 1], [1, 0]])
-        transformed_shapes["geometry"] = transformed_shapes["geometry"].apply(
-            lambda geom: shapely.transform(geom, transformation=switch_axes)
-        )
 
     return transformed_shapes
