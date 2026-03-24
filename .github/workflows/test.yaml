@@ -34,7 +34,11 @@ jobs:
           - os: ubuntu-latest
             python: "3.12"
           - os: ubuntu-latest
-            python: "3.12"
+            python: "3.13"
+          - os: ubuntu-latest
+            python: "3.14"
+          - os: ubuntu-latest
+            python: "3.14"
             pip-flags: "--pre"
             name: PRE-RELEASE DEPENDENCIES
 
@@ -45,9 +49,9 @@ jobs:
       PYTHON: ${{ matrix.python }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
           cache: "pip"
@@ -80,6 +84,6 @@ jobs:
         run: |
           coverage report
       - name: Upload coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

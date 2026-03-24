@@ -4,7 +4,7 @@ requires = [ "hatchling" ]
 
 [project]
 name = "dvp-io"
-version = "0.4.1"
+version = "0.4.2-dev0"
 description = "Read and write funtionalities from and to spatialdata for deep visual proteomics"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -14,12 +14,14 @@ maintainers = [
 authors = [
   { name = "Lucas Diedrich" },
 ]
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.10"
 classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
   "alphabase",
@@ -79,7 +81,7 @@ scripts.clean = "git clean -fdX -- {args:docs}"
 [tool.hatch.envs.hatch-test]
 features = [ "test" ]
 matrix = [
-  { python = [ "3.10", "3.11", "3.12" ] },
+  { python = [ "3.10", "3.11", "3.12", "3.13", "3.14" ] },
 ]
 
 [tool.hatch.metadata]
