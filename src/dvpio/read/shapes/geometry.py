@@ -9,7 +9,6 @@ def compute_transformation(
     query_points: NDArray[np.float64],
     reference_points: NDArray[np.float64],
     transformation_type: Literal["similarity", "affine", "euclidean"],
-    precision: int | None = None,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Computes the affine transformation mapping query_points to reference_points.
 
@@ -28,7 +27,6 @@ def compute_transformation(
         - similarity
             Similarity transformation. Compared to an affine transformation, a similarity transformation constraints
             the solution space to scaling, rotations, reflections, and translations, i.e. angles of shapes are retained.
-            precision
         - euclidean (Rigid transform)
             Only translation and rotation are allowed
 
@@ -47,7 +45,30 @@ def compute_transformation(
 
     affine_matrix = estimate_transform(ttype=transformation_type, src=query_points, dst=reference_points).params
 
-    return affine_matrix.T
+    return affine_matrix
+
+
+def affine_matrix_to_shapely(affine_matrix: np.ndarray) -> np.ndarray:
+    """Transform an affine matrix to the shapely syntax
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+        array = np.array([
+            ['a', 'b', 'x0'],
+            ['c', 'd', 'y0'],
+            ['0', '0', '1']
+        ])
+
+        affine_matrix_to_shapely(array)
+        > ['a', 'b', 'c', 'd', 'x0', 'y0']
+    """
+    if affine_matrix.shape != (3, 3):
+        raise ValueError(f"Expected matrix of shape (3, 3), got {affine_matrix.shape}")
+
+    return affine_matrix[[0, 0, 1, 1, 0, 1], [0, 1, 0, 1, 2, 2]]
 
 
 def apply_transformation(
@@ -71,9 +92,8 @@ def apply_transformation(
     NDArray[np.float64]
         Shape (N, 2) after affine transformation.
     """
-    # Extend shape with ones
+    # Pad with ones to create homogeneous coordinates, allowing a single matrix
+    # to represent both linear transformation (scale, rotation, shear) and translation
     shape_mod = np.hstack([shape, np.ones(shape=(shape.shape[0], 1))])
-    # Apply affine transformation
-    shape_transformed = shape_mod @ affine_transformation
-    # Reuturn shape without padded ones
+    shape_transformed = shape_mod @ affine_transformation.T
     return shape_transformed[:, :-1]

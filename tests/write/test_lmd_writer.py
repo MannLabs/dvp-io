@@ -13,7 +13,7 @@ from dvpio.write import write_lmd
 @pytest.fixture
 def dummy_data() -> tuple[ShapesModel, PointsModel]:
     """Example data - calibration points and triangular shapes"""
-    calibration_points_image = PointsModel.parse(np.array([[0, 2], [2, 2], [2, 0]]))
+    calibration_points_image = PointsModel.parse(np.array([[0, 200], [200, 200], [200, 0]]))
     gdf = read_lmd("./data/triangles/collection.xml", calibration_points_image=calibration_points_image)
 
     return gdf, calibration_points_image
@@ -45,6 +45,24 @@ def test_write_lmd(
         annotation_well_column=annotation_well_column,
         overwrite=True,
     )
+
+
+def test_write_lmd__raises_to_few_points(
+    tmp_path,
+    dummy_data,
+) -> None:
+    path = tmp_path / "test.xml"
+    gdf, _ = dummy_data
+    # To few calibration points (at least 3)
+    calibration_points = PointsModel.parse(np.array([[0, 0], [1, 0]]))
+
+    with pytest.raises(ValueError, match="There must be at least 3 points"):
+        write_lmd(
+            path=path,
+            annotation=gdf,
+            calibration_points=calibration_points,
+            overwrite=True,
+        )
 
 
 @pytest.mark.parametrize(
@@ -151,17 +169,17 @@ def test_read_write_lmd(tmp_path, dummy_data, read_path):
     _, calibration_points = dummy_data
 
     # Read in example data
-    gdf = read_lmd(read_path, calibration_points_image=calibration_points, precision=3)
+    gdf = read_lmd(read_path, calibration_points_image=calibration_points)
 
     # Write
     write_lmd(write_path, annotation=gdf, calibration_points=calibration_points)
 
     # Compare original (ref) with rewritten copy
-    ref = pylmd.Collection()
+    ref = pylmd.Collection(scale=1, orientation_transform=np.eye(2))
     ref.load(read_path)
     ref = ref.to_geopandas()
 
-    query = pylmd.Collection()
+    query = pylmd.Collection(scale=1, orientation_transform=np.eye(2))
     query.load(write_path)
     query = query.to_geopandas()
 

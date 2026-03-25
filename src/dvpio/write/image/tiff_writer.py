@@ -2,6 +2,7 @@
 
 import warnings
 from collections.abc import Generator
+from pathlib import Path
 from typing import Any
 
 import dask.array as da
@@ -66,7 +67,7 @@ def _is_rgb(image: sd.models.Image2DModel) -> bool:
     return any(channel_names == rgb_alias for rgb_alias in RGB_ALIASES)
 
 
-def _iter_tiles(array: da.Array, tile_shape=(512, 512)) -> Generator[np.ndarray, None, None]:
+def _iter_tiles(array: np.ndarray | da.Array, tile_shape=(512, 512)) -> Generator[np.ndarray, None, None]:
     """Yield (y, x) tiles from a dask array for memory-efficient TIFF writing.
 
     Iterates over all leading dimensions (C, Z, T, ...) and yields tiles
@@ -84,13 +85,15 @@ def _iter_tiles(array: da.Array, tile_shape=(512, 512)) -> Generator[np.ndarray,
         for y in range(0, height, tile_y):
             for x in range(0, width, tile_x):
                 tile = plane[y : y + tile_y, x : x + tile_x]
+                # xr.DataArray can store out-of-memory dask arrays or numpy arrays
+                # ensure that numpy is returned.
                 if isinstance(tile, da.Array):
                     tile = tile.compute()
                 yield tile
 
 
 def write_ome_tiff(
-    path: str,
+    path: Path,
     image: sd.models.Image2DModel,
     metadata: dict[str, Any] | None = None,
     tile_shape: tuple[int, int] = (1024, 1024),
