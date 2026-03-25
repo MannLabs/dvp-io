@@ -140,8 +140,7 @@ def write_ome_tiff(
     sd.models.Image2DModel().validate(image)
 
     # Autodetect RGB images if `rgb=None`
-    if rgb is None:
-        rgb = _is_rgb(image)
+    rgb = rgb or _is_rgb(image)
     photometric_type = "rgb" if rgb else "minisblack"
 
     image = get_raster(image, level=level)
