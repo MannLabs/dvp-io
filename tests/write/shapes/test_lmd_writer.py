@@ -7,7 +7,7 @@ import pytest
 from spatialdata.models import PointsModel, ShapesModel
 
 from dvpio.read.shapes import read_lmd
-from dvpio.write import write_lmd
+from dvpio.write.shapes import write_lmd
 
 
 @pytest.fixture
