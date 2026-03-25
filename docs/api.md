@@ -52,8 +52,20 @@ Automatically extract a controlled vocabulary of image metadata.
 
 ## Write
 
+### Images
+
 ```{eval-rst}
-.. currentmodule:: dvpio.write
+.. currentmodule:: dvpio.write.image
+.. autosummary::
+    :toctree: generated
+
+    write_ome_tiff
+```
+
+### Shapes
+
+```{eval-rst}
+.. currentmodule:: dvpio.write.shapes
 .. autosummary::
     :toctree: generated
 
