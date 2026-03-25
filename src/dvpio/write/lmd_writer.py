@@ -2,10 +2,10 @@ import os
 
 import lmd.lib as pylmd
 import numpy as np
-import shapely
 import spatialdata as sd
 
-from dvpio.read.shapes.geometry import apply_transformation
+from dvpio.read.shapes.geometry import affine_matrix_to_shapely, apply_transformation
+from dvpio.read.shapes.lmd_reader import LMD_COORD_NAME
 
 
 def write_lmd(
@@ -92,13 +92,12 @@ def write_lmd(
         raise ValueError(f"Path {path} exists and overwrite is False")
 
     # Create pylmd collection
-    collection = pylmd.Collection(orientation_transform=np.eye(2))
-    collection.scale = 1
+    collection = pylmd.Collection(orientation_transform=np.eye(2), scale=1)
 
     # Transform annotation to leica coordinate system based on transformation
     if affine_transformation is None:
         affine_transformation = sd.transformations.get_transformation(
-            annotation, to_coordinate_system="to_lmd"
+            annotation, to_coordinate_system=LMD_COORD_NAME
         ).to_affine_matrix(("x", "y"), ("x", "y"))
 
     # Convert calibration points dataframe to (N, 2) array for pylmd
@@ -106,14 +105,10 @@ def write_lmd(
         calibration_points[["x", "y"]].to_dask_array().compute(), affine_transformation
     )
 
-    annotation_transformed = annotation["geometry"].apply(
-        lambda shape: shapely.transform(
-            shape,
-            transformation=lambda geom: apply_transformation(geom, affine_transformation),
-        )
-    )
+    shapely_affine_transformation = affine_matrix_to_shapely(affine_matrix=affine_transformation)
+    transformed_shapes = annotation.geometry.affine_transform(shapely_affine_transformation)
 
-    annotation_transformed = annotation.assign(geometry=annotation_transformed)
+    annotation_transformed = annotation.assign(geometry=transformed_shapes)
 
     # Load annotation and optional columns
     collection.load_geopandas(
