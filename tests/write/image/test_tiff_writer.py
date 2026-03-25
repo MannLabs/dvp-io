@@ -8,7 +8,7 @@ import spatialdata as sd
 import tifffile as tiff
 import xarray as xr
 
-from dvpio.write.image.tiff_writer import _iter_tiles, get_raster, write_ome_tiff
+from dvpio.write.image.tiff_writer import _is_rgb, _iter_tiles, get_raster, write_ome_tiff
 
 
 @pytest.fixture
@@ -109,10 +109,45 @@ class TestIterTilesGenerator:
         assert all(tile.shape == reference_shape for tile, reference_shape in zip(tiles, resulting_shapes, strict=True))
 
 
+class TestIsRGB:
+    @pytest.fixture(
+        params=[
+            {"channel_names": ["r", "g", "b"]},
+            {"channel_names": ["R", "G", "B"]},
+            {"channel_names": ["red", "green", "blue"]},
+            {"channel_names": ["Red", "Green", "Blue"]},
+        ]
+    )
+    def rgb_image(self, image: sd.models.Image2DModel, request) -> sd.models.Image2DModel:
+        """Create an rgb image from a spatialdata image model"""
+        dim_shapes = dict(zip(image.dims, image.shape, strict=True))
+        assert dim_shapes["c"] == 3
+
+        image_rgb = image.copy()
+
+        return image_rgb.assign_coords(coords={"c": request.param["channel_names"]})
+
+    def test__is_rgb__rgb_image(self, rgb_image: sd.models.Image2DModel) -> None:
+        """Test that _check_is_rgb returns True if RGB image is passed"""
+        assert _is_rgb(rgb_image)
+
+    def test__is_rgb__grayscale_image(self, image: sd.models.Image2DModel) -> None:
+        """Test that _check_is_rgb returns True if RGB image is passed"""
+        assert not _is_rgb(image)
+
+
 class TestWriteOmeTiff:
     @pytest.fixture
     def image_path(self, tmp_path) -> Path:
         return tmp_path / "image.tiff"
+
+    @pytest.fixture
+    def image_3channel(self, image) -> Path:
+        # Validate that there are 3 channels
+        dim_shapes = dict(zip(image.dims, image.shape, strict=True))
+        assert dim_shapes["c"] == 3
+        assert sd.models.get_channel_names(image) == [0, 1, 2]
+        return image.copy()
 
     @pytest.mark.parametrize("tile_shape", [(256, 256), (512, 512), (1024, 1024)])
     def test_write_ome_tiff__dataarray(
@@ -138,3 +173,17 @@ class TestWriteOmeTiff:
         ref_image = ref_image_multiscale.data.compute()
 
         assert np.array_equal(new_image, ref_image)
+
+    @pytest.mark.parametrize("rgb", [True, False, None])
+    def test_write_ome_tiff__test_rgb(
+        self, image_path, image_3channel: sd.models.Image2DModel, rgb: bool | None
+    ) -> None:
+        write_ome_tiff(image_path, image_3channel, rgb=rgb)
+
+        with tiff.TiffFile(image_path, mode="r") as img:
+            photometric_type = img.pages[0].photometric.name.lower()
+
+        if rgb is True:
+            assert photometric_type == "rgb"
+        else:
+            assert photometric_type == "minisblack"
