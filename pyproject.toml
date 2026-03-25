@@ -25,6 +25,7 @@ classifiers = [
 dependencies = [
   "alphabase",
   "anndata",
+  "ome-types",
   "openslide-bin",
   "openslide-python",
   "pandas<3",         # TODO: Remove dependeny bound as soon as pandas 3.0 API is stable
