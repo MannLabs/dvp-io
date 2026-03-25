@@ -2,6 +2,7 @@
 
 import warnings
 from collections.abc import Generator
+from pathlib import Path
 from typing import Any
 
 import dask.array as da
@@ -77,7 +78,7 @@ def _iter_tiles(array: np.ndarray | da.Array, tile_shape=(512, 512)) -> Generato
 
 
 def write_ome_tiff(
-    path: str,
+    path: Path,
     image: sd.models.Image2DModel,
     metadata: dict[str, Any] | None = None,
     tile_shape: tuple[int, int] = (1024, 1024),
