@@ -51,7 +51,7 @@ def get_raster(raster: sd.models.Image2DModel | sd.models.Labels2DModel, level: 
         raise ValueError(f"Unknown raster type, {type(raster)}")
 
 
-def _iter_tiles(array: da.Array, tile_shape=(512, 512)) -> Generator[np.ndarray, None, None]:
+def _iter_tiles(array: np.ndarray | da.Array, tile_shape=(512, 512)) -> Generator[np.ndarray, None, None]:
     """Yield (y, x) tiles from a dask array for memory-efficient TIFF writing.
 
     Iterates over all leading dimensions (C, Z, T, ...) and yields tiles
@@ -69,6 +69,8 @@ def _iter_tiles(array: da.Array, tile_shape=(512, 512)) -> Generator[np.ndarray,
         for y in range(0, height, tile_y):
             for x in range(0, width, tile_x):
                 tile = plane[y : y + tile_y, x : x + tile_x]
+                # xr.DataArray can store out-of-memory dask arrays or numpy arrays
+                # ensure that numpy is returned.
                 if isinstance(tile, da.Array):
                     tile = tile.compute()
                 yield tile
