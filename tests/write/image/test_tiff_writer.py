@@ -8,7 +8,7 @@ import spatialdata as sd
 import tifffile as tiff
 import xarray as xr
 
-from dvpio.write.image.tiff_writer import _check_is_rgb, _iter_tiles, get_raster, write_ome_tiff
+from dvpio.write.image.tiff_writer import _is_rgb, _iter_tiles, get_raster, write_ome_tiff
 
 
 @pytest.fixture
@@ -109,7 +109,7 @@ class TestIterTilesGenerator:
         assert all(tile.shape == reference_shape for tile, reference_shape in zip(tiles, resulting_shapes, strict=True))
 
 
-class TestCheckIsRGB:
+class TestIsRGB:
     @pytest.fixture(
         params=[
             {"channel_names": ["r", "g", "b"]},
@@ -127,13 +127,13 @@ class TestCheckIsRGB:
 
         return image_rgb.assign_coords(coords={"c": request.param["channel_names"]})
 
-    def test__check_is_rgb__rgb_image(self, rgb_image: sd.models.Image2DModel) -> None:
+    def test__is_rgb__rgb_image(self, rgb_image: sd.models.Image2DModel) -> None:
         """Test that _check_is_rgb returns True if RGB image is passed"""
-        assert _check_is_rgb(rgb_image)
+        assert _is_rgb(rgb_image)
 
-    def test__check_is_rgb__grayscale_image(self, image: sd.models.Image2DModel) -> None:
+    def test__is_rgb__grayscale_image(self, image: sd.models.Image2DModel) -> None:
         """Test that _check_is_rgb returns True if RGB image is passed"""
-        assert not _check_is_rgb(image)
+        assert not _is_rgb(image)
 
 
 class TestWriteOmeTiff:
