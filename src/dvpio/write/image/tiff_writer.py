@@ -51,7 +51,7 @@ def get_raster(raster: sd.models.Image2DModel | sd.models.Labels2DModel, level: 
         raise ValueError(f"Unknown raster type, {type(raster)}")
 
 
-def _check_is_rgb(image: sd.models.Image2DModel) -> bool:
+def _is_rgb(image: sd.models.Image2DModel) -> bool:
     """Check if an image is an RGB
 
     Checks if the channel names represent typical aliases for RGB images ("r"/"red", "g"/"green", "b"/"blue")
@@ -138,7 +138,7 @@ def write_ome_tiff(
 
     # Autodetect RGB images if `rgb=None`
     if rgb is None:
-        rgb = _check_is_rgb(image)
+        rgb = _is_rgb(image)
     photometric_type = "rgb" if rgb else "minisblack"
 
     image = get_raster(image, level=level)
