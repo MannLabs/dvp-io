@@ -70,6 +70,12 @@ jobs:
         run: |
           pip install ${{ matrix.pip-flags }} ".[dev,test]"
 
+      # Check against latest pre-release of spatialdata to guard against breaking changes
+      - name: Install pre-release spatialdata from git
+        if: matrix.pip-flags == '--pre'
+        run: |
+          pip install --pre "spatialdata @ git+https://github.com/scverse/spatialdata.git@main"
+
       - name: Test
         env:
           MPLBACKEND: agg
