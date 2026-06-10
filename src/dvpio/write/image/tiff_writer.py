@@ -34,20 +34,21 @@ def get_raster(raster: sd.models.Image2DModel | sd.models.Labels2DModel, level: 
         return raster
 
     elif isinstance(raster, xr.DataTree):
-        # Get first descendant (highest resolution) per default
-        data_at_level = raster.get(key=level) if level is not None else raster.descendants[0]
+        return sd.get_pyramid_levels(raster, n=int(level.replace("scale", "")))
+    #     # Get first descendant (highest resolution) per default
+    #     data_at_level = raster.get(key=level) if level is not None else raster.descendants[0]
 
-        if data_at_level is None:
-            raise KeyError(f"Level '{level}' not found in layer with levels {list(raster.children.keys())}")
+    #     if data_at_level is None:
+    #         raise KeyError(f"Level '{level}' not found in layer with levels {list(raster.children.keys())}")
 
-        return (
-            data_at_level.to_dataset()
-            # xarray introduces a new dimension in which data variable are broadcasted against each other
-            # This dimension is empty for spatialdata.Image2DModels.
-            .to_array(dim="variable")
-            .drop_vars("variable", errors="raise")
-            .squeeze()
-        )
+    #     return (
+    #         data_at_level.to_dataset()
+    #         # xarray introduces a new dimension in which data variable are broadcasted against each other
+    #         # This dimension is empty for spatialdata.Image2DModels.
+    #         .to_array(dim="variable")
+    #         .drop_vars("variable", errors="raise")
+    #         .squeeze()
+    #     )
     else:
         raise ValueError(f"Unknown raster type, {type(raster)}")
 
