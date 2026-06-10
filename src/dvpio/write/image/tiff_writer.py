@@ -13,7 +13,7 @@ import xarray as xr
 from ome_types import OME
 
 
-def get_raster(raster: sd.models.Image2DModel | sd.models.Labels2DModel, level: str | None = None) -> xr.DataArray:
+def get_raster(raster: sd.models.Image2DModel | sd.models.Labels2DModel, level: int | None = None) -> xr.DataArray:
     """Get raster layer of spatialdata object as :class:`xr.DataArray`
 
     Parameters
@@ -34,6 +34,8 @@ def get_raster(raster: sd.models.Image2DModel | sd.models.Labels2DModel, level: 
         return raster
 
     elif isinstance(raster, xr.DataTree):
+        # Default to highest resolution
+        level = level or 0
         return sd.get_pyramid_levels(raster, n=level)
     else:
         raise ValueError(f"Unknown raster type, {type(raster)}")
