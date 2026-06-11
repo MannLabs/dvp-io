@@ -49,12 +49,6 @@ class TestGetRaster:
         with pytest.raises(ValueError):
             _ = get_raster(image)
 
-    @pytest.mark.parametrize("key", "non-existent")
-    def test_get_raster__raises_key_error(self, multiscale_image: Any, key: str) -> None:
-        """Test that get_raster raisese for unknown data types"""
-        with pytest.raises(KeyError):
-            _ = get_raster(multiscale_image, level=key)
-
 
 class TestIterTilesGenerator:
     @pytest.mark.parametrize("array_type", ["dask", "numpy"])
@@ -160,7 +154,7 @@ class TestWriteOmeTiff:
         assert np.array_equal(new_image, image.data.compute())
 
     @pytest.mark.parametrize("tile_shape", [(256, 256), (512, 512), (1024, 1024)])
-    @pytest.mark.parametrize("level", ["scale0", "scale1", "scale2", None])
+    @pytest.mark.parametrize("level", [0, 1, 2, None])
     def test_write_ome_tiff__datatree(
         self, image_path, multiscale_image: sd.models.Image2DModel, level: str, tile_shape: tuple[int, int]
     ) -> None:

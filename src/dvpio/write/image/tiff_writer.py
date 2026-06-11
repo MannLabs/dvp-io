@@ -13,7 +13,7 @@ import xarray as xr
 from ome_types import OME
 
 
-def get_raster(raster: sd.models.Image2DModel | sd.models.Labels2DModel, level: str | None = None) -> xr.DataArray:
+def get_raster(raster: sd.models.Image2DModel | sd.models.Labels2DModel, level: int | None = None) -> xr.DataArray:
     """Get raster layer of spatialdata object as :class:`xr.DataArray`
 
     Parameters
@@ -34,20 +34,9 @@ def get_raster(raster: sd.models.Image2DModel | sd.models.Labels2DModel, level: 
         return raster
 
     elif isinstance(raster, xr.DataTree):
-        # Get first descendant (highest resolution) per default
-        data_at_level = raster.get(key=level) if level is not None else raster.descendants[0]
-
-        if data_at_level is None:
-            raise KeyError(f"Level '{level}' not found in layer with levels {list(raster.children.keys())}")
-
-        return (
-            data_at_level.to_dataset()
-            # xarray introduces a new dimension in which data variable are broadcasted against each other
-            # This dimension is empty for spatialdata.Image2DModels.
-            .to_array(dim="variable")
-            .drop_vars("variable", errors="raise")
-            .squeeze()
-        )
+        # Default to highest resolution
+        level = level or 0
+        return sd.get_pyramid_levels(raster, n=level)
     else:
         raise ValueError(f"Unknown raster type, {type(raster)}")
 
@@ -97,7 +86,7 @@ def write_ome_tiff(
     image: sd.models.Image2DModel,
     metadata: dict[str, Any] | None = None,
     tile_shape: tuple[int, int] = (1024, 1024),
-    level: str | None = None,
+    level: int | None = None,
     *,
     rgb: bool | None = None,
 ) -> None:
@@ -116,7 +105,7 @@ def write_ome_tiff(
     tile_shape
         (height, width) of each tile written to the TIFF image. Tile shape must be a multiple of 16.
     level
-        Level in mulitscale image to write. If `None`, defaults to highest level. Is ignored for
+        Integer level in mulitscale image to write. If `None`, defaults to highest level. Is ignored for
         single-scale images.
     rgb
         Whether the image is RGB or grayscale. If `None`, infers the image type from the channel names.
@@ -134,7 +123,7 @@ def write_ome_tiff(
         write_ome_tiff(path, sdata["image"])
 
         # Write a multiscale image at a lower resolution level
-        write_ome_tiff(path, sdata["multiscale_image"], level="scale2")
+        write_ome_tiff(path, sdata["multiscale_image"], level=2)
 
     """
     sd.models.Image2DModel().validate(image)
