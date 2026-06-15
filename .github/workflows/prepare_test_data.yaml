@@ -39,7 +39,7 @@ jobs:
           rm ./data/omics.zip
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v19
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: data
           path: ./data
