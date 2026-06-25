@@ -15,7 +15,7 @@ def transform_shapes(
     calibration_points_target: PointsModel,
     calibration_points_source: PointsModel,
     *,
-    transformation_type: Literal["similarity", "affine", "euclidean"] = "similarity",
+    transformation_type: Literal["similarity", "affine", "euclidean"] = "affine",
 ) -> ShapesModel:
     """Apply coordinate transformation to shapes based on calibration points from a target and a source
 
@@ -32,10 +32,11 @@ def transform_shapes(
         3 Calibration points, matched to `calibration_points_target` in source coordinate system (usually LMD coordinates)
         Expects :class:`spatialdata.models.PointsModel` with calibration points in `x`/`y` column
     transformation_type
-        - affine
-            Full affine transformation (scaling, rotation/reflexion, translation, shearing). This operation does not preserve
-            the angles within or distances the shapes
-        - similarity (recommended)
+        - affine (recommended)
+            Full affine transformation (scaling, rotation/reflexion, translation, shearing). This operation does not necessarily
+            preserve the angles within or distances the shapes. Required if mirror operations are needed to transform shapes
+            to new coordinate system.
+        - similarity
             Similarity transformation. Compared to an affine transformation, a similarity transformation constraints
             the solution space to scaling, rotations, reflections, and translations, i.e. angles of shapes are retained.
             If you only want to map between image and microscopy coordinates only the subset of similarity transformations
