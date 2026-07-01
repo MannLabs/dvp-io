@@ -9,7 +9,6 @@ updates:
       interval: "weekly"
     # Do not pull most recent updates to ensure that security issues get detected
     # This only applies for version updates, i.e. security-relevant releases are immediately applied
-    # https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference#cooldown-
     cooldown:
       default-days: 7
     commit-message:
