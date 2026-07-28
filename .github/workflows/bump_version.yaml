@@ -17,7 +17,7 @@ on:
 
 jobs:
   bump-version:
-    uses: MannLabs/alphashared/.github/workflows/bump_version.yml@v1
+    uses: MannLabs/alphashared/.github/workflows/bump_version.yml@v1.1.9
     secrets: inherit
     with:
       bump_type: ${{ inputs.bump_type }}
